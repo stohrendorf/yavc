@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\geometry\geometry.csproj" />
+      <ProjectReference Include="..\utility\utility.csproj" />
+      <ProjectReference Include="..\vmfio\vmfio.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
+      <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    </ItemGroup>
+</Project>
