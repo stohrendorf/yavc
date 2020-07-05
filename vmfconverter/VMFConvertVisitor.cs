@@ -65,9 +65,9 @@ namespace VMFConverter
             if (cols.Length != 3)
                 throw new Exception();
             _displacement.StartPosition = new Vector(
-                float.Parse(cols[0]),
-                float.Parse(cols[1]),
-                float.Parse(cols[2])
+                ParserUtil.ParseDouble(cols[0]),
+                ParserUtil.ParseDouble(cols[1]),
+                ParserUtil.ParseDouble(cols[2])
             );
             _displacement.Elevation = ParserUtil.ParseDouble(entity.GetValue("elevation"));
             var n = (1 << _displacement.Power) + 1;
@@ -96,9 +96,9 @@ namespace VMFConverter
 
                 for (var j = 0; j < n; ++j)
                     dest[i].Add(new Vector(
-                        float.Parse(row[j * 3 + 0]),
-                        float.Parse(row[j * 3 + 1]),
-                        float.Parse(row[j * 3 + 2])
+                        ParserUtil.ParseDouble(row[j * 3 + 0]),
+                        ParserUtil.ParseDouble(row[j * 3 + 1]),
+                        ParserUtil.ParseDouble(row[j * 3 + 2])
                     ));
             }
         }
