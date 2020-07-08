@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using NLog;
 
 namespace VMFIO
 {
@@ -45,6 +46,8 @@ namespace VMFIO
         private static readonly Dictionary<string, (short width, short height)> cache =
             new Dictionary<string, (short, short)>();
 
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         public static (short width, short height) GetSize(string root, string filename)
         {
             if (cache.TryGetValue(filename, out var size))
@@ -57,14 +60,14 @@ namespace VMFIO
                 var normalMatches = lines.Select(_ => normalRe.Match(_)).Where(_ => _.Success).ToList();
                 if (normalMatches.Count == 1)
                     return VTF.GetSize(Path.Join(root, normalMatches[0].Groups[1].Value + ".vtf"));
-                Console.Out.WriteLine($"No basetexture in {filename}");
+                logger.Warn($"No basetexture found in {filename}");
                 cache.Add(filename, (0, 0));
                 return (0, 0);
             }
 
             if (baseMatches.Count > 1)
             {
-                Console.Out.WriteLine($"Multiple basetextures in {filename}");
+                logger.Warn($"Multiple basetextures found in {filename}");
                 cache.Add(filename, (0, 0));
                 return (0, 0);
             }

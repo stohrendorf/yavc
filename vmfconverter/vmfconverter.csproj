@@ -15,5 +15,11 @@
     <ItemGroup>
       <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
       <PackageReference Include="CommandLineParser" Version="2.8.0" />
+      <PackageReference Include="NLog" Version="5.0.0-beta11" />
+      <PackageReference Include="NLog.Extensions.Logging" Version="1.6.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>

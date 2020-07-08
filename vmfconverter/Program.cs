@@ -1,29 +1,33 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using Assimp;
 using CommandLine;
+using NLog;
 
 namespace VMFConverter
 {
     internal static class Program
     {
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
         private static void Main(string[] args)
         {
             var parsed = Parser.Default.ParseArguments<Options>(args) as Parsed<Options>;
 
+            LogManager.ReconfigExistingLoggers();
+
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
-            Console.WriteLine("Reading VMF");
+            logger.Info("Reading VMF");
             var data = VMFIO.Parser.ReadVmf(parsed!.Value.VMF);
-            Console.WriteLine("Converting VMF geometry");
+            logger.Info("Converting VMF geometry");
             var v = new VMFConvertVisitor(parsed.Value.Materials);
             v.Visit(data);
 
-            Console.WriteLine("Building export scene");
+            logger.Info("Building export scene");
 
             var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
 
@@ -32,7 +36,7 @@ namespace VMFConverter
                     _.HasMeshes))
                 scene.RootNode.Children.Add(node);
 
-            Console.WriteLine("Writing DAE");
+            logger.Info("Writing DAE");
 
             using (var ctx = new AssimpContext())
             {
@@ -42,7 +46,7 @@ namespace VMFConverter
             var totalFaces = scene.Meshes.Sum(_ => _.FaceCount);
             var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
-            Console.WriteLine($"Wrote {v.Vmf.Solids.Count} solids, {totalVertices} vertices, {totalFaces} faces");
+            logger.Info($"Wrote {v.Vmf.Solids.Count} solids, {totalVertices} vertices, {totalFaces} faces");
         }
 
         [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
