@@ -26,7 +26,7 @@ namespace VMFConverter
         {
             _faces = new List<Face>();
             entity.Accept(this);
-            var solid = new Solid(entity.GetValue("id"), _faces);
+            var solid = new Solid(int.Parse(entity.GetValue("id")), _faces);
             _faces = null;
             Vmf.Solids.Add(solid);
         }

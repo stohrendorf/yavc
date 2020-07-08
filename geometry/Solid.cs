@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Assimp;
 using NUnit.Framework;
 using utility;
 
@@ -8,16 +7,11 @@ namespace geometry
 {
     public class Solid
     {
-        private readonly string _id;
-
-        private readonly Dictionary<string, List<List<int>>>
-            _polygonIndicesByMaterial = new Dictionary<string, List<List<int>>>();
-
         private readonly IndexedSet<Vertex> _vertices = new IndexedSet<Vertex>();
 
-        public Solid(string id, IReadOnlyList<Face> faces)
+        public Solid(int id, IReadOnlyList<Face> faces)
         {
-            _id = id;
+            ID = id;
 
             for (var i = 0; i < faces.Count; i++)
             {
@@ -37,8 +31,8 @@ namespace geometry
             if (faces.Any(_ => _.Displacement != null))
                 foreach (var face in faces.Where(_ => _.Displacement != null))
                 {
-                    if (!_polygonIndicesByMaterial.TryGetValue(face.Material, out var pi))
-                        pi = _polygonIndicesByMaterial[face.Material] = new List<List<int>>();
+                    if (!PolygonIndicesByMaterial.TryGetValue(face.Material, out var pi))
+                        pi = PolygonIndicesByMaterial[face.Material] = new List<List<int>>();
 
                     var (vertices, facesIndices) = face.Displacement!.Convert(face);
                     foreach (var faceIndices in facesIndices)
@@ -47,69 +41,20 @@ namespace geometry
             else
                 foreach (var face in faces)
                 {
-                    if (!_polygonIndicesByMaterial.TryGetValue(face.Material, out var pi))
-                        pi = _polygonIndicesByMaterial[face.Material] = new List<List<int>>();
+                    if (!PolygonIndicesByMaterial.TryGetValue(face.Material, out var pi))
+                        pi = PolygonIndicesByMaterial[face.Material] = new List<List<int>>();
 
                     pi.Add(Enumerable.Range(0, face.Polygon.Count)
                         .Select(fi => _vertices.Add(face.Polygon.Vertices[fi])).ToList());
                 }
         }
 
+        public int ID { get; }
+
+        public Dictionary<string, List<List<int>>> PolygonIndicesByMaterial { get; } =
+            new Dictionary<string, List<List<int>>>();
+
         public IEnumerable<Vertex> Vertices => _vertices.GetOrdered();
-
-        public Node Export(Scene scene)
-        {
-            var node = new Node($"solid_{_id}");
-
-            foreach (var (materialName, faces) in _polygonIndicesByMaterial)
-            {
-                if (materialName.ToLower().StartsWith("tools/"))
-                    continue;
-
-                int? matIndex = null;
-                for (var i = 0; i < scene.Materials.Count; ++i)
-                    if (scene.Materials[i].Name == materialName)
-                    {
-                        matIndex = i;
-                        break;
-                    }
-
-                if (matIndex == null)
-                {
-                    var mat = new Material
-                    {
-                        Name = materialName,
-                        TextureDiffuse = new TextureSlot(materialName, TextureType.Diffuse, 0, TextureMapping.Plane, 0,
-                            1,
-                            TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0),
-                        IsTwoSided = true
-                    };
-                    scene.Materials.Add(mat);
-                    matIndex = scene.Materials.Count - 1;
-                }
-
-                var mesh = new Mesh($"{_id}-{scene.Meshes.Count}", PrimitiveType.Polygon);
-
-                mesh.Vertices.AddRange(_vertices.GetOrdered()
-                    .Select(vertex => new Vector3D((float) vertex.Co.X, (float) vertex.Co.Z, -(float) vertex.Co.Y)));
-                mesh.VertexColorChannels[0]
-                    .AddRange(_vertices.GetOrdered().Select(vertex => new Color4D((float) vertex.Alpha, 1, 1, 1)));
-                mesh.TextureCoordinateChannels[0].AddRange(_vertices.GetOrdered()
-                    .Select(vertex => new Vector3D((float) vertex.UV.X, (float) vertex.UV.Y, 0)));
-                mesh.MaterialIndex = matIndex.Value;
-
-                foreach (var indices in faces)
-                    mesh.Faces.Add(new Assimp.Face(indices.ToArray()));
-
-                if (!mesh.HasFaces)
-                    continue;
-
-                scene.Meshes.Add(mesh);
-                node.MeshIndices.Add(scene.Meshes.Count - 1);
-            }
-
-            return node;
-        }
     }
 
     [TestFixture]
@@ -131,7 +76,7 @@ namespace geometry
             var faces = planes.Select(plane =>
                 new Face(plane, "material", Vector.One, 1, Vector.One, 1, null, 512, 512)).ToList();
 
-            var solid = new Solid("2", faces);
+            var solid = new Solid(2, faces);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(24));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(-161, -87.9), Is.Empty);
@@ -154,7 +99,7 @@ namespace geometry
             var faces = planes.Select(plane =>
                 new Face(plane, "material", Vector.One, 1, Vector.One, 1, null, 512, 512)).ToList();
 
-            var solid = new Solid("2", faces);
+            var solid = new Solid(2, faces);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(4 * 6));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 5), Is.Empty);
@@ -174,7 +119,7 @@ namespace geometry
             var faces = planes.Select(plane =>
                 new Face(plane, "material", Vector.One, 1, Vector.One, 1, null, 512, 512)).ToList();
 
-            var solid = new Solid("2", faces);
+            var solid = new Solid(2, faces);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
             Assert.That(cos.Select(_ => _.Co.Z).NotInRange(0, 1), Is.Empty);
@@ -196,7 +141,7 @@ namespace geometry
             var faces = planes.Select(plane =>
                 new Face(plane, "material", Vector.One, 1, Vector.One, 1, null, 512, 512)).ToList();
 
-            var solid = new Solid("2", faces);
+            var solid = new Solid(2, faces);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 1), Is.Empty);

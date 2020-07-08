@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using NUnit.Framework;
 using utility;
 
@@ -50,8 +50,8 @@ namespace geometry
                     return;
 
                 // as both points are now on opposite sides of the plane, the intersection point must be on the edge
-                Debug.Assert(lambda >= 0 - 1e-6 && lambda <= 1 + 1e-6,
-                    $"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
+                if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
+                    throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
                 var ud = p2.UV - p1.UV;
                 result.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * ud, 1));
