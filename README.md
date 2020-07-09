@@ -31,3 +31,8 @@ To properly use "texture blending" using the provided displacement alpha data, f
 Then use it like this (note that the source shaders are grouped, because they are used without blending in other materials, which allows changing parameters by just editing the group).
 
 ![Blending material](./docdata/blend_material.jpg)
+
+### Entity Placement
+
+Use [this included blender script](./blender/operator_file_import_yavc.py) to create empties in your blender file for every `prop_static` and `prop_dynamic` entity.
+These empties are named according to the referenced models and their assigned skins, they have their viewport colors set to their render colors (allowing rgb mixing for rendering), and they are prepared for collection instancing (i.e., you only need to insert the correct collection containing the appropriate model). 

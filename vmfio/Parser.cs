@@ -10,26 +10,19 @@ namespace VMFIO
         private static readonly Regex kvPattern = new Regex("^\"([^\"]+)\" \"([^\"]*)\"$", RegexOptions.Compiled);
         private static readonly Regex typenamePattern = new Regex("^[a-z_][a-z0-9_]+$", RegexOptions.Compiled);
 
-        private static T Take<T>(this IEnumerator<T> src) where T : class
-        {
-            if (!src.MoveNext())
-                throw new Exception();
-            return src.Current;
-        }
-
-        private static Entity ReadEntity(string typename, IEnumerator<string> it)
+        private static Entity ReadEntity(string typename, LineEnumerator lineEnumerator)
         {
             if (!typenamePattern.Match(typename).Success)
                 throw new ArgumentException("Invalid typename", nameof(typename));
 
-            if (it.Take().Trim() != "{")
-                throw new Exception();
+            if (lineEnumerator.Take() != "{")
+                throw new Exception($"Expected {{ at line {lineEnumerator.Line}, got {lineEnumerator.Current}");
 
             var kvs = new List<KeyValue>();
             var children = new List<Entity>();
             while (true)
             {
-                var currentLine = it.Take().Trim();
+                var currentLine = lineEnumerator.Take();
                 if (currentLine == "}")
                     return new Entity(typename, kvs, children);
 
@@ -37,18 +30,18 @@ namespace VMFIO
                 if (kvm.Success)
                     kvs.Add(new KeyValue(kvm.Groups[1].Value, kvm.Groups[2].Value));
                 else if (typenamePattern.Match(currentLine).Success)
-                    children.Add(ReadEntity(currentLine, it));
+                    children.Add(ReadEntity(currentLine, lineEnumerator));
                 else
-                    throw new Exception($"Failed to parse line {currentLine}");
+                    throw new Exception($"Failed to parse line {lineEnumerator.Line} '{currentLine}'");
             }
         }
 
         public static Entity ReadVmf(string filename)
         {
             var result = new List<Entity>();
-            var it = File.ReadLines(filename).GetEnumerator();
-            while (it.MoveNext())
-                result.Add(ReadEntity(it.Current.Trim(), it));
+            var lineEnumerator = new LineEnumerator(File.ReadLines(filename).GetEnumerator());
+            while (lineEnumerator.MoveNext())
+                result.Add(ReadEntity(lineEnumerator.Current, lineEnumerator));
             return new Entity("<vmf>", new List<KeyValue>(), result);
         }
     }

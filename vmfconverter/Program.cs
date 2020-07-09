@@ -23,30 +23,55 @@ namespace VMFConverter
 
             logger.Info("Reading VMF");
             var data = VMFIO.Parser.ReadVmf(parsed!.Value.VMF);
-            logger.Info("Converting VMF geometry");
-            var v = new VMFConvertVisitor(parsed.Value.Materials);
-            v.Visit(data);
 
-            logger.Info("Building export scene");
-
-            var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
-
-            foreach (var node in v.Vmf.Solids
-                .Select(solid => solid.Export(scene, material => material.ToLower().StartsWith("tools/"))).Where(_ =>
-                    _.HasMeshes))
-                scene.RootNode.Children.Add(node);
-
-            logger.Info("Writing DAE");
-
-            using (var ctx = new AssimpContext())
+            if (parsed.Value.DAE != null)
             {
-                ctx.ExportFile(scene, parsed.Value.DAE, "collada");
+                if (parsed.Value.Materials == null)
+                {
+                    logger.Error("Provide materials folder for geometry output");
+                    return;
+                }
+
+                logger.Info("Converting VMF geometry");
+                var converter = new VMFConvertVisitor(parsed.Value.Materials);
+                converter.Visit(data);
+
+                logger.Info("Building export scene");
+
+                var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
+
+                foreach (var node in converter.Vmf.Solids
+                    .Select(solid => solid.Export(scene, material => material.ToLower().StartsWith("tools/"))).Where(
+                        _ =>
+                            _.HasMeshes))
+                    scene.RootNode.Children.Add(node);
+
+                logger.Info("Writing DAE");
+
+                using (var ctx = new AssimpContext())
+                {
+                    ctx.ExportFile(scene, parsed.Value.DAE, "collada");
+                }
+
+                var totalFaces = scene.Meshes.Sum(_ => _.FaceCount);
+                var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
+
+                logger.Info($"Wrote {converter.Vmf.Solids.Count} solids, {totalVertices} vertices, {totalFaces} faces");
             }
 
-            var totalFaces = scene.Meshes.Sum(_ => _.FaceCount);
-            var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
+            if (parsed.Value.Entities != null)
+            {
+                logger.Info("Converting VMF entities");
+                var converter = new VMFEntityVisitor();
+                converter.Visit(data);
 
-            logger.Info($"Wrote {v.Vmf.Solids.Count} solids, {totalVertices} vertices, {totalFaces} faces");
+                using (var f = File.CreateText(parsed.Value.Entities))
+                {
+                    foreach (var entity in converter.Entities)
+                        f.WriteLine(
+                            $"{entity.Name} {entity.Color} {entity.Origin.X:F} {entity.Origin.Y:F} {entity.Origin.Z:F} {entity.Rotation.Z:F} {entity.Rotation.X:F} {entity.Rotation.Y:F}");
+                }
+            }
         }
 
         [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
@@ -56,11 +81,14 @@ namespace VMFConverter
             [Option('v', "vmf", Required = true, HelpText = "Input VMF")]
             public string VMF { get; set; } = null!;
 
-            [Option('d', "dae", Required = true, HelpText = "Output DAE")]
-            public string DAE { get; set; } = null!;
+            [Option('d', "dae", Required = false, HelpText = "Output DAE")]
+            public string DAE { get; set; } = null;
 
-            [Option('m', "materials", Required = true, HelpText = "Materials base folder")]
-            public string Materials { get; set; } = null!;
+            [Option('e', "entities", Required = false, HelpText = "Output Entities for Blender")]
+            public string? Entities { get; set; } = null;
+
+            [Option('m', "materials", Required = false, HelpText = "Materials base folder")]
+            public string? Materials { get; set; } = null;
         }
     }
 }

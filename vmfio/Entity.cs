@@ -16,7 +16,7 @@ namespace VMFIO
             _children = children;
         }
 
-        private string Classname => GetValue("classname");
+        public string Classname => GetValue("classname");
 
         public void Accept(EntityVisitor visitor)
         {
