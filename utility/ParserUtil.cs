@@ -51,7 +51,27 @@ namespace utility
 
         public static double ParseDouble(string value)
         {
-            return double.Parse(value, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return double.Parse(value,
+                NumberStyles.AllowLeadingSign | NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint,
+                CultureInfo.InvariantCulture);
+        }
+
+        public static int ParseInt(string value)
+        {
+            return int.Parse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
+        }
+
+        public static Vector ParseVector(string data)
+        {
+            var cols = data.Split(" ");
+            if (cols.Length != 3)
+                throw new ArgumentException();
+
+            return new Vector(
+                ParseDouble(cols[0]),
+                ParseDouble(cols[1]),
+                ParseDouble(cols[2])
+            );
         }
     }
 

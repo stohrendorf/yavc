@@ -16,17 +16,25 @@ namespace VMFIO
             _children = children;
         }
 
-        public string Classname => GetValue("classname");
+        public string? Classname => GetOptionalValue("classname");
 
         public void Accept(EntityVisitor visitor)
         {
             foreach (var child in _children) visitor.Visit(child);
         }
 
-        public string GetValue(string key)
+        public string? GetOptionalValue(string key)
         {
             var kvs = _keyValues.SingleOrDefault(_ => _.Key == key);
-            return kvs.Value;
+            return kvs?.Value;
+        }
+
+        public string GetValue(string key)
+        {
+            var value = GetOptionalValue(key);
+            if (value == null)
+                throw new KeyNotFoundException();
+            return value;
         }
 
         public override string ToString()

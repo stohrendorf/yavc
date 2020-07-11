@@ -11,6 +11,7 @@ namespace VMFConverter
 {
     internal static class Program
     {
+        private const int RopeSegmentFactor = 4;
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         private static void Main(string[] args)
@@ -32,13 +33,45 @@ namespace VMFConverter
                     return;
                 }
 
+                logger.Info("Calculating Ropes");
+                var ropeVis = new RopeVisitor();
+                ropeVis.Visit(data);
+
+                var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
+
+                var mat = new Material
+                {
+                    Name = "yavc-rope-material"
+                };
+                scene.Materials.Add(mat);
+
+                foreach (var (kp, kp2) in ropeVis.Segments)
+                {
+                    var node = new Node($"ropesegment_{kp.ID}");
+                    var mesh = new Mesh($"{kp.ID}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
+
+                    var points = Catenary.Calculate(kp.Origin, kp2.Origin,
+                        kp.Origin.Distance(kp2.Origin) + kp.Slack, kp.Subdiv * RopeSegmentFactor).ToList();
+
+                    mesh.Vertices.AddRange(points.Select(v => new Vector3D((float) v.X, (float) v.Z, -(float) v.Y)));
+
+                    for (var i = 0; i < points.Count - 1; ++i) mesh.Faces.Add(new Face(new[] {i, i + 1}));
+
+                    scene.Meshes.Add(mesh);
+                    node.MeshIndices.Add(scene.Meshes.Count - 1);
+                    scene.RootNode.Children.Add(node);
+                }
+
+                using (var ctx = new AssimpContext())
+                {
+                    ctx.ExportFile(scene, parsed.Value.DAE, "collada");
+                }
+
                 logger.Info("Converting VMF geometry");
                 var converter = new VMFConvertVisitor(parsed.Value.Materials);
                 converter.Visit(data);
 
                 logger.Info("Building export scene");
-
-                var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
 
                 foreach (var node in converter.Vmf.Solids
                     .Select(solid => solid.Export(scene, material => material.ToLower().StartsWith("tools/"))).Where(
@@ -56,7 +89,8 @@ namespace VMFConverter
                 var totalFaces = scene.Meshes.Sum(_ => _.FaceCount);
                 var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
-                logger.Info($"Wrote {converter.Vmf.Solids.Count} solids, {totalVertices} vertices, {totalFaces} faces");
+                logger.Info(
+                    $"Wrote {converter.Vmf.Solids.Count} solids, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
             }
 
             if (parsed.Value.Entities != null)
@@ -82,7 +116,7 @@ namespace VMFConverter
             public string VMF { get; set; } = null!;
 
             [Option('d', "dae", Required = false, HelpText = "Output DAE")]
-            public string DAE { get; set; } = null;
+            public string? DAE { get; set; } = null;
 
             [Option('e', "entities", Required = false, HelpText = "Output Entities for Blender")]
             public string? Entities { get; set; } = null;

@@ -135,6 +135,8 @@ namespace utility
             return new[] {X, Y, Z};
         }
 
+        public double MaxValue => Math.Max(X, Math.Max(Y, Z));
+
         public int MaxAxis()
         {
             var data = Abs().ToArray();

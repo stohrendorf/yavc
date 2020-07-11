@@ -31,9 +31,9 @@ namespace geometry
             set => _uv = new Vector2(Round(value.X), Round(value.Y));
         }
 
-        public bool Equals(Vertex other)
+        public bool Equals(Vertex? other)
         {
-            return Co.Equals(other.Co) && UV.Equals(other.UV);
+            return other != null && Co.Equals(other.Co) && UV.Equals(other.UV);
         }
 
         private static double Round(double value)
@@ -56,9 +56,9 @@ namespace geometry
             return left.Equals(right);
         }
 
-        public static bool operator !=(Vertex left, Vertex right)
+        public static bool operator !=(Vertex? left, Vertex? right)
         {
-            return !left.Equals(right);
+            return !Equals(left, right);
         }
 
         public override string ToString()
