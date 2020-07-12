@@ -32,7 +32,7 @@ namespace utility
 
         public override string ToString()
         {
-            return $"({X:G} {Y:G} {Z:G})";
+            return $"({X} {Y} {Z})";
         }
 
         public double Length => Math.Sqrt(LengthSquared);
@@ -185,7 +185,7 @@ namespace utility
 
         public override string ToString()
         {
-            return $"({X:G} {Y:G})";
+            return $"({X} {Y})";
         }
 
         public static Vector2 operator +(in Vector2 left, in Vector2 right)

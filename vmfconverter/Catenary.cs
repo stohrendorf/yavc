@@ -17,77 +17,35 @@ namespace VMFConverter
 
         private static IEnumerable<double> LinSpace(double a, double b, int n)
         {
-            if (n < 2)
-            {
-                yield return b;
-                yield break;
-            }
+            if (n < 2) return Enumerable.Repeat(b, 1);
 
             var d = (b - a) / (n - 1);
-            for (var i = 0; i < n; ++i) yield return a + d * i;
+            return Enumerable.Range(0, n).Select(i => a + d * i);
         }
 
-        public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double totalLength, int subdiv)
+        private static IEnumerable<Vector2> Calculate2DNorm(double dy, int subdiv)
         {
-            if (p0.X > p1.X)
-                (p0, p1) = (p1, p0);
-
-            // scale to unit cube to avoid numeric overflow in hyperbolic functions
-            var scale = (p1 - p0).Abs().MaxValue;
-            if (scale < MinStep)
-                throw new ArgumentException($"Distance between points {p0} and {p1} too small");
-
-            p0 /= scale;
-            p1 /= scale;
-            totalLength /= scale;
-
-            if (totalLength <= p0.Distance(p1))
+            if (Math.Abs(dy) >= 1)
                 // rope is stretched: straight line
-            {
-                foreach (var v in LinSpace(p0.X, p1.X, subdiv).Zip(LinSpace(p0.Y, p1.Y, subdiv))
-                    .Zip(LinSpace(p0.Z, p1.Z, subdiv), ((double x, double y) xy, double z) => (xy.x, xy.y, z))
-                    .Select(xyz => new Vector(xyz.x, xyz.y, xyz.z)))
-                    yield return v * scale;
-                yield break;
-            }
+                return new[] {new Vector2(0, 0), new Vector2(1, dy)};
 
-            var dz = p1.Z - p0.Z;
-            var horizontalDist = Math.Sqrt(Math.Pow(p1.X - p0.X, 2) + Math.Pow(p1.Y - p0.Y, 2));
-            if (Math.Abs(horizontalDist) < VerticalThreshold) // almost perfectly vertical
-            {
-                var vSag = (totalLength - Math.Abs(dz)) / 2;
-                var nSag = (int) Math.Ceiling(subdiv * vSag / totalLength);
-                var zMax = Math.Max(p0.Z, p1.Z);
-                var zMin = Math.Min(p0.Z, p1.Z);
-                var zValues = LinSpace(zMax, zMin - vSag, subdiv - nSag).Concat(LinSpace(zMin - vSag, zMin, nSag));
-
-                var xValues = Enumerable.Repeat((p0.X + p1.X) / 2, subdiv);
-                var yValues = Enumerable.Repeat((p0.Y + p1.Y) / 2, subdiv);
-                foreach (var v in xValues.Zip(yValues)
-                    .Zip(zValues, ((double x, double y) xy, double z) => (xy.x, xy.y, z))
-                    .Select(xyz => new Vector(xyz.x, xyz.y, xyz.z)))
-                    yield return v * scale;
-
-                yield break;
-            }
-
-            var stretchedHDist = Math.Sqrt(totalLength * totalLength - dz * dz);
+            var stretchedHDist = Math.Sqrt(1 - dy * dy);
 
             double G(double s)
             {
-                var result = 2 * Math.Sinh(s * horizontalDist / 2) / s - stretchedHDist;
-                Debug.Assert(!double.IsInfinity(result) && !double.IsNaN(result),
-                    $"{nameof(s)}={s}, {nameof(horizontalDist)}={horizontalDist}");
+                var result = 2 * Math.Sinh(s / 2) / s - stretchedHDist;
+                Debug.Assert(!double.IsInfinity(result) && !double.IsNaN(result), $"{nameof(s)}={s}");
                 return result;
             }
 
-            double Dg(double s)
+            static double Dg(double s)
             {
-                return Math.Cosh(s * horizontalDist / 2) * horizontalDist / (2 * s) -
-                       2 * Math.Sinh(s * horizontalDist / 2) / (s * s);
+                var result = Math.Cosh(s / 2) / (2 * s) - 2 * Math.Sinh(s / 2) / (s * s);
+                Debug.Assert(!double.IsInfinity(result) && !double.IsNaN(result), $"{nameof(s)}={s}");
+                return result;
             }
 
-            var sag = Math.Sqrt(totalLength * totalLength - dz * dz) / 2;
+            double sag = 1;
             for (var i = 0; i < MaxIter; ++i)
             {
                 var g = G(sag);
@@ -97,10 +55,7 @@ namespace VMFConverter
                     break;
 
                 var search = -g / dg;
-                Debug.Assert(!double.IsNaN(g) && !double.IsInfinity(g));
-                Debug.Assert(!double.IsNaN(dg) && !double.IsInfinity(dg));
-
-                double alpha = 1;
+                var alpha = 1.0;
                 var sagNew = sag + alpha * search;
                 while (sagNew < 0 || Math.Abs(G(sagNew)) > Math.Abs(g))
                 {
@@ -113,14 +68,42 @@ namespace VMFConverter
                 sag = sagNew;
             }
 
-            var xLeft = 0.5 * (Math.Log((totalLength + dz) / (totalLength - dz)) / sag - horizontalDist);
-            var xMin = p0.X - xLeft;
-            var bias = p0.Z - Math.Cosh(xLeft * sag) / sag;
-            foreach (var (x, y) in LinSpace(p0.X, p1.X, subdiv).Zip(LinSpace(p0.Y, p1.Y, subdiv), (x, y) => (x, y)))
+            var xLeft = 0.5 * ((Math.Log(1 + dy) - Math.Log(1 - dy)) / sag - 1);
+            var bias = -Math.Cosh(xLeft * sag) / sag;
+
+            double CalcY(double x)
             {
-                var z = bias + Math.Cosh((x - xMin) * sag) / sag;
-                yield return new Vector(x, y, z) * scale;
+                return bias + Math.Cosh((x + xLeft) * sag) / sag;
             }
+
+            var endY = CalcY(1);
+
+            // sinh and cosh are so incredibly unstable, we fix Y calculation errors by scaling the curve into 0..1 range
+            var correction = Math.Abs(endY) < MinStep ? 1.0 : dy / endY;
+            return LinSpace(0, 1, subdiv).Select(x => new Vector2(x, CalcY(x) * correction));
+        }
+
+        public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double totalLength, int subdiv)
+        {
+            if (p0.Distance(p1) < MinStep)
+                throw new ArgumentException($"Distance between points {p0} and {p1} too small");
+
+            var d = p1 - p0;
+            if (Math.Sqrt(d.X * d.X + d.Y * d.Y) >= VerticalThreshold)
+                return Calculate2DNorm(d.Z / totalLength, subdiv).Select(xy => new Vector(
+                    xy.X * d.X + p0.X,
+                    xy.X * d.Y + p0.Y,
+                    xy.Y * totalLength + p0.Z
+                ));
+
+            if (totalLength < Math.Abs(p1.Z - p0.Z))
+                // stretched
+                return new[] {p0, p1};
+
+            var dz = Math.Abs(p1.Z - p0.Z);
+            var overhang = totalLength - 2 * dz;
+            var minZ = Math.Min(p0.Z, p1.Z);
+            return new[] {p0, new Vector(p0.X, p0.Y, minZ - overhang), p1};
         }
     }
 }

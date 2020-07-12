@@ -11,7 +11,6 @@ namespace VMFConverter
 {
     internal static class Program
     {
-        private const int RopeSegmentFactor = 4;
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         private static void Main(string[] args)
@@ -45,13 +44,14 @@ namespace VMFConverter
                 };
                 scene.Materials.Add(mat);
 
-                foreach (var (kp, kp2) in ropeVis.Segments)
+                foreach (var (id0, p0, points) in ropeVis.Chains)
                 {
-                    var node = new Node($"ropesegment_{kp.ID}");
-                    var mesh = new Mesh($"{kp.ID}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
-
-                    var points = Catenary.Calculate(kp.Origin, kp2.Origin,
-                        kp.Origin.Distance(kp2.Origin) + kp.Slack, kp.Subdiv * RopeSegmentFactor).ToList();
+                    var node = new Node($"rope_{id0}")
+                    {
+                        Transform = Matrix4x4.FromTranslation(new Vector3D((float) p0.X, (float) p0.Z,
+                            -(float) p0.Y))
+                    };
+                    var mesh = new Mesh($"rope_{id0}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
 
                     mesh.Vertices.AddRange(points.Select(v => new Vector3D((float) v.X, (float) v.Z, -(float) v.Y)));
 
@@ -60,11 +60,6 @@ namespace VMFConverter
                     scene.Meshes.Add(mesh);
                     node.MeshIndices.Add(scene.Meshes.Count - 1);
                     scene.RootNode.Children.Add(node);
-                }
-
-                using (var ctx = new AssimpContext())
-                {
-                    ctx.ExportFile(scene, parsed.Value.DAE, "collada");
                 }
 
                 logger.Info("Converting VMF geometry");
