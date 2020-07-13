@@ -10,7 +10,7 @@ namespace VMFConverter
     {
         public static Node Export(this Solid solid, Scene scene, Predicate<string> materialSkipPredicate)
         {
-            var node = new Node($"solid_{solid.ID}");
+            var node = new Node($"solid:{solid.ID}");
 
             foreach (var (material, faces) in solid.PolygonIndicesByMaterial)
             {
@@ -56,7 +56,7 @@ namespace VMFConverter
                     matIndex = scene.Materials.Count - 1;
                 }
 
-                var mesh = new Mesh($"{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon);
+                var mesh = new Mesh($"solid:{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon);
 
                 mesh.Vertices.AddRange(solid.Vertices
                     .Select(vertex => vertex.Co.ToAssimp()));
@@ -73,6 +73,44 @@ namespace VMFConverter
                 node.MeshIndices.Add(scene.Meshes.Count - 1);
             }
 
+            return node;
+        }
+
+        public static Node Export(this Polygon decal, string material, Scene scene)
+        {
+            var node = new Node($"decal:{material}");
+            int? matIndex = null;
+            for (var i = 0; i < scene.Materials.Count; ++i)
+                if (scene.Materials[i].Name == material)
+                {
+                    matIndex = i;
+                    break;
+                }
+
+            if (matIndex == null)
+            {
+                var mat = new Material
+                {
+                    Name = material,
+                    TextureDiffuse = new TextureSlot(material, TextureType.Diffuse, 0, TextureMapping.Plane, 0,
+                        1,
+                        TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0),
+                    IsTwoSided = true
+                };
+                scene.Materials.Add(mat);
+                matIndex = scene.Materials.Count - 1;
+            }
+
+            var mesh = new Mesh($"decal:{material}-{scene.Meshes.Count}", PrimitiveType.Polygon);
+            mesh.Vertices.AddRange(decal.Vertices
+                .Select(vertex => new Vector3D((float) vertex.Co.X, (float) vertex.Co.Z, -(float) vertex.Co.Y)));
+            mesh.TextureCoordinateChannels[0].AddRange(decal.Vertices
+                .Select(vertex => new Vector3D((float) vertex.UV.X, (float) vertex.UV.Y, 0)));
+            mesh.MaterialIndex = matIndex.Value;
+            mesh.Faces.Add(new Face(Enumerable.Range(0, decal.Vertices.Count).ToArray()));
+
+            scene.Meshes.Add(mesh);
+            node.MeshIndices.Add(scene.Meshes.Count - 1);
             return node;
         }
     }

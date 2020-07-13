@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace utility
+namespace geometry
 {
     public readonly struct Vector : IEquatable<Vector>
     {

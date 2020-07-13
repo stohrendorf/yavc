@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace utility
+namespace geometry
 {
     public readonly struct Plane : IEquatable<Plane>
     {

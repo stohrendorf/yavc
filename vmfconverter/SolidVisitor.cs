@@ -32,8 +32,8 @@ namespace VMFConverter
         private void ReadSide(Entity entity)
         {
             var plane = entity.GetValue("plane").ParsePlaneString();
-            var (uAxis, uShift) = entity.GetValue("uaxis").ParseTextureAxis();
-            var (vAxis, vShift) = entity.GetValue("vaxis").ParseTextureAxis();
+            var uAxis = entity.GetValue("uaxis").ParseTextureAxis();
+            var vAxis = entity.GetValue("vaxis").ParseTextureAxis();
 
             _displacement = null;
             entity.Accept(this);
@@ -41,12 +41,7 @@ namespace VMFConverter
             var material = entity.GetValue("material");
             var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.GetCached(_vtfBasePath, material + ".vmt");
 
-            var face = new Face(plane,
-                vmt,
-                uAxis, uShift,
-                vAxis, vShift,
-                _displacement
-            );
+            var face = new Face(plane, vmt, uAxis, vAxis, _displacement);
 
             _displacement = null;
 

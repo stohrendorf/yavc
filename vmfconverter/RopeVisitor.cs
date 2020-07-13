@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using geometry;
 using NLog;
-using utility;
 using VMFIO;
 
 namespace VMFConverter

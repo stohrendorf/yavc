@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading;
 using Assimp;
 using CommandLine;
+using geometry;
 using NLog;
+using Face = Assimp.Face;
 
 namespace VMFConverter
 {
@@ -48,11 +50,11 @@ namespace VMFConverter
                 foreach (var (id0, p0, points) in ropeVis.Chains)
                 {
                     ++numRopes;
-                    var node = new Node($"rope_{id0}")
+                    var node = new Node($"rope:{id0}")
                     {
                         Transform = Matrix4x4.FromTranslation(p0.ToAssimp())
                     };
-                    var mesh = new Mesh($"rope_{id0}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
+                    var mesh = new Mesh($"rope:{id0}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
 
                     mesh.Vertices.AddRange(points.Select(v => v.ToAssimp()));
 
@@ -66,6 +68,33 @@ namespace VMFConverter
                 logger.Info("Converting VMF geometry");
                 var converter = new SolidVisitor(parsed.Value.Materials);
                 converter.Visit(data);
+
+                logger.Info("Processing decals");
+                var decalVis = new DecalVisitor(parsed.Value.Materials);
+                decalVis.Visit(data);
+
+                var totalDecals = 0;
+                foreach (var decal in decalVis.Decals)
+                {
+                    var candidates = converter.Vmf.Solids.Where(s => s.Contains(decal.Origin)).ToList();
+                    if (candidates.Count == 0)
+                    {
+                        logger.Warn($"No candidate solids found for {decal.ID}");
+                        continue;
+                    }
+
+                    var createdDecals = 0;
+                    foreach (var poly in candidates.Select(candidate => DecalComputation.DecalSolid(decal, candidate))
+                        .Where(poly => poly != null))
+                    {
+                        createdDecals++;
+                        scene.RootNode.Children.Add(poly!.Export(decal.Material.Basename, scene));
+                    }
+
+                    totalDecals += createdDecals;
+                    if (createdDecals == 0)
+                        logger.Warn($"Could not create decal {decal.ID}");
+                }
 
                 logger.Info("Building export scene");
 
@@ -85,7 +114,7 @@ namespace VMFConverter
                 var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
                 logger.Info(
-                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
+                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {totalDecals} decals, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
             }
 
             if (parsed.Value.Entities != null)

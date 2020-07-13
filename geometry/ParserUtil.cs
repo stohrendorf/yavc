@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 
-namespace utility
+namespace geometry
 {
     public static class ParserUtil
     {
@@ -32,7 +32,7 @@ namespace utility
             return Plane.CreateFromVertices(plane[1], plane[0], plane[2]);
         }
 
-        public static (Vector axis, double shift) ParseTextureAxis(this string data)
+        public static TextureAxis ParseTextureAxis(this string data)
         {
             var match = axisPattern.Match(data);
             if (!match.Success)
@@ -46,7 +46,7 @@ namespace utility
             if (Math.Abs(scale) < 1e-6)
                 scale = 0.25;
 
-            return (axis / scale, shift);
+            return new TextureAxis(axis, shift, scale);
         }
 
         public static double ParseDouble(this string value)

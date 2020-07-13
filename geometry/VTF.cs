@@ -10,7 +10,7 @@ namespace geometry
 {
     public static class VTF
     {
-        public static (short width, short height) GetSize(BinaryReader s)
+        private static (short width, short height) GetSize(BinaryReader s)
         {
             var fType = s.ReadBytes(4);
             if (fType[0] != 0x56 || fType[1] != 0x54 || fType[2] != 0x46 || fType[3] != 0)
@@ -45,10 +45,10 @@ namespace geometry
         public static readonly VMT Empty = new VMT();
 
         private readonly string _absolutePath;
-        private readonly double _decalScale;
         public readonly string Basename;
         public readonly string? BaseTexture;
         public readonly string? BaseTexture2;
+        public readonly double DecalScale;
         public readonly int Height;
         public readonly string? NormalMap;
         public readonly string? NormalMap2;
@@ -83,15 +83,15 @@ namespace geometry
             BaseTexture2 = findTexture(rootChild.GetOptionalValue("$basetexture2"));
             NormalMap = findTexture(rootChild.GetOptionalValue("$normalmap"));
             NormalMap2 = findTexture(rootChild.GetOptionalValue("$normalmap2"));
-            _decalScale = StringUtil.ParseDouble(rootChild.GetOptionalValue("$decalscale") ?? "0.25");
+            DecalScale = StringUtil.ParseDouble(rootChild.GetOptionalValue("$decalscale") ?? "0.25");
             if ((BaseTexture ?? NormalMap) == null)
                 throw new Exception($"Material {subPath} contains neither $basetexture nor $normalmap");
             (Width, Height) = VTF.GetSize(Path.Join(root, (BaseTexture ?? NormalMap)!));
         }
 
-        public double DecalWidth => Width * _decalScale;
+        public double DecalWidth => Width * DecalScale;
 
-        public double DecalHeight => Height * _decalScale;
+        public double DecalHeight => Height * DecalScale;
 
         public bool IsBlending => BaseTexture2 != null;
 

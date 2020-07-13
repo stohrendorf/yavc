@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using utility;
+using geometry;
 
 namespace VMFConverter
 {
