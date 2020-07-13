@@ -9,11 +9,7 @@ namespace VMFConverter
     public static class Catenary
     {
         private const int MaxIter = 1000;
-        private const double MinDg = 1e-10;
-        private const double MinG = 1e-8;
-        private const double StepFactor = 0.5;
-        private const double MinStep = 1e-9;
-        private const double VerticalThreshold = 1e-3;
+        private const double VerticalThreshold = 1e-6;
 
         private static IEnumerable<double> LinSpace(double a, double b, int n)
         {
@@ -23,82 +19,67 @@ namespace VMFConverter
             return Enumerable.Range(0, n).Select(i => a + d * i);
         }
 
-        private static IEnumerable<Vector2> Calculate2DNorm(double dy, int subdiv)
+        private static IEnumerable<Vector2> Calculate2D(double dx, double dy, double length, int subdivisions)
         {
-            if (Math.Abs(dy) >= 1)
-                // rope is stretched: straight line
-                return new[] {new Vector2(0, 0), new Vector2(1, dy)};
+            // https://math.stackexchange.com/questions/3557767/how-to-construct-a-catenary-of-a-specified-length-through-two-specified-points
+            if (dx <= 0)
+                throw new ArgumentException();
+            if (dx < 1e-8)
+                throw new ArgumentException();
+            if (length <= 0 || length * length < dx * dx + dy * dy)
+                throw new ArgumentException();
 
-            var stretchedHDist = Math.Sqrt(1 - dy * dy);
+            var r = Math.Sqrt(length * length - dy * dy) / dx;
+            Debug.Assert(r > 1, $"r={r} dx={dx} dy={dy} length={length}");
 
-            double G(double s)
-            {
-                var result = 2 * Math.Sinh(s / 2) / s - stretchedHDist;
-                Debug.Assert(!double.IsInfinity(result) && !double.IsNaN(result), $"{nameof(s)}={s}");
-                return result;
-            }
-
-            static double Dg(double s)
-            {
-                var result = Math.Cosh(s / 2) / (2 * s) - 2 * Math.Sinh(s / 2) / (s * s);
-                Debug.Assert(!double.IsInfinity(result) && !double.IsNaN(result), $"{nameof(s)}={s}");
-                return result;
-            }
-
-            double sag = 1;
+            var aN = r < 3 ? Math.Sqrt(6 * (r - 1)) : Math.Log(2 * r) + Math.Log(Math.Log(2 * r));
             for (var i = 0; i < MaxIter; ++i)
             {
-                var g = G(sag);
-                var dg = Dg(sag);
-
-                if (Math.Abs(g) < MinG || Math.Abs(dg) < MinDg)
+                var xx = r * aN - Math.Sinh(aN);
+                if (Math.Abs(xx / aN) <= 1e-15)
                     break;
 
-                var search = -g / dg;
-                var alpha = 1.0;
-                var sagNew = sag + alpha * search;
-                while (sagNew < 0 || Math.Abs(G(sagNew)) > Math.Abs(g))
-                {
-                    alpha *= StepFactor;
-                    if (alpha < MinStep)
-                        break;
-                    sagNew = sag + alpha * search;
-                }
-
-                sag = sagNew;
+                if (double.IsInfinity(aN) || double.IsNaN(aN))
+                    throw new ArithmeticException("aN calculation gave NaN");
+                aN += xx / (Math.Cosh(aN) - r);
             }
 
-            var xLeft = 0.5 * ((Math.Log(1 + dy) - Math.Log(1 - dy)) / sag - 1);
-            var bias = -Math.Cosh(xLeft * sag) / sag;
+            var a = dx / (2 * aN);
+            var b = dx / 2 - a * Math.Atanh(dy / length);
+            var c = dy / 2 - length / (2 * Math.Tanh(aN));
 
-            double CalcY(double x)
+            double F(double x)
             {
-                return bias + Math.Cosh((x + xLeft) * sag) / sag;
+                var result = a * Math.Cosh((x - b) / a) + c;
+                Debug.Assert(!double.IsNaN(result), $"x={x} aN={aN} a={a} b={b} c={c} dx={dx} dy={dy}");
+                return result;
             }
 
-            var endY = CalcY(1);
-
-            // sinh and cosh are so incredibly unstable, we fix Y calculation errors by scaling the curve into 0..1 range
-            var correction = Math.Abs(endY) < MinStep ? 1.0 : dy / endY;
-            return LinSpace(0, 1, subdiv).Select(x => new Vector2(x, CalcY(x) * correction));
+            return LinSpace(0, 1, subdivisions).Select(x => new Vector2(x, F(x * dx)));
         }
 
-        public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double totalLength, int subdiv)
+        public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double additionalLength, int subdivisions)
         {
-            if (p0.Distance(p1) < MinStep)
+            if (p0.Distance(p1) < 1e-8)
                 throw new ArgumentException($"Distance between points {p0} and {p1} too small");
+            if (subdivisions < 0)
+                throw new ArgumentException("subdivisions must be >= 0", nameof(subdivisions));
 
             var d = p1 - p0;
-            if (Math.Sqrt(d.X * d.X + d.Y * d.Y) >= VerticalThreshold)
-                return Calculate2DNorm(d.Z / totalLength, subdiv).Select(xy => new Vector(
-                    xy.X * d.X + p0.X,
-                    xy.X * d.Y + p0.Y,
-                    xy.Y * totalLength + p0.Z
-                ));
+            var dLength = d.Length;
+            var totalLength = dLength + additionalLength;
+            var hDist = Math.Sqrt(d.X * d.X + d.Y * d.Y);
 
-            if (totalLength < Math.Abs(p1.Z - p0.Z))
-                // stretched
+            if (dLength >= totalLength)
+                // rope is stretched: straight line
                 return new[] {p0, p1};
+
+            if (hDist >= VerticalThreshold)
+                return Calculate2D(hDist, p1.Z - p0.Z, totalLength, subdivisions).Select(xy => new Vector(
+                    p0.X + xy.X * d.X,
+                    p0.Y + xy.X * d.Y,
+                    p0.Z + xy.Y
+                ));
 
             var dz = Math.Abs(p1.Z - p0.Z);
             var overhang = totalLength - 2 * dz;

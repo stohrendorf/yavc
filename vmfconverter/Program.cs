@@ -73,7 +73,6 @@ namespace VMFConverter
                         _ =>
                             _.HasMeshes))
                     scene.RootNode.Children.Add(node);
-
                 logger.Info("Writing DAE");
 
                 using (var ctx = new AssimpContext())

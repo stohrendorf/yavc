@@ -30,7 +30,6 @@ namespace VMFConverter
                         continue;
                     }
 
-
                     var currentChain = new List<Vector>();
                     var pt = start;
                     Vector? p0 = null;
@@ -38,8 +37,7 @@ namespace VMFConverter
                     {
                         var next = _keyPoints[pt.Next];
 
-                        var points = Catenary.Calculate(pt.Origin, next.Origin,
-                            pt.Origin.Distance(next.Origin) + pt.Slack,
+                        var points = Catenary.Calculate(pt.Origin, next.Origin, pt.AdditionalLength,
                             (pt.Subdivision + 1) * RopeSegmentFactor);
 
                         if (!ReferenceEquals(pt, start))
@@ -68,10 +66,10 @@ namespace VMFConverter
                 var name = entity.GetOptionalValue("targetname");
                 var nextName = entity.GetOptionalValue("NextKey");
                 var origin = ParserUtil.ParseVector(entity.GetValue("origin"));
-                var slack = ParserUtil.ParseDouble(entity.GetValue("Slack"));
+                var additionalLength = ParserUtil.ParseDouble(entity.GetValue("Slack")) / 16.0;
                 var subdivision = ParserUtil.ParseInt(entity.GetValue("Subdiv"));
                 var id = ParserUtil.ParseInt(entity.GetValue("id"));
-                var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, slack,
+                var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, additionalLength,
                     subdivision);
                 if (name == null)
                     _starts.Add(keyPoint);
@@ -82,22 +80,23 @@ namespace VMFConverter
             entity.Accept(this);
         }
 
-        public class RopeKeyPoint
+        private class RopeKeyPoint
         {
+            public readonly double AdditionalLength;
             public readonly int ID;
             public readonly string? Name;
             public readonly string? Next;
             public readonly Vector Origin;
-            public readonly double Slack;
             public readonly int Subdivision;
 
-            public RopeKeyPoint(int id, Vector origin, string? name, string? next, double slack, int subdivision)
+            public RopeKeyPoint(int id, Vector origin, string? name, string? next, double additionalLength,
+                int subdivision)
             {
                 ID = id;
                 Origin = origin;
                 Name = name;
                 Next = next;
-                Slack = slack;
+                AdditionalLength = additionalLength;
                 Subdivision = subdivision;
             }
         }

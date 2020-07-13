@@ -259,5 +259,19 @@ namespace utility
             var self = this;
             return Enumerable.Range(0, n).Select(i => d * i + self);
         }
+
+        public double Distance(Vector2 other)
+        {
+            return (other - this).Length;
+        }
+
+        public double Length => Math.Sqrt(LengthSquared);
+
+        public double LengthSquared => Dot(this);
+
+        public double Dot(Vector2 rhs)
+        {
+            return X * rhs.X + Y * rhs.Y;
+        }
     }
 }
