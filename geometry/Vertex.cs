@@ -1,16 +1,15 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using utility;
 
 namespace geometry
 {
     public class Vertex : IEquatable<Vertex>
     {
-        private const int Rounding = 4;
-
-        private Vector _co;
-        private Vector2 _uv;
-
         public double Alpha;
+
+        public Vector Co;
+        public Vector2 UV;
 
         public Vertex(Vector co, Vector2 uv, double alpha)
         {
@@ -19,26 +18,9 @@ namespace geometry
             Alpha = alpha;
         }
 
-        public Vector Co
-        {
-            get => _co;
-            set => _co = new Vector(Round(value.X), Round(value.Y), Round(value.Z));
-        }
-
-        public Vector2 UV
-        {
-            get => _uv;
-            set => _uv = new Vector2(Round(value.X), Round(value.Y));
-        }
-
         public bool Equals(Vertex? other)
         {
             return other != null && Co.Equals(other.Co) && UV.Equals(other.UV);
-        }
-
-        private static double Round(double value)
-        {
-            return Math.Round(value, Rounding, MidpointRounding.ToPositiveInfinity);
         }
 
         public override bool Equals(object? obj)
@@ -46,6 +28,7 @@ namespace geometry
             return obj is Vertex other && Equals(other);
         }
 
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode()
         {
             return HashCode.Combine(Co, UV);
@@ -63,7 +46,12 @@ namespace geometry
 
         public override string ToString()
         {
-            return $"Co={_co} UV={_uv} Alpha={Alpha}";
+            return $"Co={Co} UV={UV} Alpha={Alpha}";
+        }
+
+        public bool FuzzyEquals(Vertex other)
+        {
+            return Co.FuzzyEquals(other.Co) && UV.FuzzyEquals(other.UV) && Math.Abs(Alpha - other.Alpha) < 1e-3;
         }
     }
 }

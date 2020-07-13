@@ -6,6 +6,8 @@ namespace utility
     {
         private readonly Dictionary<T, int> _data = new Dictionary<T, int>();
 
+        public IEnumerable<KeyValuePair<T, int>> Data => _data;
+
         public int Add(T key)
         {
             if (_data.TryGetValue(key, out var idx))

@@ -22,7 +22,7 @@ namespace VMFConverter
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             logger.Info("Reading VMF");
-            var data = VMFIO.Parser.ReadVmf(parsed!.Value.VMF);
+            var data = VMFIO.Parser.Parse(parsed!.Value.VMF);
 
             if (parsed.Value.DAE != null)
             {
@@ -44,16 +44,17 @@ namespace VMFConverter
                 };
                 scene.Materials.Add(mat);
 
+                var numRopes = 0;
                 foreach (var (id0, p0, points) in ropeVis.Chains)
                 {
+                    ++numRopes;
                     var node = new Node($"rope_{id0}")
                     {
-                        Transform = Matrix4x4.FromTranslation(new Vector3D((float) p0.X, (float) p0.Z,
-                            -(float) p0.Y))
+                        Transform = Matrix4x4.FromTranslation(p0.ToAssimp())
                     };
                     var mesh = new Mesh($"rope_{id0}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
 
-                    mesh.Vertices.AddRange(points.Select(v => new Vector3D((float) v.X, (float) v.Z, -(float) v.Y)));
+                    mesh.Vertices.AddRange(points.Select(v => v.ToAssimp()));
 
                     for (var i = 0; i < points.Count - 1; ++i) mesh.Faces.Add(new Face(new[] {i, i + 1}));
 
@@ -63,7 +64,7 @@ namespace VMFConverter
                 }
 
                 logger.Info("Converting VMF geometry");
-                var converter = new VMFConvertVisitor(parsed.Value.Materials);
+                var converter = new SolidVisitor(parsed.Value.Materials);
                 converter.Visit(data);
 
                 logger.Info("Building export scene");
@@ -84,20 +85,20 @@ namespace VMFConverter
                 var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
                 logger.Info(
-                    $"Wrote {converter.Vmf.Solids.Count} solids, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
+                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
             }
 
             if (parsed.Value.Entities != null)
             {
                 logger.Info("Converting VMF entities");
-                var converter = new VMFEntityVisitor();
+                var converter = new EntityVisitor();
                 converter.Visit(data);
 
                 using (var f = File.CreateText(parsed.Value.Entities))
                 {
                     foreach (var entity in converter.Entities)
                         f.WriteLine(
-                            $"{entity.Name} {entity.Color} {entity.Origin.X:F} {entity.Origin.Y:F} {entity.Origin.Z:F} {entity.Rotation.Z:F} {entity.Rotation.X:F} {entity.Rotation.Y:F}");
+                            $"{entity.Model}:{entity.Skin} {entity.Color} {entity.Origin.X:F} {entity.Origin.Y:F} {entity.Origin.Z:F} {entity.Rotation.Z:F} {entity.Rotation.X:F} {entity.Rotation.Y:F}");
                 }
             }
         }

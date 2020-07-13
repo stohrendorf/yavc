@@ -7,7 +7,7 @@ using VMFIO;
 
 namespace VMFConverter
 {
-    public class RopeVisitor : EntityVisitor
+    public class RopeVisitor : VMFIO.EntityVisitor
     {
         private const int RopeSegmentFactor = 4;
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
@@ -65,10 +65,10 @@ namespace VMFConverter
             {
                 var name = entity.GetOptionalValue("targetname");
                 var nextName = entity.GetOptionalValue("NextKey");
-                var origin = ParserUtil.ParseVector(entity.GetValue("origin"));
-                var additionalLength = ParserUtil.ParseDouble(entity.GetValue("Slack")) / 16.0;
-                var subdivision = ParserUtil.ParseInt(entity.GetValue("Subdiv"));
-                var id = ParserUtil.ParseInt(entity.GetValue("id"));
+                var origin = entity.GetValue("origin").ParseVector();
+                var additionalLength = entity.GetValue("Slack").ParseDouble() / 16.0;
+                var subdivision = entity.GetValue("Subdiv").ParseInt();
+                var id = entity.GetValue("id").ParseInt();
                 var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, additionalLength,
                     subdivision);
                 if (name == null)

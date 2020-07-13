@@ -135,8 +135,6 @@ namespace utility
             return new[] {X, Y, Z};
         }
 
-        public double MaxValue => Math.Max(X, Math.Max(Y, Z));
-
         public int MaxAxis()
         {
             var data = Abs().ToArray();
@@ -162,6 +160,11 @@ namespace utility
             var d = (other - this) / (n - 1);
             var self = this;
             return Enumerable.Range(0, n).Select(i => d * i + self);
+        }
+
+        public bool FuzzyEquals(Vector other)
+        {
+            return Math.Abs(X - other.X) <= 1e-4 && Math.Abs(Y - other.Y) <= 1e-4 && Math.Abs(Z - other.Z) <= 1e-4;
         }
     }
 
@@ -272,6 +275,11 @@ namespace utility
         public double Dot(Vector2 rhs)
         {
             return X * rhs.X + Y * rhs.Y;
+        }
+
+        public bool FuzzyEquals(Vector2 other)
+        {
+            return Math.Abs(X - other.X) <= 1e-4 && Math.Abs(Y - other.Y) <= 1e-4;
         }
     }
 }

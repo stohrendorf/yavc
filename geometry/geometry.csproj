@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\utility\utility.csproj" />
+        <ProjectReference Include="..\vmfio\vmfio.csproj" />
     </ItemGroup>
 
     <ItemGroup>

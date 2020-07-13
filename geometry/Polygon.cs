@@ -20,7 +20,7 @@ namespace geometry
         {
             var result = new Polygon();
 
-            void DoSplit(Vertex p1, Vertex p2)
+            void doSplit(Vertex p1, Vertex p2)
             {
                 var dot1 = split.Dot(p1.Co);
                 var dot2 = split.Dot(p2.Co);
@@ -60,18 +60,21 @@ namespace geometry
             for (var i = 0; i < Count; i++)
             {
                 var i2 = (i + 1) % Count;
-                DoSplit(Vertices[i], Vertices[i2]);
+                doSplit(Vertices[i], Vertices[i2]);
             }
 
             Vertices.Clear();
+            if (result.Vertices.Count == 0)
+                return;
 
             Vertex prev = result.Vertices[^1];
             foreach (var vertex in result.Vertices)
-                if (!Equals(prev, vertex))
-                {
-                    prev = vertex;
-                    Vertices.Add(vertex);
-                }
+            {
+                if (prev.FuzzyEquals(vertex))
+                    continue;
+                prev = vertex;
+                Vertices.Add(vertex);
+            }
 
             Vertices.NormalizeUV();
         }

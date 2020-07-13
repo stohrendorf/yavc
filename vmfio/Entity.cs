@@ -5,22 +5,23 @@ namespace VMFIO
 {
     public class Entity
     {
-        private readonly List<Entity> _children;
         private readonly List<KeyValue> _keyValues;
+
+        public readonly List<Entity> Children;
         public readonly string Typename;
 
         public Entity(string typename, List<KeyValue> keyValues, List<Entity> children)
         {
             Typename = typename;
             _keyValues = keyValues;
-            _children = children;
+            Children = children;
         }
 
         public string? Classname => GetOptionalValue("classname");
 
         public void Accept(EntityVisitor visitor)
         {
-            foreach (var child in _children) visitor.Visit(child);
+            foreach (var child in Children) visitor.Visit(child);
         }
 
         public string? GetOptionalValue(string key)

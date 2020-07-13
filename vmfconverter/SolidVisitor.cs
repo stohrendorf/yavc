@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using geometry;
 using utility;
@@ -9,15 +8,14 @@ using VMFIO;
 
 namespace VMFConverter
 {
-    public class VMFConvertVisitor : EntityVisitor
+    public class SolidVisitor : VMFIO.EntityVisitor
     {
         private readonly string _vtfBasePath;
         public readonly VMF Vmf = new VMF();
         private Displacement? _displacement;
-
         private List<Face>? _faces;
 
-        public VMFConvertVisitor(string vtfBasePath)
+        public SolidVisitor(string vtfBasePath)
         {
             _vtfBasePath = vtfBasePath;
         }
@@ -33,23 +31,21 @@ namespace VMFConverter
 
         private void ReadSide(Entity entity)
         {
-            var plane = ParserUtil.ParsePlaneString(entity.GetValue("plane"));
-            var (uAxis, uShift) = ParserUtil.ParseTextureAxis(entity.GetValue("uaxis"));
-            var (vAxis, vShift) = ParserUtil.ParseTextureAxis(entity.GetValue("vaxis"));
+            var plane = entity.GetValue("plane").ParsePlaneString();
+            var (uAxis, uShift) = entity.GetValue("uaxis").ParseTextureAxis();
+            var (vAxis, vShift) = entity.GetValue("vaxis").ParseTextureAxis();
 
             _displacement = null;
             entity.Accept(this);
 
             var material = entity.GetValue("material");
-            var (texWidth, texHeight) = VMT.GetSize(_vtfBasePath, Path.Join(_vtfBasePath, material) + ".vmt");
+            var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.GetCached(_vtfBasePath, material + ".vmt");
 
             var face = new Face(plane,
-                material,
+                vmt,
                 uAxis, uShift,
                 vAxis, vShift,
-                _displacement,
-                texWidth,
-                texHeight
+                _displacement
             );
 
             _displacement = null;
@@ -65,11 +61,11 @@ namespace VMFConverter
             if (cols.Length != 3)
                 throw new Exception();
             _displacement.StartPosition = new Vector(
-                ParserUtil.ParseDouble(cols[0]),
-                ParserUtil.ParseDouble(cols[1]),
-                ParserUtil.ParseDouble(cols[2])
+                StringUtil.ParseDouble(cols[0]),
+                StringUtil.ParseDouble(cols[1]),
+                StringUtil.ParseDouble(cols[2])
             );
-            _displacement.Elevation = ParserUtil.ParseDouble(entity.GetValue("elevation"));
+            _displacement.Elevation = StringUtil.ParseDouble(entity.GetValue("elevation"));
             var n = (1 << _displacement.Power) + 1;
             _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
             _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
@@ -96,9 +92,9 @@ namespace VMFConverter
 
                 for (var j = 0; j < n; ++j)
                     dest[i].Add(new Vector(
-                        ParserUtil.ParseDouble(row[j * 3 + 0]),
-                        ParserUtil.ParseDouble(row[j * 3 + 1]),
-                        ParserUtil.ParseDouble(row[j * 3 + 2])
+                        StringUtil.ParseDouble(row[j * 3 + 0]),
+                        StringUtil.ParseDouble(row[j * 3 + 1]),
+                        StringUtil.ParseDouble(row[j * 3 + 2])
                     ));
             }
         }
@@ -119,7 +115,7 @@ namespace VMFConverter
                     throw new Exception($"{n} != {row.Length}");
 
                 for (var j = 0; j < n; ++j)
-                    dest[i].AddRange(row.Select(ParserUtil.ParseDouble));
+                    dest[i].AddRange(row.Select(StringUtil.ParseDouble));
             }
         }
 

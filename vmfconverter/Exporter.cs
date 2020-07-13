@@ -12,17 +12,17 @@ namespace VMFConverter
         {
             var node = new Node($"solid_{solid.ID}");
 
-            foreach (var (materialName, faces) in solid.PolygonIndicesByMaterial)
+            foreach (var (material, faces) in solid.PolygonIndicesByMaterial)
             {
                 if (!faces.Any(_ => _.Count > 0))
                     continue;
 
-                if (materialSkipPredicate(materialName))
+                if (materialSkipPredicate(material.Basename))
                     continue;
 
                 int? matIndex = null;
                 for (var i = 0; i < scene.Materials.Count; ++i)
-                    if (scene.Materials[i].Name == materialName)
+                    if (scene.Materials[i].Name == material.Basename)
                     {
                         matIndex = i;
                         break;
@@ -32,12 +32,26 @@ namespace VMFConverter
                 {
                     var mat = new Material
                     {
-                        Name = materialName,
-                        TextureDiffuse = new TextureSlot(materialName, TextureType.Diffuse, 0, TextureMapping.Plane, 0,
+                        Name = material.Basename,
+                        TextureDiffuse = new TextureSlot(material.BaseTexture, TextureType.Diffuse, 0,
+                            TextureMapping.Plane, 0,
                             1,
                             TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0),
                         IsTwoSided = true
                     };
+                    MaterialProperty matProp = mat.GetProperty("$mat.refracti,0,0");
+                    if (matProp == null)
+                    {
+                        matProp = new MaterialProperty("$mat.refracti", 1.45f);
+                        mat.AddProperty(matProp);
+                    }
+
+                    matProp.SetFloatValue(1.45f);
+                    if (material.NormalMap != null)
+                        mat.TextureNormal = new TextureSlot(material.NormalMap, TextureType.Normals, 0,
+                            TextureMapping.Plane, 0,
+                            1,
+                            TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0);
                     scene.Materials.Add(mat);
                     matIndex = scene.Materials.Count - 1;
                 }
@@ -45,11 +59,11 @@ namespace VMFConverter
                 var mesh = new Mesh($"{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon);
 
                 mesh.Vertices.AddRange(solid.Vertices
-                    .Select(vertex => new Vector3D((float) vertex.Co.X, (float) vertex.Co.Z, -(float) vertex.Co.Y)));
+                    .Select(vertex => vertex.Co.ToAssimp()));
                 mesh.VertexColorChannels[0]
                     .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha, 1, 1, 1)));
                 mesh.TextureCoordinateChannels[0].AddRange(solid.Vertices
-                    .Select(vertex => new Vector3D((float) vertex.UV.X, (float) vertex.UV.Y, 0)));
+                    .Select(vertex => vertex.UV.ToAssimp()));
                 mesh.MaterialIndex = matIndex.Value;
 
                 foreach (var indices in faces)

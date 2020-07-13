@@ -18,15 +18,22 @@ namespace VMFIO
 
         public bool MoveNext()
         {
-            return _enumerator.MoveNext();
+            do
+            {
+                if (!_enumerator.MoveNext())
+                    return false;
+                ++Line;
+            } while (Current == string.Empty || Current.StartsWith("//"));
+
+            return true;
         }
 
         public string Take()
         {
-            if (!_enumerator.MoveNext())
+            if (!MoveNext())
                 throw new Exception();
-            ++Line;
-            return _enumerator.Current.Trim();
+
+            return Current;
         }
     }
 }

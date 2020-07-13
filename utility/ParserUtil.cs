@@ -15,7 +15,7 @@ namespace utility
                 @"^\(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\)$",
                 RegexOptions.Compiled);
 
-        public static Plane ParsePlaneString(string data)
+        public static Plane ParsePlaneString(this string data)
         {
             var match = planePattern.Match(data);
             if (!match.Success)
@@ -32,7 +32,7 @@ namespace utility
             return Plane.CreateFromVertices(plane[1], plane[0], plane[2]);
         }
 
-        public static (Vector axis, double shift) ParseTextureAxis(string data)
+        public static (Vector axis, double shift) ParseTextureAxis(this string data)
         {
             var match = axisPattern.Match(data);
             if (!match.Success)
@@ -49,19 +49,19 @@ namespace utility
             return (axis / scale, shift);
         }
 
-        public static double ParseDouble(string value)
+        public static double ParseDouble(this string value)
         {
             return double.Parse(value,
                 NumberStyles.AllowLeadingSign | NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint,
                 CultureInfo.InvariantCulture);
         }
 
-        public static int ParseInt(string value)
+        public static int ParseInt(this string value)
         {
             return int.Parse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
         }
 
-        public static Vector ParseVector(string data)
+        public static Vector ParseVector(this string data)
         {
             var cols = data.Split(" ");
             if (cols.Length != 3)
@@ -81,9 +81,9 @@ namespace utility
         [Test]
         public static void TestDeterministicParsing()
         {
-            var p1 = ParserUtil.ParsePlaneString("(0 1 0) (0 0 0) (0 0 1)");
-            var p2 = ParserUtil.ParsePlaneString("(0 10 0) (0 0 0) (0 0 1)");
-            var p3 = ParserUtil.ParsePlaneString("(0 1 0) (0 0 0) (0 0 10)");
+            var p1 = "(0 1 0) (0 0 0) (0 0 1)".ParsePlaneString();
+            var p2 = "(0 10 0) (0 0 0) (0 0 1)".ParsePlaneString();
+            var p3 = "(0 1 0) (0 0 0) (0 0 10)".ParsePlaneString();
             Assert.That(p1, Is.EqualTo(p2));
             Assert.That(p1, Is.EqualTo(p3));
         }
