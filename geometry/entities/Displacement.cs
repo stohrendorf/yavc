@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using geometry.components;
+using geometry.utils;
 
-namespace geometry
+namespace geometry.entities
 {
     public class Displacement
     {

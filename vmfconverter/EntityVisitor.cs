@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using geometry;
+using geometry.components;
+using geometry.utils;
 using utility;
 using VMFIO;
 

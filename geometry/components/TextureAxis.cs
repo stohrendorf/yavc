@@ -1,4 +1,4 @@
-namespace geometry
+namespace geometry.components
 {
     public class TextureAxis
     {

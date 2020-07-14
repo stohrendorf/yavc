@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using geometry.components;
 
-namespace geometry
+namespace geometry.utils
 {
     public static class VertexUtil
     {

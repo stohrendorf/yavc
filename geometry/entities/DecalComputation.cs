@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using geometry.components;
 
-namespace geometry
+namespace geometry.entities
 {
-    public static class DecalComputation
+    internal static class DecalComputation
     {
         public const double Margin = 4;
         private static readonly double deg45 = Math.Sin(45 * Math.PI / 180);
@@ -83,7 +84,7 @@ namespace geometry
             return result;
         }
 
-        private static Polygon? CreateClippedPoly(Decal decal, Face face)
+        internal static Polygon? CreateClippedPoly(Decal decal, Face face)
         {
             var textureSpaceBasis = ComputeDecalBasis(face.Plane.Normal);
 
@@ -110,15 +111,6 @@ namespace geometry
                 new Vertex(vert.Co + face.Plane.Normal * 0.1, new Vector2(vert.UV.X, 1 - vert.UV.Y), vert.Alpha)))
                 poly.Add(p);
             return poly;
-        }
-
-        public static Polygon? DecalSolid(Decal decal, Solid solid)
-        {
-            return solid.Faces
-                .Select(f => (f.Plane.DotCoordinate(decal.Origin), f))
-                .Where(df => df.Item1 <= Margin && df.Item1 >= -1e-4)
-                .Select(df => CreateClippedPoly(decal, df.Item2))
-                .FirstOrDefault(poly => poly != null);
         }
     }
 }

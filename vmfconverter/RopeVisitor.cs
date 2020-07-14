@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using geometry;
+using geometry.components;
+using geometry.utils;
 using NLog;
 using VMFIO;
 

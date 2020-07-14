@@ -1,7 +1,8 @@
 using System;
 using System.Linq;
 using Assimp;
-using geometry;
+using geometry.components;
+using geometry.entities;
 using Face = Assimp.Face;
 
 namespace VMFConverter

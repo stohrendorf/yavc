@@ -5,9 +5,7 @@ using System.Linq;
 using System.Threading;
 using Assimp;
 using CommandLine;
-using geometry;
 using NLog;
-using Face = Assimp.Face;
 
 namespace VMFConverter
 {
@@ -84,7 +82,7 @@ namespace VMFConverter
                     }
 
                     var createdDecals = 0;
-                    foreach (var poly in candidates.Select(candidate => DecalComputation.DecalSolid(decal, candidate))
+                    foreach (var poly in candidates.Select(candidate => decal.TryConvert(candidate))
                         .Where(poly => poly != null))
                     {
                         createdDecals++;

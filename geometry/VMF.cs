@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using geometry.entities;
 
 namespace geometry
 {

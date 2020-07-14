@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using geometry.components;
+using geometry.entities;
 
-namespace geometry
+namespace geometry.utils
 {
     public static class PlaneUtils
     {

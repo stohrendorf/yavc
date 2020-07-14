@@ -1,5 +1,5 @@
 using Assimp;
-using geometry;
+using geometry.components;
 
 namespace VMFConverter
 {
