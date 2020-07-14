@@ -119,12 +119,12 @@ namespace yavc
             if (parsed.Value.Entities != null)
             {
                 logger.Info("Converting VMF entities");
-                var converter = new EntityVisitor();
-                converter.Visit(data);
+                var propsVisitor = new PropsVisitor();
+                propsVisitor.Visit(data);
 
                 using (var f = File.CreateText(parsed.Value.Entities))
                 {
-                    foreach (var entity in converter.Entities)
+                    foreach (var entity in propsVisitor.Props)
                         f.WriteLine(
                             $"{entity.Model}:{entity.Skin} {entity.Color} {entity.Origin.X:F} {entity.Origin.Y:F} {entity.Origin.Z:F} {entity.Rotation.Z:F} {entity.Rotation.X:F} {entity.Rotation.Y:F}");
                 }

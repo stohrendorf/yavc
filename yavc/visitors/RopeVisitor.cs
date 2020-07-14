@@ -8,7 +8,7 @@ using VMFIO;
 
 namespace yavc.visitors
 {
-    public class RopeVisitor : VMFIO.EntityVisitor
+    public class RopeVisitor : EntityVisitor
     {
         private const int RopeSegmentFactor = 4;
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();

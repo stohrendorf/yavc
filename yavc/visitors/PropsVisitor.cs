@@ -7,7 +7,7 @@ using VMFIO;
 
 namespace yavc.visitors
 {
-    public class VMFEntity
+    public class VMFProp
     {
         public string Color = null!;
         public string Model = null!;
@@ -16,9 +16,9 @@ namespace yavc.visitors
         public int Skin;
     }
 
-    public class EntityVisitor : VMFIO.EntityVisitor
+    public class PropsVisitor : EntityVisitor
     {
-        public readonly List<VMFEntity> Entities = new List<VMFEntity>();
+        public readonly List<VMFProp> Props = new List<VMFProp>();
 
         public override void Visit(Entity entity)
         {
@@ -30,7 +30,7 @@ namespace yavc.visitors
 
             if (entity.Typename == "entity" &&
                 (entity.Classname == "prop_static" || entity.Classname == "prop_dynamic"))
-                Entities.Add(new VMFEntity
+                Props.Add(new VMFProp
                 {
                     Origin = entity.GetValue("origin").ParseVector(),
                     Rotation = entity.GetValue("angles").ParseVector() * Math.PI / 180.0,

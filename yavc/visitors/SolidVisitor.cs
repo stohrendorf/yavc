@@ -12,7 +12,7 @@ using VMFIO;
 
 namespace yavc.visitors
 {
-    public class SolidVisitor : VMFIO.EntityVisitor
+    public class SolidVisitor : EntityVisitor
     {
         private readonly string _vtfBasePath;
         public readonly VMF Vmf = new VMF();
