@@ -10,9 +10,9 @@ namespace yavc
             return new Vector3D((float) v.X, (float) v.Z, -(float) v.Y);
         }
 
-        public static Vector3D ToAssimp(this Vector2 v)
+        public static Vector3D ToAssimpUV(this Vector2 v)
         {
-            return new Vector3D((float) v.X, (float) v.Y, 0);
+            return new Vector3D((float) v.X, 1 - (float) v.Y, 0);
         }
     }
 }

@@ -30,9 +30,9 @@ namespace geometry.entities
             if (Material == null)
                 return new Vector2(0.0, 0.0);
 
-            var u = 1 - (vec.Dot(_uAxis.ScaledAxis) + _uAxis.Shift) / Material.Width;
+            var u = (vec.Dot(_uAxis.ScaledAxis) + _uAxis.Shift) / Material.Width;
             Debug.Assert(!double.IsNaN(u));
-            var v = 1 - (vec.Dot(_vAxis.ScaledAxis) + _vAxis.Shift) / Material.Height;
+            var v = (vec.Dot(_vAxis.ScaledAxis) + _vAxis.Shift) / Material.Height;
             Debug.Assert(!double.IsNaN(v));
             return new Vector2(u, v);
         }

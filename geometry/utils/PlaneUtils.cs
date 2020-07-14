@@ -43,9 +43,9 @@ namespace geometry.utils
             polygon.Add(new Vertex(origin + b - a, Vector2.Zero, 1));
             polygon.Add(new Vertex(origin - b - a, Vector2.Zero, 1));
 
-            Debug.Assert(polygon.Vertices.All(_ => Math.Abs(plane.DotCoordinate(_.Co)) < 1e-3));
+            Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DotCoordinate(_)) < 1e-3));
 
-            for (var i = 0; i < 4; i++) polygon.Vertices[i].UV = face.CalcUV(polygon.Vertices[i].Co);
+            for (var i = 0; i < 4; i++) polygon.Vertices.UV0[i] = face.CalcUV(polygon.Vertices.Co[i]);
 
             polygon.Vertices.NormalizeUV();
 

@@ -162,9 +162,10 @@ namespace geometry.components
             return Enumerable.Range(0, n).Select(i => d * i + self);
         }
 
-        public bool FuzzyEquals(Vector other)
+        public bool FuzzyEquals(Vector other, double margin = 1e-4)
         {
-            return Math.Abs(X - other.X) <= 1e-4 && Math.Abs(Y - other.Y) <= 1e-4 && Math.Abs(Z - other.Z) <= 1e-4;
+            return Math.Abs(X - other.X) <= margin && Math.Abs(Y - other.Y) <= margin &&
+                   Math.Abs(Z - other.Z) <= margin;
         }
     }
 }

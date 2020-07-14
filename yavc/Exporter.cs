@@ -64,7 +64,7 @@ namespace yavc
                 mesh.VertexColorChannels[0]
                     .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha, 1, 1, 1)));
                 mesh.TextureCoordinateChannels[0].AddRange(solid.Vertices
-                    .Select(vertex => vertex.UV.ToAssimp()));
+                    .Select(vertex => vertex.UV0.ToAssimpUV()));
                 mesh.MaterialIndex = matIndex.Value;
 
                 foreach (var indices in faces)
@@ -103,10 +103,15 @@ namespace yavc
             }
 
             var mesh = new Mesh($"decal:{material}-{scene.Meshes.Count}", PrimitiveType.Polygon);
-            mesh.Vertices.AddRange(decal.Vertices
-                .Select(vertex => new Vector3D((float) vertex.Co.X, (float) vertex.Co.Z, -(float) vertex.Co.Y)));
-            mesh.TextureCoordinateChannels[0].AddRange(decal.Vertices
-                .Select(vertex => new Vector3D((float) vertex.UV.X, (float) vertex.UV.Y, 0)));
+            mesh.Vertices.AddRange(decal.Vertices.Co.Select(_ => _.ToAssimp()));
+            for (var i = 0; i < Vertex.UVChannels; ++i)
+            {
+                var channel = decal.Vertices.UVs[i];
+                if (!channel.Active)
+                    continue;
+                mesh.TextureCoordinateChannels[i].AddRange(channel.Select(_ => _.ToAssimpUV()));
+            }
+
             mesh.MaterialIndex = matIndex.Value;
             mesh.Faces.Add(new Face(Enumerable.Range(0, decal.Vertices.Count).ToArray()));
 

@@ -27,55 +27,55 @@ namespace geometry.entities
             return result;
         }
 
-        private static Vertex Intersect(Vertex a, Vertex b, int edge)
+        private static Vertex ClampToUVEdge(Vertex a, Vertex b, int edge)
         {
-            var dUv = b.UV - a.UV;
+            var dUv = b.UV0 - a.UV0;
             var dCo = b.Co - a.Co;
             var dAlpha = b.Alpha - a.Alpha;
 
             var t = edge switch
             {
-                0 => (a.UV.X - 0) / dUv.X,
-                1 => (a.UV.X - 1) / dUv.X,
-                2 => (a.UV.Y - 0) / dUv.Y,
-                3 => (a.UV.Y - 1) / dUv.Y,
+                0 => (a.UV0.X - 0) / dUv.X,
+                1 => (a.UV0.X - 1) / dUv.X,
+                2 => (a.UV0.Y - 0) / dUv.Y,
+                3 => (a.UV0.Y - 1) / dUv.Y,
                 _ => throw new ArgumentException("Invalid edge", nameof(edge))
             };
 
-            return new Vertex(a.Co - dCo * t, a.UV - dUv * t, a.Alpha - dAlpha * t);
+            return new Vertex(a.Co - dCo * t, a.UV0 - dUv * t, a.Alpha - dAlpha * t);
         }
 
-        private static bool Inside(Vertex vert, int edge)
+        private static bool IsInsideUV(Vector2 uv, int edge)
         {
             return edge switch
             {
-                0 => vert.UV.X > 0.0,
-                1 => vert.UV.X < 1.0,
-                2 => vert.UV.Y > 0.0,
-                3 => vert.UV.Y < 1.0,
+                0 => uv.X > 0.0,
+                1 => uv.X < 1.0,
+                2 => uv.Y > 0.0,
+                3 => uv.Y < 1.0,
                 _ => false
             };
         }
 
-        private static List<Vertex> ShClip(IReadOnlyList<Vertex> verts, int edge)
+        private static VertexCollection ClampToUVRegion(IReadOnlyList<Vertex> verts, int edge)
         {
+            var result = new VertexCollection();
             if (verts.Count == 0)
-                return new List<Vertex>();
+                return result;
 
             var p0 = verts[^1];
-            var result = new List<Vertex>();
             foreach (var p1 in verts)
             {
-                if (Inside(p1, edge))
+                if (IsInsideUV(p1.UV0, edge))
                 {
-                    if (!Inside(p0, edge))
-                        result.Add(Intersect(p0, p1, edge));
+                    if (!IsInsideUV(p0.UV0, edge))
+                        result.Add(ClampToUVEdge(p0, p1, edge));
                     result.Add(p1);
                 }
                 else
                 {
-                    if (Inside(p0, edge))
-                        result.Add(Intersect(p1, p0, edge));
+                    if (IsInsideUV(p0.UV0, edge))
+                        result.Add(ClampToUVEdge(p1, p0, edge));
                 }
 
                 p0 = p1;
@@ -101,14 +101,14 @@ namespace geometry.entities
 
             for (var i = 0; i < 4; ++i)
             {
-                clipped = ShClip(clipped, i);
+                clipped = ClampToUVRegion(clipped, i);
                 if (clipped.Count == 0) return null;
             }
 
             var poly = new Polygon();
             // fix UV coordinates and add slight offset to hover above the surface
             foreach (var p in clipped.Select(vert =>
-                new Vertex(vert.Co + face.Plane.Normal * 0.1, new Vector2(vert.UV.X, 1 - vert.UV.Y), vert.Alpha)))
+                new Vertex(vert.Co + face.Plane.Normal * 0.1, vert.UV0, vert.Alpha)))
                 poly.Add(p);
             return poly;
         }

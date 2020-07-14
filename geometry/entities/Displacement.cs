@@ -20,7 +20,7 @@ namespace geometry.entities
 
         private int Dimension => 1 << Power;
 
-        public (List<Vertex> vertices, List<List<int>> indices) Convert(Face face)
+        public (VertexCollection vertices, List<List<int>> indices) Convert(Face face)
         {
             if (face.Polygon.Count != 4)
                 throw new ArgumentException($"Expected polygon with 4 vertices, got {face.Polygon.Count}");
@@ -31,7 +31,7 @@ namespace geometry.entities
             var bestDistance = double.PositiveInfinity;
             for (var i = 0; i < face.Polygon.Count; i++)
             {
-                var distance = face.Polygon.Vertices[i].Co.Distance(StartPosition);
+                var distance = face.Polygon.Vertices.Co[i].Distance(StartPosition);
 
                 if (distance >= bestDistance)
                     continue;
@@ -46,19 +46,19 @@ namespace geometry.entities
             if (vertexWindingIndices[0] == -1)
                 throw new Exception("Failed to determine starting vertex index");
 
-            var baseA = face.Polygon.Vertices[vertexWindingIndices[3]].Co
-                .StepsTo(face.Polygon.Vertices[vertexWindingIndices[2]].Co, size).ToList();
+            var baseA = face.Polygon.Vertices.Co[vertexWindingIndices[3]]
+                .StepsTo(face.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
 
-            var uvBaseA = face.CalcUV(face.Polygon.Vertices[vertexWindingIndices[3]].Co)
-                .StepsTo(face.CalcUV(face.Polygon.Vertices[vertexWindingIndices[2]].Co), size).ToList();
+            var uvBaseA = face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[3]])
+                .StepsTo(face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[2]]), size).ToList();
 
-            var baseB = face.Polygon.Vertices[vertexWindingIndices[0]].Co
-                .StepsTo(face.Polygon.Vertices[vertexWindingIndices[1]].Co, size).ToList();
+            var baseB = face.Polygon.Vertices.Co[vertexWindingIndices[0]]
+                .StepsTo(face.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
 
-            var uvBaseB = face.CalcUV(face.Polygon.Vertices[vertexWindingIndices[0]].Co)
-                .StepsTo(face.CalcUV(face.Polygon.Vertices[vertexWindingIndices[1]].Co), size).ToList();
+            var uvBaseB = face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[0]])
+                .StepsTo(face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[1]]), size).ToList();
 
-            var vertices = new List<Vertex>();
+            var vertices = new VertexCollection();
             for (var s = 0; s < size; s++)
                 vertices.AddRange(baseB[s].StepsTo(baseA[s], size).Zip(uvBaseB[s].StepsTo(uvBaseA[s], size),
                     (co, uv) => new Vertex(co, uv, 1)));

@@ -13,10 +13,10 @@ namespace geometry.entities
             var plane = Plane.CreateFromVertices(Vector.Zero, Vector.UnitZ, Vector.UnitY);
             var face = new Face(plane, null, axis, axis, null);
             Assert.That(face.Polygon.Count, Is.EqualTo(4));
-            Assert.That(face.Polygon.Vertices[0].Co.X, Is.EqualTo(0.0));
-            Assert.That(face.Polygon.Vertices[1].Co.X, Is.EqualTo(0.0));
-            Assert.That(face.Polygon.Vertices[2].Co.X, Is.EqualTo(0.0));
-            Assert.That(face.Polygon.Vertices[3].Co.X, Is.EqualTo(0.0));
+            Assert.That(face.Polygon.Vertices.Co[0].X, Is.EqualTo(0.0));
+            Assert.That(face.Polygon.Vertices.Co[1].X, Is.EqualTo(0.0));
+            Assert.That(face.Polygon.Vertices.Co[2].X, Is.EqualTo(0.0));
+            Assert.That(face.Polygon.Vertices.Co[3].X, Is.EqualTo(0.0));
             Assert.That(face.Plane.Normal, Is.EqualTo(-Vector.UnitX));
             Assert.That(face.Plane.D, Is.EqualTo(0.0));
         }

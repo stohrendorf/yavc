@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using geometry.utils;
 
 namespace geometry.components
 {
     public class Polygon
     {
-        public readonly List<Vertex> Vertices = new List<Vertex>();
+        public readonly VertexCollection Vertices = new VertexCollection();
 
         public int Count => Vertices.Count;
 
@@ -52,8 +51,8 @@ namespace geometry.components
                 if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
                     throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
-                var ud = p2.UV - p1.UV;
-                result.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * ud, 1));
+                var uv = p2.UV0 - p1.UV0;
+                result.Add(new Vertex(p1.Co + lambda * d, p1.UV0 + lambda * uv, 1));
             }
 
             for (var i = 0; i < Count; i++)

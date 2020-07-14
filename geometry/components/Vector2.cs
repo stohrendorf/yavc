@@ -115,9 +115,9 @@ namespace geometry.components
             return X * rhs.X + Y * rhs.Y;
         }
 
-        public bool FuzzyEquals(Vector2 other)
+        public bool FuzzyEquals(Vector2 other, double margin = 1e-4)
         {
-            return Math.Abs(X - other.X) <= 1e-4 && Math.Abs(Y - other.Y) <= 1e-4;
+            return Math.Abs(X - other.X) <= margin && Math.Abs(Y - other.Y) <= margin;
         }
     }
 }
