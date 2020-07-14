@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vmfconverter", "vmfconverter\vmfconverter.csproj", "{0C873101-A9D3-48AF-8E3E-5583CCA1BFDF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "yavc", "yavc\yavc.csproj", "{0C873101-A9D3-48AF-8E3E-5583CCA1BFDF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vmfio", "vmfio\vmfio.csproj", "{54B798BC-B93B-459F-BB38-DCFDB2CFAEBF}"
 EndProject

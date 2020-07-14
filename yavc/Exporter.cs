@@ -5,7 +5,7 @@ using geometry.components;
 using geometry.entities;
 using Face = Assimp.Face;
 
-namespace VMFConverter
+namespace yavc
 {
     public static class Exporter
     {

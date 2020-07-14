@@ -5,7 +5,7 @@ using geometry.utils;
 using utility;
 using VMFIO;
 
-namespace VMFConverter
+namespace yavc.visitors
 {
     public class VMFEntity
     {

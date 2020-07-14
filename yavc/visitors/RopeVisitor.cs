@@ -6,7 +6,7 @@ using geometry.utils;
 using NLog;
 using VMFIO;
 
-namespace VMFConverter
+namespace yavc.visitors
 {
     public class RopeVisitor : VMFIO.EntityVisitor
     {

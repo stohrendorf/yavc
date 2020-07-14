@@ -6,8 +6,9 @@ using System.Threading;
 using Assimp;
 using CommandLine;
 using NLog;
+using yavc.visitors;
 
-namespace VMFConverter
+namespace yavc
 {
     internal static class Program
     {

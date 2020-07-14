@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using geometry.components;
 
-namespace VMFConverter
+namespace yavc
 {
     public static class Catenary
     {
