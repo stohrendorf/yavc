@@ -20,18 +20,18 @@ namespace geometry.entities
 
         private int Dimension => 1 << Power;
 
-        public (VertexCollection vertices, List<List<int>> indices) Convert(Face face)
+        public (VertexCollection vertices, List<List<int>> indices) Convert(Side side)
         {
-            if (face.Polygon.Count != 4)
-                throw new ArgumentException($"Expected polygon with 4 vertices, got {face.Polygon.Count}");
+            if (side.Polygon.Count != 4)
+                throw new ArgumentException($"Expected polygon with 4 vertices, got {side.Polygon.Count}");
 
             var size = Dimension + 1;
 
             int[] vertexWindingIndices = {-1, -1, -1, -1};
             var bestDistance = double.PositiveInfinity;
-            for (var i = 0; i < face.Polygon.Count; i++)
+            for (var i = 0; i < side.Polygon.Count; i++)
             {
-                var distance = face.Polygon.Vertices.Co[i].Distance(StartPosition);
+                var distance = side.Polygon.Vertices.Co[i].Distance(StartPosition);
 
                 if (distance >= bestDistance)
                     continue;
@@ -46,17 +46,17 @@ namespace geometry.entities
             if (vertexWindingIndices[0] == -1)
                 throw new Exception("Failed to determine starting vertex index");
 
-            var baseA = face.Polygon.Vertices.Co[vertexWindingIndices[3]]
-                .StepsTo(face.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
+            var baseA = side.Polygon.Vertices.Co[vertexWindingIndices[3]]
+                .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
 
-            var uvBaseA = face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[3]])
-                .StepsTo(face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[2]]), size).ToList();
+            var uvBaseA = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[3]])
+                .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[2]]), size).ToList();
 
-            var baseB = face.Polygon.Vertices.Co[vertexWindingIndices[0]]
-                .StepsTo(face.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
+            var baseB = side.Polygon.Vertices.Co[vertexWindingIndices[0]]
+                .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
 
-            var uvBaseB = face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[0]])
-                .StepsTo(face.CalcUV(face.Polygon.Vertices.Co[vertexWindingIndices[1]]), size).ToList();
+            var uvBaseB = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[0]])
+                .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[1]]), size).ToList();
 
             var vertices = new VertexCollection();
             for (var s = 0; s < size; s++)
@@ -71,7 +71,7 @@ namespace geometry.entities
                 var normal = Normals[i][j] * Distances[i][j];
                 var offset = Offsets[i][j] + OffsetNormals[i][j];
 
-                vertices[i * size + j].Co += face.Plane.Normal * Elevation + normal + offset;
+                vertices[i * size + j].Co += side.Plane.Normal * Elevation + normal + offset;
             }
 
             for (var i = 0; i < size; i++)

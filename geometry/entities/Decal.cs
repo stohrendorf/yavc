@@ -19,7 +19,7 @@ namespace geometry.entities
 
         public Polygon? TryConvert(Solid solid)
         {
-            return solid.Faces
+            return solid.Sides
                 .Select(f => (f.Plane.DotCoordinate(Origin), f))
                 .Where(df => df.Item1 <= DecalComputation.Margin && df.Item1 >= -1e-4)
                 .Select(df => DecalComputation.CreateClippedPoly(this, df.Item2))

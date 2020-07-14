@@ -84,13 +84,13 @@ namespace geometry.entities
             return result;
         }
 
-        internal static Polygon? CreateClippedPoly(Decal decal, Face face)
+        internal static Polygon? CreateClippedPoly(Decal decal, Side side)
         {
-            var textureSpaceBasis = ComputeDecalBasis(face.Plane.Normal);
+            var textureSpaceBasis = ComputeDecalBasis(side.Plane.Normal);
 
             var u0 = textureSpaceBasis[0].Dot(decal.Origin) - decal.Material.DecalWidth / 2.0;
             var v0 = textureSpaceBasis[1].Dot(decal.Origin) - decal.Material.DecalHeight / 2.0;
-            var clipped = face.Polygon.Vertices.Select(vert =>
+            var clipped = side.Polygon.Vertices.Select(vert =>
             {
                 var u = textureSpaceBasis[0].Dot(vert.Co) - u0;
                 var v = textureSpaceBasis[1].Dot(vert.Co) - v0;
@@ -108,7 +108,7 @@ namespace geometry.entities
             var poly = new Polygon();
             // fix UV coordinates and add slight offset to hover above the surface
             foreach (var p in clipped.Select(vert =>
-                new Vertex(vert.Co + face.Plane.Normal * 0.1, vert.UV0, vert.Alpha)))
+                new Vertex(vert.Co + side.Plane.Normal * 0.1, vert.UV0, vert.Alpha)))
                 poly.Add(p);
             return poly;
         }

@@ -13,7 +13,7 @@ namespace geometry.utils
             return p.DotCoordinate(v);
         }
 
-        public static Polygon ToPolygon(this Plane plane, Face face)
+        public static Polygon ToPolygon(this Plane plane, Side side)
         {
             Vector n;
             switch (plane.Normal.MaxAxis())
@@ -45,7 +45,7 @@ namespace geometry.utils
 
             Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DotCoordinate(_)) < 1e-3));
 
-            for (var i = 0; i < 4; i++) polygon.Vertices.UV0[i] = face.CalcUV(polygon.Vertices.Co[i]);
+            for (var i = 0; i < 4; i++) polygon.Vertices.UV0[i] = side.CalcUV(polygon.Vertices.Co[i]);
 
             polygon.Vertices.NormalizeUV();
 

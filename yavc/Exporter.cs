@@ -3,7 +3,6 @@ using System.Linq;
 using Assimp;
 using geometry.components;
 using geometry.entities;
-using Face = Assimp.Face;
 
 namespace yavc
 {
@@ -13,9 +12,9 @@ namespace yavc
         {
             var node = new Node($"solid:{solid.ID}");
 
-            foreach (var (material, faces) in solid.PolygonIndicesByMaterial)
+            foreach (var (material, polys) in solid.PolygonIndicesByMaterial)
             {
-                if (!faces.Any(_ => _.Count > 0))
+                if (!polys.Any(_ => _.Count > 0))
                     continue;
 
                 if (materialSkipPredicate(material.Basename))
@@ -67,7 +66,7 @@ namespace yavc
                     .Select(vertex => vertex.UV0.ToAssimpUV()));
                 mesh.MaterialIndex = matIndex.Value;
 
-                foreach (var indices in faces)
+                foreach (var indices in polys)
                     mesh.Faces.Add(new Face(indices.ToArray()));
 
                 scene.Meshes.Add(mesh);

@@ -5,7 +5,7 @@ using geometry.utils;
 
 namespace geometry.entities
 {
-    public class Face
+    public class Side
     {
         private readonly TextureAxis _uAxis;
         private readonly TextureAxis _vAxis;
@@ -14,7 +14,7 @@ namespace geometry.entities
         public readonly Plane Plane;
         public readonly Polygon Polygon;
 
-        public Face(Plane plane, VMT? material, TextureAxis uAxis, TextureAxis vAxis, Displacement? displacement)
+        public Side(Plane plane, VMT? material, TextureAxis uAxis, TextureAxis vAxis, Displacement? displacement)
         {
             Plane = plane;
             Material = material;

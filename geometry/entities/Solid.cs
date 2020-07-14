@@ -10,24 +10,24 @@ namespace geometry.entities
     {
         private readonly Vector _bBoxMax;
         private readonly Vector _bBoxMin;
-        private readonly IReadOnlyList<Face> _faces;
+        private readonly IReadOnlyList<Side> _sides;
         private readonly IndexedSet<Vertex> _vertices = new IndexedSet<Vertex>();
 
-        public Solid(int id, IReadOnlyList<Face> faces)
+        public Solid(int id, IReadOnlyList<Side> sides)
         {
             ID = id;
-            _faces = faces;
+            _sides = sides;
 
-            for (var i = 0; i < faces.Count; i++)
+            for (var i = 0; i < sides.Count; i++)
             {
-                var f = faces[i];
+                var f = sides[i];
 
-                for (var j = 0; j < faces.Count; j++)
+                for (var j = 0; j < sides.Count; j++)
                 {
                     if (j == i)
                         continue;
 
-                    f.Polygon.Cut(faces[j].Plane.NormalFlipped());
+                    f.Polygon.Cut(sides[j].Plane.NormalFlipped());
                     if (f.Polygon.Count == 0)
                         break;
                 }
@@ -40,24 +40,24 @@ namespace geometry.entities
                 return existing ?? _vertices.Add(v);
             }
 
-            if (faces.Any(_ => _.Displacement != null))
-                foreach (var face in faces.Where(_ => _.Displacement != null && _.Material != null))
+            if (sides.Any(_ => _.Displacement != null))
+                foreach (var side in sides.Where(_ => _.Displacement != null && _.Material != null))
                 {
-                    if (!PolygonIndicesByMaterial.TryGetValue(face.Material!, out var pi))
-                        pi = PolygonIndicesByMaterial[face.Material!] = new List<List<int>>();
+                    if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
+                        pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
 
-                    var (vertices, facesIndices) = face.Displacement!.Convert(face);
-                    foreach (var faceIndices in facesIndices)
-                        pi.Add(faceIndices.Select(fi => addVertex(vertices[fi])).ToList());
+                    var (vertices, polysIndices) = side.Displacement!.Convert(side);
+                    foreach (var polyIndices in polysIndices)
+                        pi.Add(polyIndices.Select(idx => addVertex(vertices[idx])).ToList());
                 }
             else
-                foreach (var face in faces.Where(_ => _.Material != null))
+                foreach (var side in sides.Where(_ => _.Material != null))
                 {
-                    if (!PolygonIndicesByMaterial.TryGetValue(face.Material!, out var pi))
-                        pi = PolygonIndicesByMaterial[face.Material!] = new List<List<int>>();
+                    if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
+                        pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
 
-                    pi.Add(Enumerable.Range(0, face.Polygon.Count)
-                        .Select(fi => addVertex(face.Polygon.Vertices[fi])).ToList());
+                    pi.Add(Enumerable.Range(0, side.Polygon.Count)
+                        .Select(fi => addVertex(side.Polygon.Vertices[fi])).ToList());
                 }
 
             var minX = double.PositiveInfinity;
@@ -87,7 +87,7 @@ namespace geometry.entities
             new Dictionary<VMT, List<List<int>>>();
 
         public IEnumerable<Vertex> Vertices => _vertices.GetOrdered();
-        public IEnumerable<Face> Faces => _faces;
+        public IEnumerable<Side> Sides => _sides;
 
         public bool Contains(Vector v, double margin = DecalComputation.Margin)
         {

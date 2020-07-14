@@ -23,10 +23,10 @@ namespace geometry.entities
                 "(-88 7020 -3024) (-88.9224 7020.3862 -3024) (-88 7020 -3248)".ParsePlaneString()
             };
             var axis = new TextureAxis(Vector.One, 1, 1);
-            var faces = planes.Select(plane =>
-                new Face(plane, VMT.Empty, axis, axis, null)).ToList();
+            var sides = planes.Select(plane =>
+                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
 
-            var solid = new Solid(2, faces);
+            var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(19));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(-161, -87.9), Is.Empty);
@@ -47,10 +47,10 @@ namespace geometry.entities
                 "(5 2 1) (4 3 1) (5 2 0)".ParsePlaneString()
             };
             var axis = new TextureAxis(Vector.One, 1, 1);
-            var faces = planes.Select(plane =>
-                new Face(plane, VMT.Empty, axis, axis, null)).ToList();
+            var sides = planes.Select(plane =>
+                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
 
-            var solid = new Solid(2, faces);
+            var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(17));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 5), Is.Empty);
@@ -68,10 +68,10 @@ namespace geometry.entities
             };
 
             var axis = new TextureAxis(Vector.One, 1, 1);
-            var faces = planes.Select(plane =>
-                new Face(plane, VMT.Empty, axis, axis, null)).ToList();
+            var sides = planes.Select(plane =>
+                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
 
-            var solid = new Solid(2, faces);
+            var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
             Assert.That(cos.Select(_ => _.Co.Z).NotInRange(0, 1), Is.Empty);
@@ -91,10 +91,10 @@ namespace geometry.entities
             };
 
             var axis = new TextureAxis(Vector.One, 1, 1);
-            var faces = planes.Select(plane =>
-                new Face(plane, VMT.Empty, axis, axis, null)).ToList();
+            var sides = planes.Select(plane =>
+                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
 
-            var solid = new Solid(2, faces);
+            var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(14));
             Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 1), Is.Empty);

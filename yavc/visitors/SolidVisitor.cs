@@ -17,7 +17,7 @@ namespace yavc.visitors
         private readonly string _vtfBasePath;
         public readonly VMF Vmf = new VMF();
         private Displacement? _displacement;
-        private List<Face>? _faces;
+        private List<Side>? _sides;
 
         public SolidVisitor(string vtfBasePath)
         {
@@ -26,10 +26,10 @@ namespace yavc.visitors
 
         private void ReadSolid(Entity entity)
         {
-            _faces = new List<Face>();
+            _sides = new List<Side>();
             entity.Accept(this);
-            var solid = new Solid(int.Parse(entity.GetValue("id")), _faces);
-            _faces = null;
+            var solid = new Solid(int.Parse(entity.GetValue("id")), _sides);
+            _sides = null;
             Vmf.Solids.Add(solid);
         }
 
@@ -45,12 +45,12 @@ namespace yavc.visitors
             var material = entity.GetValue("material");
             var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.GetCached(_vtfBasePath, material + ".vmt");
 
-            var face = new Face(plane, vmt, uAxis, vAxis, _displacement);
+            var side = new Side(plane, vmt, uAxis, vAxis, _displacement);
 
             _displacement = null;
 
-            Debug.Assert(_faces != null);
-            _faces!.Add(face);
+            Debug.Assert(_sides != null);
+            _sides!.Add(side);
         }
 
         private void ReadDisplacementInfo(Entity entity)
