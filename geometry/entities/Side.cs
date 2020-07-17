@@ -10,12 +10,15 @@ namespace geometry.entities
         private readonly TextureAxis _uAxis;
         private readonly TextureAxis _vAxis;
         public readonly Displacement? Displacement;
+        public readonly int ID;
         public readonly VMT? Material;
         public readonly Plane Plane;
-        public readonly Polygon Polygon;
+        public Polygon Polygon;
 
-        public Side(Plane plane, VMT? material, TextureAxis uAxis, TextureAxis vAxis, Displacement? displacement)
+        public Side(int id, Plane plane, VMT? material, TextureAxis uAxis, TextureAxis vAxis,
+            Displacement? displacement)
         {
+            ID = id;
             Plane = plane;
             Material = material;
             _uAxis = uAxis;

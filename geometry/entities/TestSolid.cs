@@ -24,7 +24,7 @@ namespace geometry.entities
             };
             var axis = new TextureAxis(Vector.One, 1, 1);
             var sides = planes.Select(plane =>
-                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
+                new Side(123, plane, VMT.Empty, axis, axis, null)).ToList();
 
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
@@ -48,7 +48,7 @@ namespace geometry.entities
             };
             var axis = new TextureAxis(Vector.One, 1, 1);
             var sides = planes.Select(plane =>
-                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
+                new Side(123, plane, VMT.Empty, axis, axis, null)).ToList();
 
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
@@ -69,7 +69,7 @@ namespace geometry.entities
 
             var axis = new TextureAxis(Vector.One, 1, 1);
             var sides = planes.Select(plane =>
-                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
+                new Side(123, plane, VMT.Empty, axis, axis, null)).ToList();
 
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
@@ -92,7 +92,7 @@ namespace geometry.entities
 
             var axis = new TextureAxis(Vector.One, 1, 1);
             var sides = planes.Select(plane =>
-                new Side(plane, VMT.Empty, axis, axis, null)).ToList();
+                new Side(123, plane, VMT.Empty, axis, axis, null)).ToList();
 
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();

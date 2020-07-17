@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -72,6 +73,13 @@ namespace yavc
                 var decalVis = new DecalVisitor(parsed.Value.Materials);
                 decalVis.Visit(data);
 
+                logger.Info("Processing overlays");
+                var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
+                    converter.Vmf.Solids.SelectMany(_ => _.Sides).ToImmutableDictionary(_ => _.ID, _ => _));
+                overlaysVis.Visit(data);
+
+                foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
+
                 var totalDecals = 0;
                 foreach (var decal in decalVis.Decals)
                 {
@@ -87,7 +95,7 @@ namespace yavc
                         .Where(poly => poly != null))
                     {
                         createdDecals++;
-                        scene.RootNode.Children.Add(poly!.Export(decal.Material.Basename, scene));
+                        scene.RootNode.Children.Add(poly!.ExportDecal(decal.Material, scene));
                     }
 
                     totalDecals += createdDecals;
@@ -113,7 +121,7 @@ namespace yavc
                 var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
                 logger.Info(
-                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {totalDecals} decals, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
+                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {totalDecals} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
             }
 
             if (parsed.Value.Entities != null)

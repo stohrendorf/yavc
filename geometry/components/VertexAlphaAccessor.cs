@@ -4,24 +4,24 @@ using System.Linq;
 
 namespace geometry.components
 {
-    public class VertexUVAccessor : IEnumerable<Vector2>
+    public class VertexAlphaAccessor : IEnumerable<Vector>
     {
         private readonly IList<Vertex> _vertices;
 
-        public VertexUVAccessor(IList<Vertex> vertices)
+        public VertexAlphaAccessor(IList<Vertex> vertices)
         {
             _vertices = vertices;
         }
 
-        public Vector2 this[int i]
+        public double this[int i]
         {
-            get => _vertices[i].UV;
-            set => _vertices[i].UV = value;
+            get => _vertices[i].Alpha;
+            set => _vertices[i].Alpha = value;
         }
 
-        public IEnumerator<Vector2> GetEnumerator()
+        public IEnumerator<Vector> GetEnumerator()
         {
-            return _vertices.Select(_ => _.UV).GetEnumerator();
+            return _vertices.Select(_ => _.Co).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

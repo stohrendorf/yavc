@@ -14,6 +14,8 @@ namespace geometry.components
             D = d;
         }
 
+        public Vector Origin => -Normal * D;
+
         public static Plane CreateFromVertices(Vector origin, Vector p1, Vector p2)
         {
             var n = (p1 - origin).Cross(p2 - origin).Normalized;
@@ -23,7 +25,7 @@ namespace geometry.components
             );
         }
 
-        public double DotCoordinate(Vector value)
+        public double DistanceTo(Vector value)
         {
             return Normal.Dot(value) + D;
         }

@@ -3,6 +3,7 @@ using System.Linq;
 using Assimp;
 using geometry.components;
 using geometry.entities;
+using geometry.materials;
 
 namespace yavc
 {
@@ -20,51 +21,17 @@ namespace yavc
                 if (materialSkipPredicate(material.Basename))
                     continue;
 
-                int? matIndex = null;
-                for (var i = 0; i < scene.Materials.Count; ++i)
-                    if (scene.Materials[i].Name == material.Basename)
-                    {
-                        matIndex = i;
-                        break;
-                    }
-
-                if (matIndex == null)
+                var mesh = new Mesh($"solid:{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon)
                 {
-                    var mat = new Material
-                    {
-                        Name = material.Basename,
-                        TextureDiffuse = new TextureSlot(material.BaseTexture, TextureType.Diffuse, 0,
-                            TextureMapping.Plane, 0,
-                            1,
-                            TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0),
-                        IsTwoSided = true
-                    };
-                    MaterialProperty matProp = mat.GetProperty("$mat.refracti,0,0");
-                    if (matProp == null)
-                    {
-                        matProp = new MaterialProperty("$mat.refracti", 1.45f);
-                        mat.AddProperty(matProp);
-                    }
-
-                    matProp.SetFloatValue(1.45f);
-                    if (material.NormalMap != null)
-                        mat.TextureNormal = new TextureSlot(material.NormalMap, TextureType.Normals, 0,
-                            TextureMapping.Plane, 0,
-                            1,
-                            TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0);
-                    scene.Materials.Add(mat);
-                    matIndex = scene.Materials.Count - 1;
-                }
-
-                var mesh = new Mesh($"solid:{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon);
+                    MaterialIndex = scene.FindOrCreateMaterial(material)
+                };
 
                 mesh.Vertices.AddRange(solid.Vertices
                     .Select(vertex => vertex.Co.ToAssimp()));
                 mesh.VertexColorChannels[0]
                     .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha, 1, 1, 1)));
                 mesh.TextureCoordinateChannels[0].AddRange(solid.Vertices
-                    .Select(vertex => vertex.UV0.ToAssimpUV()));
-                mesh.MaterialIndex = matIndex.Value;
+                    .Select(vertex => vertex.UV.ToAssimpUV()));
 
                 foreach (var indices in polys)
                     mesh.Faces.Add(new Face(indices.ToArray()));
@@ -76,43 +43,37 @@ namespace yavc
             return node;
         }
 
-        public static Node Export(this Polygon decal, string material, Scene scene)
+        public static Node ExportDecal(this Polygon polygon, VMT material, Scene scene)
         {
-            var node = new Node($"decal:{material}");
-            int? matIndex = null;
-            for (var i = 0; i < scene.Materials.Count; ++i)
-                if (scene.Materials[i].Name == material)
-                {
-                    matIndex = i;
-                    break;
-                }
-
-            if (matIndex == null)
+            var node = new Node($"decal:{material.Basename}");
+            var mesh = new Mesh($"decal:{material.Basename}-{scene.Meshes.Count}", PrimitiveType.Polygon)
             {
-                var mat = new Material
-                {
-                    Name = material,
-                    TextureDiffuse = new TextureSlot(material, TextureType.Diffuse, 0, TextureMapping.Plane, 0,
-                        1,
-                        TextureOperation.Add, TextureWrapMode.Wrap, TextureWrapMode.Wrap, 0),
-                    IsTwoSided = true
-                };
-                scene.Materials.Add(mat);
-                matIndex = scene.Materials.Count - 1;
-            }
+                MaterialIndex = scene.FindOrCreateMaterial(material)
+            };
+            mesh.Vertices.AddRange(polygon.Vertices.Co.Select(_ => _.ToAssimp()));
+            mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(_ => _.ToAssimpUV()));
+            mesh.Faces.Add(new Face(Enumerable.Range(0, polygon.Vertices.Count).ToArray()));
 
-            var mesh = new Mesh($"decal:{material}-{scene.Meshes.Count}", PrimitiveType.Polygon);
-            mesh.Vertices.AddRange(decal.Vertices.Co.Select(_ => _.ToAssimp()));
-            for (var i = 0; i < Vertex.UVChannels; ++i)
+            scene.Meshes.Add(mesh);
+            node.MeshIndices.Add(scene.Meshes.Count - 1);
+            return node;
+        }
+
+        public static Node Export(this Overlay overlay, Scene scene)
+        {
+            var node = new Node($"overlay:{overlay.Material.Basename}");
+            var mesh = new Mesh($"overlay:{overlay.Material.Basename}-{scene.Meshes.Count}", PrimitiveType.Polygon)
             {
-                var channel = decal.Vertices.UVs[i];
-                if (!channel.Active)
-                    continue;
-                mesh.TextureCoordinateChannels[i].AddRange(channel.Select(_ => _.ToAssimpUV()));
-            }
+                MaterialIndex = scene.FindOrCreateMaterial(overlay.Material)
+            };
 
-            mesh.MaterialIndex = matIndex.Value;
-            mesh.Faces.Add(new Face(Enumerable.Range(0, decal.Vertices.Count).ToArray()));
+            foreach (var polygon in overlay.Polygons)
+            {
+                var i0 = mesh.Vertices.Count;
+                mesh.Vertices.AddRange(polygon.Vertices.Co.Select(_ => _.ToAssimp()));
+                mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(_ => _.ToAssimpUV()));
+                mesh.Faces.Add(new Face(Enumerable.Range(i0, polygon.Vertices.Count).ToArray()));
+            }
 
             scene.Meshes.Add(mesh);
             node.MeshIndices.Add(scene.Meshes.Count - 1);

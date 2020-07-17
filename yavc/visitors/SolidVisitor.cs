@@ -28,24 +28,24 @@ namespace yavc.visitors
         {
             _sides = new List<Side>();
             entity.Accept(this);
-            var solid = new Solid(int.Parse(entity.GetValue("id")), _sides);
+            var solid = new Solid(int.Parse(entity["id"]), _sides);
             _sides = null;
             Vmf.Solids.Add(solid);
         }
 
         private void ReadSide(Entity entity)
         {
-            var plane = entity.GetValue("plane").ParsePlaneString();
-            var uAxis = entity.GetValue("uaxis").ParseTextureAxis();
-            var vAxis = entity.GetValue("vaxis").ParseTextureAxis();
+            var plane = entity["plane"].ParsePlaneString();
+            var uAxis = entity["uaxis"].ParseTextureAxis();
+            var vAxis = entity["vaxis"].ParseTextureAxis();
 
             _displacement = null;
             entity.Accept(this);
 
-            var material = entity.GetValue("material");
+            var material = entity["material"];
             var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.GetCached(_vtfBasePath, material + ".vmt");
 
-            var side = new Side(plane, vmt, uAxis, vAxis, _displacement);
+            var side = new Side(entity["id"].ParseInt(), plane, vmt, uAxis, vAxis, _displacement);
 
             _displacement = null;
 
@@ -55,8 +55,8 @@ namespace yavc.visitors
 
         private void ReadDisplacementInfo(Entity entity)
         {
-            _displacement = new Displacement {Power = int.Parse(entity.GetValue("power"))};
-            var cols = entity.GetValue("startposition").Replace("[", "").Replace("]", "").Split(" ");
+            _displacement = new Displacement {Power = int.Parse(entity["power"])};
+            var cols = entity["startposition"].Replace("[", "").Replace("]", "").Split(" ");
             if (cols.Length != 3)
                 throw new Exception();
             _displacement.StartPosition = new Vector(
@@ -64,7 +64,7 @@ namespace yavc.visitors
                 StringUtil.ParseDouble(cols[1]),
                 StringUtil.ParseDouble(cols[2])
             );
-            _displacement.Elevation = StringUtil.ParseDouble(entity.GetValue("elevation"));
+            _displacement.Elevation = StringUtil.ParseDouble(entity["elevation"]);
             var n = (1 << _displacement.Power) + 1;
             _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
             _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
@@ -76,10 +76,10 @@ namespace yavc.visitors
 
         private void ReadVectorRow(IList<List<Vector>> dest, Entity entity)
         {
-            var n = (1 << _displacement!.Power) + 1;
+            var n = _displacement!.Dimension + 1;
             for (var i = 0; i < n; ++i)
             {
-                var row = entity.GetValue("row" + i).Split(" ");
+                var row = entity["row" + i].Split(" ");
                 if (row.Length == 0)
                 {
                     dest[i].AddRange(Enumerable.Repeat(Vector.Zero, n));
@@ -103,7 +103,7 @@ namespace yavc.visitors
             var n = (1 << _displacement!.Power) + 1;
             for (var i = 0; i < n; ++i)
             {
-                var row = entity.GetValue("row" + i).Split(" ");
+                var row = entity["row" + i].Split(" ");
                 if (row.Length == 0)
                 {
                     dest[i].AddRange(Enumerable.Repeat(0.0, n));

@@ -32,11 +32,11 @@ namespace yavc.visitors
                 (entity.Classname == "prop_static" || entity.Classname == "prop_dynamic"))
                 Props.Add(new VMFProp
                 {
-                    Origin = entity.GetValue("origin").ParseVector(),
-                    Rotation = entity.GetValue("angles").ParseVector() * Math.PI / 180.0,
-                    Color = entity.GetValue("rendercolor"),
-                    Model = dropExtension(entity.GetValue("model").ToLower()),
-                    Skin = StringUtil.ParseInt(entity.GetValue("skin"))
+                    Origin = entity["origin"].ParseVector(),
+                    Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
+                    Color = entity["rendercolor"],
+                    Model = dropExtension(entity["model"].ToLower()),
+                    Skin = StringUtil.ParseInt(entity["skin"])
                 });
 
             entity.Accept(this);

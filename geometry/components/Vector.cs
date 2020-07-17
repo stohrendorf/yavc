@@ -167,5 +167,10 @@ namespace geometry.components
             return Math.Abs(X - other.X) <= margin && Math.Abs(Y - other.Y) <= margin &&
                    Math.Abs(Z - other.Z) <= margin;
         }
+
+        public Vector2 AsVector2()
+        {
+            return new Vector2(X, Y);
+        }
     }
 }

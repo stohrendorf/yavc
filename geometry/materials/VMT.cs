@@ -70,8 +70,8 @@ namespace geometry.materials
         public bool Equals(VMT? other)
         {
             if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return string.Equals(_absolutePath, other._absolutePath, StringComparison.OrdinalIgnoreCase);
+            return ReferenceEquals(this, other) ||
+                   string.Equals(_absolutePath, other._absolutePath, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool CheckCaseSensitiveFilesystem()
@@ -125,8 +125,7 @@ namespace geometry.materials
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((VMT) obj);
+            return obj.GetType() == GetType() && Equals((VMT) obj);
         }
 
         public override int GetHashCode()

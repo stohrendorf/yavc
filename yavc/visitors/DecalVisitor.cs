@@ -24,9 +24,9 @@ namespace yavc.visitors
             var classname = entity.Classname;
             if (classname == "infodecal")
                 _decals.Add(new Decal(
-                    StringUtil.ParseInt(entity.GetValue("id")),
-                    entity.GetValue("origin").ParseVector(),
-                    VMT.GetCached(_root, entity.GetValue("texture"))
+                    StringUtil.ParseInt(entity["id"]),
+                    entity["origin"].ParseVector(),
+                    VMT.GetCached(_root, entity["texture"])
                 ));
 
             entity.Accept(this);

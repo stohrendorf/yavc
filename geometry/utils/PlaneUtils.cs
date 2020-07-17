@@ -8,11 +8,6 @@ namespace geometry.utils
 {
     public static class PlaneUtils
     {
-        public static double Dot(this Plane p, Vector v)
-        {
-            return p.DotCoordinate(v);
-        }
-
         public static Polygon ToPolygon(this Plane plane, Side side)
         {
             Vector n;
@@ -43,9 +38,9 @@ namespace geometry.utils
             polygon.Add(new Vertex(origin + b - a, Vector2.Zero, 1));
             polygon.Add(new Vertex(origin - b - a, Vector2.Zero, 1));
 
-            Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DotCoordinate(_)) < 1e-3));
+            Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DistanceTo(_)) < 1e-3));
 
-            for (var i = 0; i < 4; i++) polygon.Vertices.UV0[i] = side.CalcUV(polygon.Vertices.Co[i]);
+            for (var i = 0; i < 4; i++) polygon.Vertices.UV[i] = side.CalcUV(polygon.Vertices.Co[i]);
 
             polygon.Vertices.NormalizeUV();
 

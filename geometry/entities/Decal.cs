@@ -20,8 +20,8 @@ namespace geometry.entities
         public Polygon? TryConvert(Solid solid)
         {
             return solid.Sides
-                .Select(f => (f.Plane.DotCoordinate(Origin), f))
-                .Where(df => df.Item1 <= DecalComputation.Margin && df.Item1 >= -1e-4)
+                .Select(f => (f.Plane.DistanceTo(Origin), f))
+                .Where(df => df.Item1 <= DecalComputation.Eps && df.Item1 >= -1e-4)
                 .Select(df => DecalComputation.CreateClippedPoly(this, df.Item2))
                 .FirstOrDefault(poly => poly != null);
         }

@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using geometry.utils;
+using utility;
 
 namespace geometry.components
 {
@@ -9,26 +12,43 @@ namespace geometry.components
 
         public int Count => Vertices.Count;
 
+        public IEnumerable<Plane> EdgePlanes
+        {
+            get
+            {
+                var cos = Vertices.Co.ToList();
+                for (var i = 0; i < cos.Count; ++i)
+                {
+                    var p1 = cos[i];
+                    var p2 = cos[(i + 1) % cos.Count];
+
+                    var n = (p2 - p1).Normalized;
+                    var d = -n.Dot(p1);
+                    yield return new Plane(n, d);
+                }
+            }
+        }
+
         public void Add(Vertex v)
         {
             Vertices.Add(v);
         }
 
-        public void Cut(Plane split)
+        public Polygon Cut(Plane split)
         {
-            var result = new Polygon();
+            var verts = new List<Vertex>();
 
             void doSplit(Vertex p1, Vertex p2)
             {
-                var dot1 = split.Dot(p1.Co);
-                var dot2 = split.Dot(p2.Co);
+                var dot1 = split.DistanceTo(p1.Co);
+                var dot2 = split.DistanceTo(p2.Co);
                 if (dot1 < 0 && dot2 < 0)
                     // the edge is fully behind the plane
                     return;
 
                 if (dot1 >= 0)
                     // keep points in front of the plane
-                    result.Add(p1);
+                    verts.Add(p1);
 
                 if (dot1 > 0 && dot2 >= 0)
                     // the edge is fully in front of the plane
@@ -51,30 +71,26 @@ namespace geometry.components
                 if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
                     throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
-                var uv = p2.UV0 - p1.UV0;
-                result.Add(new Vertex(p1.Co + lambda * d, p1.UV0 + lambda * uv, 1));
+                verts.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV), 1));
             }
 
-            for (var i = 0; i < Count; i++)
-            {
-                var i2 = (i + 1) % Count;
-                doSplit(Vertices[i], Vertices[i2]);
-            }
+            foreach (var (first, second) in Vertices.Cyclic().ToList().Pairs()) doSplit(first, second);
 
-            Vertices.Clear();
-            if (result.Vertices.Count == 0)
-                return;
+            var result = new Polygon();
+            if (verts.Count == 0)
+                return result;
 
-            Vertex prev = result.Vertices[^1];
-            foreach (var vertex in result.Vertices)
+            Vertex prev = verts[^1];
+            foreach (var vertex in verts)
             {
                 if (prev.FuzzyEquals(vertex))
                     continue;
                 prev = vertex;
-                Vertices.Add(vertex);
+                result.Add(vertex);
             }
 
-            Vertices.NormalizeUV();
+            result.Vertices.NormalizeUV();
+            return result;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace geometry.entities
 {
     internal static class DecalComputation
     {
-        public const double Margin = 4;
+        public const double Eps = 4;
         private static readonly double deg45 = Math.Sin(45 * Math.PI / 180);
 
         private static Vector[] ComputeDecalBasis(Vector n)
@@ -29,20 +29,20 @@ namespace geometry.entities
 
         private static Vertex ClampToUVEdge(Vertex a, Vertex b, int edge)
         {
-            var dUv = b.UV0 - a.UV0;
+            var dUv = b.UV - a.UV;
             var dCo = b.Co - a.Co;
             var dAlpha = b.Alpha - a.Alpha;
 
             var t = edge switch
             {
-                0 => (a.UV0.X - 0) / dUv.X,
-                1 => (a.UV0.X - 1) / dUv.X,
-                2 => (a.UV0.Y - 0) / dUv.Y,
-                3 => (a.UV0.Y - 1) / dUv.Y,
+                0 => (a.UV.X - 0) / dUv.X,
+                1 => (a.UV.X - 1) / dUv.X,
+                2 => (a.UV.Y - 0) / dUv.Y,
+                3 => (a.UV.Y - 1) / dUv.Y,
                 _ => throw new ArgumentException("Invalid edge", nameof(edge))
             };
 
-            return new Vertex(a.Co - dCo * t, a.UV0 - dUv * t, a.Alpha - dAlpha * t);
+            return new Vertex(a.Co - dCo * t, a.UV - dUv * t, a.Alpha - dAlpha * t);
         }
 
         private static bool IsInsideUV(Vector2 uv, int edge)
@@ -53,7 +53,7 @@ namespace geometry.entities
                 1 => uv.X < 1.0,
                 2 => uv.Y > 0.0,
                 3 => uv.Y < 1.0,
-                _ => false
+                _ => throw new ArgumentException("Invalid edge", nameof(edge))
             };
         }
 
@@ -66,15 +66,15 @@ namespace geometry.entities
             var p0 = verts[^1];
             foreach (var p1 in verts)
             {
-                if (IsInsideUV(p1.UV0, edge))
+                if (IsInsideUV(p1.UV, edge))
                 {
-                    if (!IsInsideUV(p0.UV0, edge))
+                    if (!IsInsideUV(p0.UV, edge))
                         result.Add(ClampToUVEdge(p0, p1, edge));
                     result.Add(p1);
                 }
                 else
                 {
-                    if (IsInsideUV(p0.UV0, edge))
+                    if (IsInsideUV(p0.UV, edge))
                         result.Add(ClampToUVEdge(p1, p0, edge));
                 }
 
@@ -106,9 +106,9 @@ namespace geometry.entities
             }
 
             var poly = new Polygon();
-            // fix UV coordinates and add slight offset to hover above the surface
+            // add slight offset to hover above the surface
             foreach (var p in clipped.Select(vert =>
-                new Vertex(vert.Co + side.Plane.Normal * 0.1, vert.UV0, vert.Alpha)))
+                new Vertex(vert.Co + side.Plane.Normal * 0.1, vert.UV, vert.Alpha)))
                 poly.Add(p);
             return poly;
         }

@@ -14,16 +14,33 @@ namespace geometry.entities
         public readonly List<List<Vector>> Normals = new List<List<Vector>>();
         public readonly List<List<Vector>> OffsetNormals = new List<List<Vector>>();
         public readonly List<List<Vector>> Offsets = new List<List<Vector>>();
+        private IList<Polygon>? _flatPolygons;
+
+        private IList<Polygon>? _polygons;
+        private Side? _side;
         public double Elevation;
         public int Power;
         public Vector StartPosition;
 
-        private int Dimension => 1 << Power;
+        public IEnumerable<Polygon> Polygons => _polygons;
+        public IEnumerable<Polygon> FlatPolygons => _flatPolygons;
 
-        public (VertexCollection vertices, List<List<int>> indices) Convert(Side side)
+        public int Dimension => 1 << Power;
+
+        public IEnumerable<Polygon> Convert(Side side)
         {
             if (side.Polygon.Count != 4)
                 throw new ArgumentException($"Expected polygon with 4 vertices, got {side.Polygon.Count}");
+
+            if (_side != null)
+            {
+                Debug.Assert(_polygons != null);
+                if (_side != side)
+                    throw new ArgumentException();
+                return _polygons;
+            }
+
+            _side = side;
 
             var size = Dimension + 1;
 
@@ -46,22 +63,27 @@ namespace geometry.entities
             if (vertexWindingIndices[0] == -1)
                 throw new Exception("Failed to determine starting vertex index");
 
-            var baseA = side.Polygon.Vertices.Co[vertexWindingIndices[3]]
+            var stepsA = side.Polygon.Vertices.Co[vertexWindingIndices[3]]
                 .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
 
-            var uvBaseA = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[3]])
+            var uvStepsA = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[3]])
                 .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[2]]), size).ToList();
 
-            var baseB = side.Polygon.Vertices.Co[vertexWindingIndices[0]]
+            var stepsB = side.Polygon.Vertices.Co[vertexWindingIndices[0]]
                 .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
 
-            var uvBaseB = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[0]])
+            var uvStepsB = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[0]])
                 .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[1]]), size).ToList();
 
             var vertices = new VertexCollection();
+            var flatVertices = new VertexCollection();
             for (var s = 0; s < size; s++)
-                vertices.AddRange(baseB[s].StepsTo(baseA[s], size).Zip(uvBaseB[s].StepsTo(uvBaseA[s], size),
+            {
+                vertices.AddRange(stepsB[s].StepsTo(stepsA[s], size).Zip(uvStepsB[s].StepsTo(uvStepsA[s], size),
                     (co, uv) => new Vertex(co, uv, 1)));
+                flatVertices.AddRange(stepsB[s].StepsTo(stepsA[s], size).Zip(uvStepsB[s].StepsTo(uvStepsA[s], size),
+                    (co, uv) => new Vertex(co, uv, 1)));
+            }
 
             Debug.Assert(vertices.Count == size * size);
 
@@ -71,31 +93,40 @@ namespace geometry.entities
                 var normal = Normals[i][j] * Distances[i][j];
                 var offset = Offsets[i][j] + OffsetNormals[i][j];
 
-                vertices[i * size + j].Co += side.Plane.Normal * Elevation + normal + offset;
+                vertices.Co[i * size + j] += side.Plane.Normal * Elevation + normal + offset;
             }
 
             for (var i = 0; i < size; i++)
             for (var j = 0; j < size; j++)
-                vertices[i * size + j].Alpha = Alphas[i][j];
+            {
+                vertices.Alpha[i * size + j] = Alphas[i][j];
+                flatVertices.Alpha[i * size + j] = Alphas[i][j];
+            }
 
             vertices.NormalizeUV();
 
-            var indices = new List<List<int>>();
-
+            _polygons = new List<Polygon>();
+            _flatPolygons = new List<Polygon>();
             for (var i = 0; i < Dimension; i++)
             for (var j = 0; j < Dimension; j++)
             {
                 var idx0 = i * size + j;
-                indices.Add(new List<int>
-                {
-                    idx0, idx0 + 1, idx0 + size + 1, idx0 + size
-                });
+                var p = new Polygon();
+                p.Add(vertices[idx0]);
+                p.Add(vertices[idx0 + 1]);
+                p.Add(vertices[idx0 + size + 1]);
+                p.Add(vertices[idx0 + size]);
+                _polygons.Add(p);
+
+                p = new Polygon();
+                p.Add(flatVertices[idx0]);
+                p.Add(flatVertices[idx0 + 1]);
+                p.Add(flatVertices[idx0 + size + 1]);
+                p.Add(flatVertices[idx0 + size]);
+                _flatPolygons.Add(p);
             }
 
-            Debug.Assert(indices.Count == Dimension * Dimension);
-            Debug.Assert(indices.SelectMany(_ => _).All(idx => idx < size * size));
-
-            return (vertices, indices);
+            return _polygons;
         }
     }
 }

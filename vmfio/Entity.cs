@@ -19,6 +19,8 @@ namespace VMFIO
 
         public string? Classname => GetOptionalValue("classname");
 
+        public string this[string key] => GetValue(key);
+
         public void Accept(EntityVisitor visitor)
         {
             foreach (var child in Children) visitor.Visit(child);
@@ -26,7 +28,7 @@ namespace VMFIO
 
         public string? GetOptionalValue(string key)
         {
-            var kvs = _keyValues.SingleOrDefault(_ => _.Key == key);
+            var kvs = _keyValues.SingleOrDefault(entry => entry.Key == key);
             return kvs?.Value;
         }
 
@@ -34,7 +36,7 @@ namespace VMFIO
         {
             var value = GetOptionalValue(key);
             if (value == null)
-                throw new KeyNotFoundException();
+                throw new KeyNotFoundException($"Key {key} not found");
             return value;
         }
 
