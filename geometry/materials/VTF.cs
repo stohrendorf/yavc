@@ -1,33 +1,24 @@
-using System;
-using System.IO;
+using System.Collections.Generic;
+using geometry.materials.vtfimage;
 
 namespace geometry.materials
 {
     public static class VTF
     {
-        private static (short width, short height) GetSize(BinaryReader s)
+        private static readonly Dictionary<string, VTFFile> cache = new Dictionary<string, VTFFile>();
+
+        public static VTFFile Get(string filename)
         {
-            var fType = s.ReadBytes(4);
-            if (fType[0] != 0x56 || fType[1] != 0x54 || fType[2] != 0x46 || fType[3] != 0)
-                throw new Exception("VTF signature mismatch");
-            var version1 = s.ReadInt32();
-            if (version1 != 7)
-                throw new Exception($"Invalid VTF version (expected 7, got {version1})");
-            var version2 = s.ReadInt32();
-            var hSize = s.ReadInt32();
-            var width = s.ReadInt16();
-            if (width <= 0)
-                throw new Exception($"Invalid non-positive width {width}");
-            var height = s.ReadInt16();
-            if (height <= 0)
-                throw new Exception($"Invalid non-positive height {width}");
-            return (width, height);
+            if (!cache.TryGetValue(filename, out var file))
+                file = cache[filename] = new VTFFile(filename);
+
+            return file;
         }
 
-        public static (short width, short height) GetSize(string filename)
+        public static (int width, int height) GetSize(string filename)
         {
-            using var s = new BinaryReader(File.Open(filename, FileMode.Open));
-            return GetSize(s);
+            var file = Get(filename);
+            return (file.Images[0].Width, file.Images[0].Height);
         }
     }
 }

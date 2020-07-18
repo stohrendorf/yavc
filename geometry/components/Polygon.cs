@@ -84,7 +84,8 @@ namespace geometry.components
                 if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
                     throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
-                vertices.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV), 1));
+                vertices.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV),
+                    p1.Alpha + lambda * (p2.Alpha - p1.Alpha)));
             }
 
             foreach (var (first, second) in Vertices.Cyclic().ToList().Pairs()) doSplit(first, second);
