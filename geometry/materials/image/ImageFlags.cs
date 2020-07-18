@@ -1,6 +1,6 @@
 using System;
 
-namespace geometry.materials.vtfimage
+namespace geometry.materials.image
 {
     [Flags]
     public enum ImageFlags : uint

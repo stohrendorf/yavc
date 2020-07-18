@@ -6,7 +6,6 @@ namespace geometry.components
     public class Vertex : IEquatable<Vertex>
     {
         public double Alpha;
-
         public Vector Co;
         public Vector2 UV;
 

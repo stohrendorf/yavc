@@ -65,29 +65,28 @@ namespace geometry.entities
 
                 var size = Dimension + 1;
 
-                var stepsA = _side.Polygon.Vertices.Co[vertexWindingIndices[3]]
-                    .StepsTo(_side.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
-                var stepsB = _side.Polygon.Vertices.Co[vertexWindingIndices[0]]
-                    .StepsTo(_side.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
+                var cos = vertexWindingIndices.Select(idx => _side.Polygon.Vertices.Co[idx]).ToArray();
+                var steps01 = cos[0].StepsTo(cos[1], size).ToArray();
+                var steps03 = cos[0].StepsTo(cos[3], size).ToArray();
+                var steps12 = cos[1].StepsTo(cos[2], size).ToArray();
+                var steps32 = cos[3].StepsTo(cos[2], size).ToArray();
 
-                var stepsC = stepsB[0].StepsTo(stepsA[0], size).ToArray();
-                var stepsD = stepsB[^1].StepsTo(stepsA[^1], size).ToArray();
+                var edge01 = cos[1] - cos[0];
+                var edge03 = cos[3] - cos[0];
 
-                var edgeA = _side.Polygon.Vertices.Co[vertexWindingIndices[2]] -
-                            _side.Polygon.Vertices.Co[vertexWindingIndices[3]];
-                var edgeB = _side.Polygon.Vertices.Co[vertexWindingIndices[1]] -
-                            _side.Polygon.Vertices.Co[vertexWindingIndices[0]];
                 for (var s = 0; s < size; s++)
                 {
-                    var a = stepsA[s];
-                    var b = stepsB[s];
-                    var c = (b - a).Cross(edgeA);
-                    yield return Plane.CreateFromVertices(a, b, c);
+                    var a = steps32[s];
+                    var b = steps01[s];
+                    var ab = (b - a).Cross(edge01);
+                    Debug.Assert(ab.Length >= 1);
+                    yield return Plane.CreateFromVertices(a, b, ab);
 
-                    a = stepsC[s];
-                    b = stepsD[s];
-                    c = (b - a).Cross(edgeB);
-                    yield return Plane.CreateFromVertices(a, b, c);
+                    a = steps03[s];
+                    b = steps12[s];
+                    ab = (b - a).Cross(edge03);
+                    Debug.Assert(ab.Length >= 1);
+                    yield return Plane.CreateFromVertices(a, b, ab);
                 }
             }
         }
@@ -128,25 +127,19 @@ namespace geometry.entities
             if (vertexWindingIndices[0] == -1)
                 throw new Exception("Failed to determine starting vertex index");
 
-            var stepsA = side.Polygon.Vertices.Co[vertexWindingIndices[3]]
-                .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
-
-            var uvStepsA = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[3]])
-                .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[2]]), size).ToList();
-
-            var stepsB = side.Polygon.Vertices.Co[vertexWindingIndices[0]]
-                .StepsTo(side.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
-
-            var uvStepsB = side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[0]])
-                .StepsTo(side.CalcUV(side.Polygon.Vertices.Co[vertexWindingIndices[1]]), size).ToList();
+            var cos = vertexWindingIndices.Select(idx => _side.Polygon.Vertices.Co[idx]).ToArray();
+            var steps32 = cos[3].StepsTo(cos[2], size).ToArray();
+            var uvSteps32 = side.CalcUV(cos[3]).StepsTo(side.CalcUV(cos[2]), size).ToArray();
+            var steps01 = cos[0].StepsTo(cos[1], size).ToArray();
+            var uvSteps01 = side.CalcUV(cos[0]).StepsTo(side.CalcUV(cos[1]), size).ToArray();
 
             var vertices = new VertexCollection();
             var flatVertices = new VertexCollection();
             for (var s = 0; s < size; s++)
             {
-                vertices.AddRange(stepsB[s].StepsTo(stepsA[s], size).Zip(uvStepsB[s].StepsTo(uvStepsA[s], size),
+                vertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size),
                     (co, uv) => new Vertex(co, uv, 1)));
-                flatVertices.AddRange(stepsB[s].StepsTo(stepsA[s], size).Zip(uvStepsB[s].StepsTo(uvStepsA[s], size),
+                flatVertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size),
                     (co, uv) => new Vertex(co, uv, 1)));
             }
 

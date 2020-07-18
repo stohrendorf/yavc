@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using geometry.components;
 
@@ -57,14 +56,14 @@ namespace geometry.entities
             };
         }
 
-        private static VertexCollection ClampToUVRegion(IReadOnlyList<Vertex> verts, int edge)
+        private static VertexCollection ClampToUVRegion(VertexCollection vertices, int edge)
         {
             var result = new VertexCollection();
-            if (verts.Count == 0)
+            if (vertices.Count == 0)
                 return result;
 
-            var p0 = verts[^1];
-            foreach (var p1 in verts)
+            var p0 = vertices[^1];
+            foreach (var p1 in vertices)
             {
                 if (IsInsideUV(p1.UV, edge))
                 {
@@ -90,14 +89,10 @@ namespace geometry.entities
 
             var u0 = textureSpaceBasis[0].Dot(decal.Origin) - decal.Material.DecalWidth / 2.0;
             var v0 = textureSpaceBasis[1].Dot(decal.Origin) - decal.Material.DecalHeight / 2.0;
-            var clipped = side.Polygon.Vertices.Select(vert =>
-            {
-                var u = textureSpaceBasis[0].Dot(vert.Co) - u0;
-                var v = textureSpaceBasis[1].Dot(vert.Co) - v0;
-                return new Vertex(vert.Co,
-                    new Vector2(u / decal.Material.DecalWidth, v / decal.Material.DecalHeight),
-                    vert.Alpha);
-            }).ToList();
+            var clipped = side.Polygon.Vertices.Select(vert => new Vertex(vert.Co,
+                new Vector2((textureSpaceBasis[0].Dot(vert.Co) - u0) / decal.Material.DecalWidth,
+                    (textureSpaceBasis[1].Dot(vert.Co) - v0) / decal.Material.DecalHeight),
+                vert.Alpha)).ToVertexCollection();
 
             for (var i = 0; i < 4; ++i)
             {

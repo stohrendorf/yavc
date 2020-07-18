@@ -1,4 +1,4 @@
-namespace geometry.materials.vtfimage
+namespace geometry.materials.image
 {
     /// <summary>
     ///     A VTF image containing binary pixel data in some format.

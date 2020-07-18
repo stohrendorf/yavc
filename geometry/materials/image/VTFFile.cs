@@ -5,11 +5,14 @@ using System.IO;
 using System.Text;
 using geometry.components;
 
-namespace geometry.materials.vtfimage
+namespace geometry.materials.image
 {
     public class VTFFile
     {
         private const string VTFHeaderID = "VTF";
+
+        public readonly int Width;
+        public readonly int Height;
 
         public VTFFile(string filename) : this(new BinaryReader(File.Open(filename, FileMode.Open)))
         {
@@ -30,8 +33,8 @@ namespace geometry.materials.vtfimage
             Header.Version = version;
 
             var headerSize = reader.ReadUInt32();
-            var width = reader.ReadUInt16();
-            var height = reader.ReadUInt16();
+            Width = reader.ReadUInt16();
+            Height = reader.ReadUInt16();
 
             Header.Flags = (ImageFlags) reader.ReadUInt32();
 
@@ -128,8 +131,8 @@ namespace geometry.materials.vtfimage
             for (var face = 0; face < faces; face++)
             for (var slice = 0; slice < depth; slice++)
             {
-                var wid = GetMipSize(width, mip);
-                var hei = GetMipSize(height, mip);
+                var wid = GetMipSize(Width, mip);
+                var hei = GetMipSize(Height, mip);
                 var size = highResFormatInfo.GetDataSize(wid, hei);
 
                 Images.Add(new Image

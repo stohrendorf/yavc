@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using geometry.materials.vtfimage;
+using geometry.materials.image;
 
 namespace geometry.materials
 {
@@ -18,7 +18,7 @@ namespace geometry.materials
         public static (int width, int height) GetSize(string filename)
         {
             var file = Get(filename);
-            return (file.Images[0].Width, file.Images[0].Height);
+            return (file.Width, file.Height);
         }
     }
 }

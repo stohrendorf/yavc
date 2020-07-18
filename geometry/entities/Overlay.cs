@@ -65,8 +65,9 @@ namespace geometry.entities
                     }
 
                     // split the cut polygon at the displacement edges
-                    var subdividedPolygons = side.Displacement.EdgePlanes.Aggregate(Enumerable.Repeat(cutPoly, 1),
-                        (current, edgePlane) => current.SelectMany(poly => poly.Split(edgePlane)).ToList()).ToList();
+                    List<Polygon> subdividedPolygons = new List<Polygon> {cutPoly};
+                    foreach (var plane in side.Displacement.EdgePlanes)
+                        subdividedPolygons = subdividedPolygons.SelectMany(poly => poly.Split(plane)).ToList();
 
                     Debug.Assert(subdividedPolygons.All(poly =>
                         poly.Vertices.Co.All(co => side.Plane.DistanceTo(co) < 1e-6)));
@@ -94,41 +95,25 @@ namespace geometry.entities
                     var f2 = flatPolygon.Vertices[i2].Co;
 
                     // try to find the barycentric values for the displacement coordinates
-                    if (!VectorUtils.CalcBarycentric(overlayVertex.Co, f0, f1, f2, out var displacementS,
-                        out var displacementT, out var displacementU))
+                    if (!VectorUtils.CalcBarycentric(overlayVertex.Co, f0, f1, f2, out var s,
+                        out var t, out var u))
                         return false;
 
                     var dp0 = displacedPolygon.Vertices[i0].Co;
                     var dp1 = displacedPolygon.Vertices[i1].Co;
                     var dp2 = displacedPolygon.Vertices[i2].Co;
-                    var co = dp0 * displacementS + dp1 * displacementT + dp2 * displacementU;
+                    var co = dp0 * s + dp1 * t + dp2 * u;
 
-                    // we got our displaced coordinate. now we need to find the barycentric coordinates on the overlay
-                    // polygon to properly interpolate alpha and uv coordinates.
-                    var o0 = overlayPolygon.Vertices[0];
-                    for (var i = 0; i < overlayPolygon.Vertices.Count - 2; ++i)
-                    {
-                        var o1 = overlayPolygon.Vertices[i + 1];
-                        var o2 = overlayPolygon.Vertices[i + 2];
-                        if (!VectorUtils.CalcBarycentric(overlayVertex.Co, o0.Co, o1.Co, o2.Co, out var overlayS,
-                            out var overlayT, out var overlayU))
-                            continue;
-
-                        var uv = o0.UV * overlayS + o1.UV * overlayT + o2.UV * overlayU;
-                        var alpha = o0.Alpha * overlayS + o1.Alpha * overlayT + o2.Alpha * overlayU;
-                        matched.Add(new Vertex(co, uv, alpha));
-                        return true;
-                    }
-
-                    // if we didn't find the overlay vertex in the overlay polygon... something went incredibly wrong
-                    throw new Exception();
+                    matched.Add(new Vertex(co, overlayVertex.UV, overlayVertex.Alpha));
+                    return true;
                 }
 
                 foreach (var overlayVertex in overlayPolygon.Vertices)
                 {
                     // fast path: most overlay vertices will exactly match with a base vertex
                     var displacedMatches = flatPolygon.Vertices.Zip(displacedPolygon.Vertices)
-                        .Where(fv => overlayVertex.Co.Distance(fv.First.Co) < 1e-3).Select(_ => _.Second.Co).ToList();
+                        .Where(fv => overlayVertex.Co.Distance(fv.First.Co) < VectorUtils.Epsilon)
+                        .Select(_ => _.Second.Co).ToList();
                     if (displacedMatches.Count > 1)
                         throw new Exception();
 

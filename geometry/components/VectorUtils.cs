@@ -6,7 +6,7 @@ namespace geometry.components
 {
     public static class VectorUtils
     {
-        private const double Epsilon = 1e-3;
+        public const double Epsilon = 1e-4;
 
         public static Vector? RayPlaneIntersection(Vector orig, Vector dir, Plane plane)
         {

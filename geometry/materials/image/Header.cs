@@ -1,6 +1,6 @@
 using geometry.components;
 
-namespace geometry.materials.vtfimage
+namespace geometry.materials.image
 {
     public class Header
     {

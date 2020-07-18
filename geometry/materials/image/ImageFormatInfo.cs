@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace geometry.materials.vtfimage
+namespace geometry.materials.image
 {
     // Uses logic from the excellent (LGPL-licensed) VtfLib, courtesy of Neil Jedrzejewski & Ryan Gregg
     public class ImageFormatInfo
@@ -13,24 +13,24 @@ namespace geometry.materials.vtfimage
             {
                 {ImageFormat.None, null},
                 {
-                    ImageFormat.Rgba8888,
-                    new ImageFormatInfo(ImageFormat.Rgba8888, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
+                    ImageFormat.RGBA8,
+                    new ImageFormatInfo(ImageFormat.RGBA8, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
                 },
                 {
-                    ImageFormat.Abgr8888,
-                    new ImageFormatInfo(ImageFormat.Abgr8888, 32, 4, 8, 8, 8, 8, 3, 2, 1, 0, false, true)
+                    ImageFormat.ABGR8,
+                    new ImageFormatInfo(ImageFormat.ABGR8, 32, 4, 8, 8, 8, 8, 3, 2, 1, 0, false, true)
                 },
                 {
-                    ImageFormat.Rgb888,
-                    new ImageFormatInfo(ImageFormat.Rgb888, 24, 3, 8, 8, 8, 0, 0, 1, 2, -1, false, true)
+                    ImageFormat.RGB8,
+                    new ImageFormatInfo(ImageFormat.RGB8, 24, 3, 8, 8, 8, 0, 0, 1, 2, -1, false, true)
                 },
                 {
-                    ImageFormat.Bgr888,
-                    new ImageFormatInfo(ImageFormat.Bgr888, 24, 3, 8, 8, 8, 0, 2, 1, 0, -1, false, true)
+                    ImageFormat.BGR8,
+                    new ImageFormatInfo(ImageFormat.BGR8, 24, 3, 8, 8, 8, 0, 2, 1, 0, -1, false, true)
                 },
                 {
-                    ImageFormat.Rgb565,
-                    new ImageFormatInfo(ImageFormat.Rgb565, 16, 2, 5, 6, 5, 0, 0, 1, 2, -1, false, true)
+                    ImageFormat.RGB565,
+                    new ImageFormatInfo(ImageFormat.RGB565, 16, 2, 5, 6, 5, 0, 0, 1, 2, -1, false, true)
                 },
                 {
                     ImageFormat.I8,
@@ -38,85 +38,85 @@ namespace geometry.materials.vtfimage
                         TransformLuminance)
                 },
                 {
-                    ImageFormat.Ia88,
-                    new ImageFormatInfo(ImageFormat.Ia88, 16, 2, 8, 8, 8, 8, 0, -1, -1, 1, false, true,
+                    ImageFormat.IA8,
+                    new ImageFormatInfo(ImageFormat.IA8, 16, 2, 8, 8, 8, 8, 0, -1, -1, 1, false, true,
                         TransformLuminance)
                 },
                 {ImageFormat.P8, new ImageFormatInfo(ImageFormat.P8, 8, 1, 0, 0, 0, 0, -1, -1, -1, -1, false, false)},
                 {ImageFormat.A8, new ImageFormatInfo(ImageFormat.A8, 8, 1, 0, 0, 0, 8, -1, -1, -1, 0, false, true)},
                 {
-                    ImageFormat.Rgb888Bluescreen,
-                    new ImageFormatInfo(ImageFormat.Rgb888Bluescreen, 24, 3, 8, 8, 8, 8, 0, 1, 2, -1, false, true,
+                    ImageFormat.RGB8Bluescreen,
+                    new ImageFormatInfo(ImageFormat.RGB8Bluescreen, 24, 3, 8, 8, 8, 8, 0, 1, 2, -1, false, true,
                         TransformBluescreen)
                 },
                 {
-                    ImageFormat.Bgr888Bluescreen,
-                    new ImageFormatInfo(ImageFormat.Bgr888Bluescreen, 24, 3, 8, 8, 8, 8, 2, 1, 0, -1, false, true,
+                    ImageFormat.BGR8Bluescreen,
+                    new ImageFormatInfo(ImageFormat.BGR8Bluescreen, 24, 3, 8, 8, 8, 8, 2, 1, 0, -1, false, true,
                         TransformBluescreen)
                 },
                 {
-                    ImageFormat.Argb8888,
-                    new ImageFormatInfo(ImageFormat.Argb8888, 32, 4, 8, 8, 8, 8, 3, 0, 1, 2, false, true)
+                    ImageFormat.ARGB8,
+                    new ImageFormatInfo(ImageFormat.ARGB8, 32, 4, 8, 8, 8, 8, 3, 0, 1, 2, false, true)
                 },
                 {
-                    ImageFormat.Bgra8888,
-                    new ImageFormatInfo(ImageFormat.Bgra8888, 32, 4, 8, 8, 8, 8, 2, 1, 0, 3, false, true)
+                    ImageFormat.BGRA8,
+                    new ImageFormatInfo(ImageFormat.BGRA8, 32, 4, 8, 8, 8, 8, 2, 1, 0, 3, false, true)
                 },
-                {ImageFormat.Dxt1, new ImageFormatInfo(ImageFormat.Dxt1, 4, 0, 0, 0, 0, 0, -1, -1, -1, -1, true, true)},
-                {ImageFormat.Dxt3, new ImageFormatInfo(ImageFormat.Dxt3, 8, 0, 0, 0, 0, 8, -1, -1, -1, -1, true, true)},
-                {ImageFormat.Dxt5, new ImageFormatInfo(ImageFormat.Dxt5, 8, 0, 0, 0, 0, 8, -1, -1, -1, -1, true, true)},
+                {ImageFormat.DXT1, new ImageFormatInfo(ImageFormat.DXT1, 4, 0, 0, 0, 0, 0, -1, -1, -1, -1, true, true)},
+                {ImageFormat.DXT3, new ImageFormatInfo(ImageFormat.DXT3, 8, 0, 0, 0, 0, 8, -1, -1, -1, -1, true, true)},
+                {ImageFormat.DXT5, new ImageFormatInfo(ImageFormat.DXT5, 8, 0, 0, 0, 0, 8, -1, -1, -1, -1, true, true)},
                 {
-                    ImageFormat.Bgrx8888,
-                    new ImageFormatInfo(ImageFormat.Bgrx8888, 32, 4, 8, 8, 8, 0, 2, 1, 0, -1, false, true)
-                },
-                {
-                    ImageFormat.Bgr565,
-                    new ImageFormatInfo(ImageFormat.Bgr565, 16, 2, 5, 6, 5, 0, 2, 1, 0, -1, false, true)
+                    ImageFormat.BGRX8,
+                    new ImageFormatInfo(ImageFormat.BGRX8, 32, 4, 8, 8, 8, 0, 2, 1, 0, -1, false, true)
                 },
                 {
-                    ImageFormat.Bgrx5551,
-                    new ImageFormatInfo(ImageFormat.Bgrx5551, 16, 2, 5, 5, 5, 0, 2, 1, 0, -1, false, true)
+                    ImageFormat.BGR565,
+                    new ImageFormatInfo(ImageFormat.BGR565, 16, 2, 5, 6, 5, 0, 2, 1, 0, -1, false, true)
                 },
                 {
-                    ImageFormat.Bgra4444,
-                    new ImageFormatInfo(ImageFormat.Bgra4444, 16, 2, 4, 4, 4, 4, 2, 1, 0, 3, false, true)
+                    ImageFormat.BGRX5551,
+                    new ImageFormatInfo(ImageFormat.BGRX5551, 16, 2, 5, 5, 5, 0, 2, 1, 0, -1, false, true)
                 },
                 {
-                    ImageFormat.Dxt1Onebitalpha,
-                    new ImageFormatInfo(ImageFormat.Dxt1Onebitalpha, 4, 0, 0, 0, 0, 1, -1, -1, -1, -1, true, true)
+                    ImageFormat.BGRA4,
+                    new ImageFormatInfo(ImageFormat.BGRA4, 16, 2, 4, 4, 4, 4, 2, 1, 0, 3, false, true)
                 },
                 {
-                    ImageFormat.Bgra5551,
-                    new ImageFormatInfo(ImageFormat.Bgra5551, 16, 2, 5, 5, 5, 1, 2, 1, 0, 3, false, true)
-                },
-                {ImageFormat.Uv88, new ImageFormatInfo(ImageFormat.Uv88, 16, 2, 8, 8, 0, 0, 0, 1, -1, -1, false, true)},
-                {
-                    ImageFormat.Uvwq8888,
-                    new ImageFormatInfo(ImageFormat.Uvwq8888, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
+                    ImageFormat.DXT1OneBitAlpha,
+                    new ImageFormatInfo(ImageFormat.DXT1OneBitAlpha, 4, 0, 0, 0, 0, 1, -1, -1, -1, -1, true, true)
                 },
                 {
-                    ImageFormat.Rgba16161616F,
-                    new ImageFormatInfo(ImageFormat.Rgba16161616F, 64, 8, 16, 16, 16, 16, 0, 1, 2, 3, false, true)
+                    ImageFormat.BGRA5551,
+                    new ImageFormatInfo(ImageFormat.BGRA5551, 16, 2, 5, 5, 5, 1, 2, 1, 0, 3, false, true)
+                },
+                {ImageFormat.UV8, new ImageFormatInfo(ImageFormat.UV8, 16, 2, 8, 8, 0, 0, 0, 1, -1, -1, false, true)},
+                {
+                    ImageFormat.UVWQ8,
+                    new ImageFormatInfo(ImageFormat.UVWQ8, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
                 },
                 {
-                    ImageFormat.Rgba16161616,
-                    new ImageFormatInfo(ImageFormat.Rgba16161616, 64, 8, 16, 16, 16, 16, 0, 1, 2, 3, false, true)
+                    ImageFormat.RGBA16F,
+                    new ImageFormatInfo(ImageFormat.RGBA16F, 64, 8, 16, 16, 16, 16, 0, 1, 2, 3, false, true)
                 },
                 {
-                    ImageFormat.Uvlx8888,
-                    new ImageFormatInfo(ImageFormat.Uvlx8888, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
+                    ImageFormat.RGBA16,
+                    new ImageFormatInfo(ImageFormat.RGBA16, 64, 8, 16, 16, 16, 16, 0, 1, 2, 3, false, true)
+                },
+                {
+                    ImageFormat.UVLX8,
+                    new ImageFormatInfo(ImageFormat.UVLX8, 32, 4, 8, 8, 8, 8, 0, 1, 2, 3, false, true)
                 },
                 {
                     ImageFormat.R32F,
                     new ImageFormatInfo(ImageFormat.R32F, 32, 4, 32, 0, 0, 0, 0, -1, -1, -1, false, false)
                 },
                 {
-                    ImageFormat.Rgb323232F,
-                    new ImageFormatInfo(ImageFormat.Rgb323232F, 96, 12, 32, 32, 32, 0, 0, 1, 2, -1, false, false)
+                    ImageFormat.RGB32F,
+                    new ImageFormatInfo(ImageFormat.RGB32F, 96, 12, 32, 32, 32, 0, 0, 1, 2, -1, false, false)
                 },
                 {
-                    ImageFormat.Rgba32323232F,
-                    new ImageFormatInfo(ImageFormat.Rgba32323232F, 128, 16, 32, 32, 32, 32, 0, 1, 2, 3, false, false)
+                    ImageFormat.RGBA32F,
+                    new ImageFormatInfo(ImageFormat.RGBA32F, 128, 16, 32, 32, 32, 32, 0, 1, 2, 3, false, false)
                 },
                 {
                     ImageFormat.NvDst16,
@@ -127,12 +127,12 @@ namespace geometry.materials.vtfimage
                     new ImageFormatInfo(ImageFormat.NvDst24, 24, 3, 24, 0, 0, 0, 0, -1, -1, -1, false, true)
                 },
                 {
-                    ImageFormat.NvIntz,
-                    new ImageFormatInfo(ImageFormat.NvIntz, 32, 4, 0, 0, 0, 0, -1, -1, -1, -1, false, false)
+                    ImageFormat.NvIntZ,
+                    new ImageFormatInfo(ImageFormat.NvIntZ, 32, 4, 0, 0, 0, 0, -1, -1, -1, -1, false, false)
                 },
                 {
-                    ImageFormat.NvRawz,
-                    new ImageFormatInfo(ImageFormat.NvRawz, 24, 3, 0, 0, 0, 0, -1, -1, -1, -1, false, false)
+                    ImageFormat.NvRawZ,
+                    new ImageFormatInfo(ImageFormat.NvRawZ, 24, 3, 0, 0, 0, 0, -1, -1, -1, -1, false, false)
                 },
                 {
                     ImageFormat.AtiDst16,
@@ -208,26 +208,26 @@ namespace geometry.materials.vtfimage
                            (blueBitsPerPixel == 0 || blueBitsPerPixel == 32) &&
                            (alphaBitsPerPixel == 0 || alphaBitsPerPixel == 32);
 
-            if (!_is8Aligned && !_is16Aligned && !_is32Aligned)
+            if (_is8Aligned || _is16Aligned || _is32Aligned)
+                return;
+
+            var masks = new[]
             {
-                var masks = new[]
-                {
-                    new Mask('r', redBitsPerPixel, redIndex),
-                    new Mask('g', greenBitsPerPixel, greenIndex),
-                    new Mask('b', blueBitsPerPixel, blueIndex),
-                    new Mask('a', alphaBitsPerPixel, alphaIndex)
-                }.OrderBy(x => x.Index).ToList();
+                new Mask('r', redBitsPerPixel, redIndex),
+                new Mask('g', greenBitsPerPixel, greenIndex),
+                new Mask('b', blueBitsPerPixel, blueIndex),
+                new Mask('a', alphaBitsPerPixel, alphaIndex)
+            }.OrderBy(x => x.Index).ToList();
 
-                var offset = bitsPerPixel;
-                foreach (var m in masks)
-                {
-                    offset -= m.Size;
-                    m.Offset = offset;
-                }
-
-                var dict = masks.ToDictionary(x => x.Component, x => x);
-                _masks = new[] {dict['b'], dict['g'], dict['r'], dict['a']};
+            var offset = bitsPerPixel;
+            foreach (var m in masks)
+            {
+                offset -= m.Size;
+                m.Offset = offset;
             }
+
+            var dict = masks.ToDictionary(x => x.Component, x => x);
+            _masks = new[] {dict['b'], dict['g'], dict['r'], dict['a']};
         }
 
         public ImageFormat Format { get; }
@@ -263,13 +263,13 @@ namespace geometry.materials.vtfimage
         {
             switch (Format)
             {
-                case ImageFormat.Dxt1:
-                case ImageFormat.Dxt1Onebitalpha:
+                case ImageFormat.DXT1:
+                case ImageFormat.DXT1OneBitAlpha:
                     if (width < 4 && width > 0) width = 4;
                     if (height < 4 && height > 0) height = 4;
                     return (width + 3) / 4 * ((height + 3) / 4) * 8;
-                case ImageFormat.Dxt3:
-                case ImageFormat.Dxt5:
+                case ImageFormat.DXT3:
+                case ImageFormat.DXT5:
                     if (width < 4 && width > 0) width = 4;
                     if (height < 4 && height > 0) height = 4;
                     return (width + 3) / 4 * ((height + 3) / 4) * 16;
@@ -296,7 +296,7 @@ namespace geometry.materials.vtfimage
                 case ImageFormat.None:
                     return buffer;
                 // Handle compressed formats
-                case ImageFormat.Bgra8888:
+                case ImageFormat.BGRA8:
                     Array.Copy(data, buffer, buffer.Length);
                     return buffer;
                 default:
@@ -305,14 +305,14 @@ namespace geometry.materials.vtfimage
                     {
                         switch (Format)
                         {
-                            case ImageFormat.Dxt1:
-                            case ImageFormat.Dxt1Onebitalpha:
+                            case ImageFormat.DXT1:
+                            case ImageFormat.DXT1OneBitAlpha:
                                 DxtFormat.DecompressDxt1(buffer, data, width, height);
                                 break;
-                            case ImageFormat.Dxt3:
+                            case ImageFormat.DXT3:
                                 DxtFormat.DecompressDxt3(buffer, data, width, height);
                                 break;
-                            case ImageFormat.Dxt5:
+                            case ImageFormat.DXT5:
                                 DxtFormat.DecompressDxt5(buffer, data, width, height);
                                 break;
                             default:
@@ -340,7 +340,7 @@ namespace geometry.materials.vtfimage
 
                     // Special logic for half-precision HDR format
 
-                    if (Format == ImageFormat.Rgba16161616F)
+                    if (Format == ImageFormat.RGBA16F)
                     {
                         var logAverageLuminance = 0.0f;
 
@@ -392,34 +392,31 @@ namespace geometry.materials.vtfimage
 
                     // Handle custom-aligned data that fits into a uint
 
-                    if (BitsPerPixel <= 32)
-                    {
-                        Debug.Assert(_masks != null);
-                        for (int i = 0, j = 0; i < data.Length; i += BytesPerPixel, j += 4)
-                        {
-                            var val = 0u;
-                            for (var k = BytesPerPixel - 1; k >= 0; k--)
-                            {
-                                val = val << 8;
-                                val |= data[i + k];
-                            }
+                    if (BitsPerPixel > 32)
+                        throw new NotImplementedException($"Unsupported format: {Format}");
 
-                            buffer[j + 0] = _masks[0].Apply(val, BitsPerPixel);
-                            buffer[j + 1] = _masks[1].Apply(val, BitsPerPixel);
-                            buffer[j + 2] = _masks[2].Apply(val, BitsPerPixel);
-                            buffer[j + 3] = _masks[3].Apply(val, BitsPerPixel);
+                    Debug.Assert(_masks != null);
+                    for (int i = 0, j = 0; i < data.Length; i += BytesPerPixel, j += 4)
+                    {
+                        var val = 0u;
+                        for (var k = BytesPerPixel - 1; k >= 0; k--)
+                        {
+                            val <<= 8;
+                            val |= data[i + k];
                         }
 
-                        return buffer;
+                        buffer[j + 0] = _masks[0].Apply(val, BitsPerPixel);
+                        buffer[j + 1] = _masks[1].Apply(val, BitsPerPixel);
+                        buffer[j + 2] = _masks[2].Apply(val, BitsPerPixel);
+                        buffer[j + 3] = _masks[3].Apply(val, BitsPerPixel);
                     }
 
-                    // Format not supported yet
-                    throw new NotImplementedException($"Unsupported format: {Format}");
+                    return buffer;
                 }
             }
         }
 
-        private static void TransformFp16(ushort[] shorts, int offset, float logAverageLuminance)
+        private static void TransformFp16(IList<ushort> shorts, int offset, float logAverageLuminance)
         {
             const float Fp16HdrKey = 4.0f;
             const float Fp16HdrShift = 0.0f;
@@ -435,15 +432,15 @@ namespace geometry.materials.vtfimage
             var sTemp = sY;
 
             sTemp = Fp16HdrKey * sTemp / logAverageLuminance;
-            sTemp = sTemp / (1.0f + sTemp);
-            sTemp = sTemp / sY;
+            sTemp /= 1.0f + sTemp;
+            sTemp /= sY;
 
-            shorts[offset + 0] = Clamp(Math.Pow((sY + 1.403f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
-            shorts[offset + 1] = Clamp(Math.Pow((sY - 0.344f * sU - 0.714f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) *
+            shorts[offset + 0] = clamp(Math.Pow((sY + 1.403f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
+            shorts[offset + 1] = clamp(Math.Pow((sY - 0.344f * sU - 0.714f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) *
                                        65535.0f);
-            shorts[offset + 2] = Clamp(Math.Pow((sY + 1.770f * sU) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
+            shorts[offset + 2] = clamp(Math.Pow((sY + 1.770f * sU) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
 
-            ushort Clamp(double sValue)
+            static ushort clamp(double sValue)
             {
                 if (sValue < ushort.MinValue) return ushort.MinValue;
                 if (sValue > ushort.MaxValue) return ushort.MaxValue;
@@ -478,13 +475,12 @@ namespace geometry.materials.vtfimage
                 dest -= bits;
             }
 
-            if (dest != 0)
-            {
-                partial >>= bits - dest;
-                b <<= dest;
-                b |= partial;
-            }
+            if (dest == 0)
+                return b;
 
+            partial >>= bits - dest;
+            b <<= dest;
+            b |= partial;
             return b;
         }
 
