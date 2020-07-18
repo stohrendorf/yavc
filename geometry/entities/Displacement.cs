@@ -22,10 +22,75 @@ namespace geometry.entities
         public int Power;
         public Vector StartPosition;
 
-        public IEnumerable<Polygon> Polygons => _polygons;
-        public IEnumerable<Polygon> FlatPolygons => _flatPolygons;
+        public IEnumerable<Polygon> DisplacedPolygons
+        {
+            get
+            {
+                Debug.Assert(_polygons != null);
+                return _polygons;
+            }
+        }
+
+        public IEnumerable<Polygon> FlatPolygons
+        {
+            get
+            {
+                Debug.Assert(_flatPolygons != null);
+                return _flatPolygons;
+            }
+        }
 
         public int Dimension => 1 << Power;
+
+        public IEnumerable<Plane> EdgePlanes
+        {
+            get
+            {
+                Debug.Assert(_side != null);
+                int[] vertexWindingIndices = {-1, -1, -1, -1};
+                var bestDistance = double.PositiveInfinity;
+                for (var i = 0; i < _side.Polygon.Count; i++)
+                {
+                    var distance = _side.Polygon.Vertices.Co[i].Distance(StartPosition);
+
+                    if (distance >= bestDistance)
+                        continue;
+
+                    vertexWindingIndices[0] = i;
+                    vertexWindingIndices[1] = (i + 1) % 4;
+                    vertexWindingIndices[2] = (i + 2) % 4;
+                    vertexWindingIndices[3] = (i + 3) % 4;
+                    bestDistance = distance;
+                }
+
+                var size = Dimension + 1;
+
+                var stepsA = _side.Polygon.Vertices.Co[vertexWindingIndices[3]]
+                    .StepsTo(_side.Polygon.Vertices.Co[vertexWindingIndices[2]], size).ToList();
+                var stepsB = _side.Polygon.Vertices.Co[vertexWindingIndices[0]]
+                    .StepsTo(_side.Polygon.Vertices.Co[vertexWindingIndices[1]], size).ToList();
+
+                var stepsC = stepsB[0].StepsTo(stepsA[0], size).ToArray();
+                var stepsD = stepsB[^1].StepsTo(stepsA[^1], size).ToArray();
+
+                var edgeA = _side.Polygon.Vertices.Co[vertexWindingIndices[2]] -
+                            _side.Polygon.Vertices.Co[vertexWindingIndices[3]];
+                var edgeB = _side.Polygon.Vertices.Co[vertexWindingIndices[1]] -
+                            _side.Polygon.Vertices.Co[vertexWindingIndices[0]];
+                for (var s = 0; s < size; s++)
+                {
+                    var a = stepsA[s];
+                    var b = stepsB[s];
+                    var c = (b - a).Cross(edgeA);
+                    yield return Plane.CreateFromVertices(a, b, c);
+
+                    a = stepsC[s];
+                    b = stepsD[s];
+                    c = (b - a).Cross(edgeB);
+                    yield return Plane.CreateFromVertices(a, b, c);
+                }
+            }
+        }
 
         public IEnumerable<Polygon> Convert(Side side)
         {

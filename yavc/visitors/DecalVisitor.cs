@@ -17,7 +17,7 @@ namespace yavc.visitors
             _root = root;
         }
 
-        public IEnumerable<Decal> Decals => _decals;
+        public IReadOnlyList<Decal> Decals => _decals;
 
         public override void Visit(Entity entity)
         {

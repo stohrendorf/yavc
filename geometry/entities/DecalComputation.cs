@@ -107,8 +107,9 @@ namespace geometry.entities
 
             var poly = new Polygon();
             // add slight offset to hover above the surface
+            var offset = side.Plane.Normal.Normalized * 0.1;
             foreach (var p in clipped.Select(vert =>
-                new Vertex(vert.Co + side.Plane.Normal * 0.1, vert.UV, vert.Alpha)))
+                new Vertex(vert.Co + offset, vert.UV, vert.Alpha)))
                 poly.Add(p);
             return poly;
         }

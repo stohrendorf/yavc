@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using geometry.utils;
 using utility;
@@ -21,10 +22,11 @@ namespace geometry.components
                 {
                     var p1 = cos[i];
                     var p2 = cos[(i + 1) % cos.Count];
-
-                    var n = (p2 - p1).Normalized;
-                    var d = -n.Dot(p1);
-                    yield return new Plane(n, d);
+                    var p3 = cos[(i + 2) % cos.Count];
+                    var e1 = p1 - p2;
+                    var e2 = p3 - p2;
+                    var n = e1.Cross(e2);
+                    yield return Plane.CreateFromVertices(p1, p2, p1 + n);
                 }
             }
         }
@@ -34,9 +36,20 @@ namespace geometry.components
             Vertices.Add(v);
         }
 
+        public IEnumerable<Polygon> Split(Plane split)
+        {
+            var a = Cut(split);
+            if (a.Count >= 3)
+                yield return a;
+            var b = Cut(split.NormalFlipped());
+            if (b.Count >= 3)
+                yield return b;
+            Debug.Assert(a.Count >= 3 || b.Count >= 3);
+        }
+
         public Polygon Cut(Plane split)
         {
-            var verts = new List<Vertex>();
+            var vertices = new List<Vertex>();
 
             void doSplit(Vertex p1, Vertex p2)
             {
@@ -48,7 +61,7 @@ namespace geometry.components
 
                 if (dot1 >= 0)
                     // keep points in front of the plane
-                    verts.Add(p1);
+                    vertices.Add(p1);
 
                 if (dot1 > 0 && dot2 >= 0)
                     // the edge is fully in front of the plane
@@ -71,17 +84,17 @@ namespace geometry.components
                 if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
                     throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
-                verts.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV), 1));
+                vertices.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV), 1));
             }
 
             foreach (var (first, second) in Vertices.Cyclic().ToList().Pairs()) doSplit(first, second);
 
             var result = new Polygon();
-            if (verts.Count == 0)
+            if (vertices.Count == 0)
                 return result;
 
-            Vertex prev = verts[^1];
-            foreach (var vertex in verts)
+            Vertex prev = vertices[^1];
+            foreach (var vertex in vertices)
             {
                 if (prev.FuzzyEquals(vertex))
                     continue;

@@ -13,9 +13,9 @@ namespace yavc
         {
             var node = new Node($"solid:{solid.ID}");
 
-            foreach (var (material, polys) in solid.PolygonIndicesByMaterial)
+            foreach (var (material, polygons) in solid.PolygonIndicesByMaterial)
             {
-                if (!polys.Any(_ => _.Count > 0))
+                if (!polygons.Any(_ => _.Count > 0))
                     continue;
 
                 if (materialSkipPredicate(material.Basename))
@@ -29,11 +29,11 @@ namespace yavc
                 mesh.Vertices.AddRange(solid.Vertices
                     .Select(vertex => vertex.Co.ToAssimp()));
                 mesh.VertexColorChannels[0]
-                    .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha, 1, 1, 1)));
+                    .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha / 255, 1, 1, 1)));
                 mesh.TextureCoordinateChannels[0].AddRange(solid.Vertices
                     .Select(vertex => vertex.UV.ToAssimpUV()));
 
-                foreach (var indices in polys)
+                foreach (var indices in polygons)
                     mesh.Faces.Add(new Face(indices.ToArray()));
 
                 scene.Meshes.Add(mesh);

@@ -80,7 +80,6 @@ namespace yavc
 
                 foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
 
-                var totalDecals = 0;
                 foreach (var decal in decalVis.Decals)
                 {
                     var candidates = converter.Vmf.Solids.Where(s => s.Contains(decal.Origin)).ToList();
@@ -98,7 +97,6 @@ namespace yavc
                         scene.RootNode.Children.Add(poly!.ExportDecal(decal.Material, scene));
                     }
 
-                    totalDecals += createdDecals;
                     if (createdDecals == 0)
                         logger.Warn($"Could not create decal {decal.ID}");
                 }
@@ -121,7 +119,7 @@ namespace yavc
                 var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
 
                 logger.Info(
-                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {totalDecals} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
+                    $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {decalVis.Decals.Count} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
             }
 
             if (parsed.Value.Entities != null)
