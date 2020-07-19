@@ -45,8 +45,8 @@ namespace yavc
 
         public static Node ExportDecal(this Polygon polygon, VMT material, Scene scene)
         {
-            var node = new Node($"decal:{material.Basename}");
-            var mesh = new Mesh($"decal:{material.Basename}-{scene.Meshes.Count}", PrimitiveType.Polygon)
+            var node = new Node($"decal:{material.MaterialName}");
+            var mesh = new Mesh($"decal:{material.MaterialName}-{scene.Meshes.Count}", PrimitiveType.Polygon)
             {
                 MaterialIndex = scene.FindOrCreateMaterial(material)
             };
@@ -61,8 +61,8 @@ namespace yavc
 
         public static Node Export(this Overlay overlay, Scene scene)
         {
-            var node = new Node($"overlay:{overlay.Material.Basename}");
-            var mesh = new Mesh($"overlay:{overlay.Material.Basename}-{scene.Meshes.Count}", PrimitiveType.Polygon)
+            var node = new Node($"overlay:{overlay.Material.MaterialName}");
+            var mesh = new Mesh($"overlay:{overlay.Material.MaterialName}-{scene.Meshes.Count}", PrimitiveType.Polygon)
             {
                 MaterialIndex = scene.FindOrCreateMaterial(overlay.Material)
             };

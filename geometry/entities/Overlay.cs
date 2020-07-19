@@ -47,7 +47,8 @@ namespace geometry.entities
                         var projected = VectorUtils.RayPlaneIntersection(v.Co, BasisNormal, side.Plane);
                         Debug.Assert(projected != null);
                         Debug.Assert(side.Plane.DistanceTo(projected.Value) < 1e-6);
-                        overlayPolygon.Add(new Vertex(projected.Value, v.UV, 255));
+                        overlayPolygon.Add(new Vertex(projected.Value,
+                            side.Material?.BaseTextureTransform.Apply(v.UV) ?? v.UV, 255));
                     }
 
                     // clamp the overlay to the side it's projected onto

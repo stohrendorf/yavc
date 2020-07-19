@@ -73,5 +73,17 @@ namespace geometry.utils
                 ParseDouble(cols[2])
             );
         }
+
+        public static Vector2 ParseVector2(this string data)
+        {
+            var cols = data.Split(" ");
+            if (cols.Length != 2)
+                throw new ArgumentException();
+
+            return new Vector2(
+                ParseDouble(cols[0]),
+                ParseDouble(cols[1])
+            );
+        }
     }
 }

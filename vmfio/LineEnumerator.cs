@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace VMFIO
 {
@@ -31,7 +31,7 @@ namespace VMFIO
         public string Take()
         {
             if (!MoveNext())
-                throw new Exception();
+                throw new EndOfStreamException($"Unexpected end of file at line {Line}");
 
             return Current;
         }

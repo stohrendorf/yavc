@@ -28,6 +28,7 @@ namespace VMFIO
 
         public string? GetOptionalValue(string key)
         {
+            key = key.ToLower();
             var kvs = _keyValues.SingleOrDefault(entry => entry.Key == key);
             return kvs?.Value;
         }

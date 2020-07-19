@@ -1,11 +1,6 @@
 # Yet Another VMF Converter
 A simple converter for basic map geometry of VMF files.
 
-## Shortcomings + Benefits
-* Only processes solids, but no entities, decals, overlays, etc., i.e. only the very basic map geometry.
-* Maps displacements' alpha values to the red vertex color channel, allowing texture blending using that channel.
-* It's fast.
-
 ## Blender Helpers
 
 ### UVMap/Vertex Color Channel names
@@ -16,11 +11,17 @@ To allow lossless merging of meshes, run this script first to give all channels 
 ```python
 import bpy
 
-for obj in bpy.context.selected_objects :
-    for uvmap in obj.data.uv_layers:
-        uvmap.name = "UVMap"
-    layer, *_ = obj.data.vertex_colors.values()
-    layer.name = "VCol"
+for obj in bpy.context.selected_objects:
+    try:
+        for uvmap in obj.data.uv_layers:
+            uvmap.name = "UVMap"
+        try:
+            layer, *_ = obj.data.vertex_colors.values()
+            layer.name = "VCol"
+        except ValueError:
+            pass
+    except AttributeError:
+        pass
 ```
 
 ### Blender Texture Blending

@@ -3,7 +3,7 @@ using geometry.materials.image;
 
 namespace geometry.materials
 {
-    public static class VTF
+    public static class VTFCache
     {
         private static readonly Dictionary<string, VTFFile> cache = new Dictionary<string, VTFFile>();
 
@@ -13,12 +13,6 @@ namespace geometry.materials
                 file = cache[filename] = new VTFFile(filename);
 
             return file;
-        }
-
-        public static (int width, int height) GetSize(string filename)
-        {
-            var file = Get(filename);
-            return (file.Width, file.Height);
         }
     }
 }

@@ -10,9 +10,9 @@ namespace geometry.materials.image
     public class VTFFile
     {
         private const string VTFHeaderID = "VTF";
+        public readonly int Height;
 
         public readonly int Width;
-        public readonly int Height;
 
         public VTFFile(string filename) : this(new BinaryReader(File.Open(filename, FileMode.Open)))
         {

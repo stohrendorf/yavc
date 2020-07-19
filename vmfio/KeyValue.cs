@@ -7,7 +7,7 @@
 
         public KeyValue(string key, string value)
         {
-            Key = key;
+            Key = key.ToLower();
             Value = value;
         }
 

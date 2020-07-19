@@ -28,7 +28,7 @@ namespace geometry.entities
             Polygon = Plane.ToPolygon(this);
         }
 
-        public Vector2 CalcUV(Vector vec)
+        public Vector2 CalcUV(Vector vec, VMT.TextureTransform? transform = null)
         {
             if (Material == null)
                 return new Vector2(0.0, 0.0);
@@ -37,7 +37,9 @@ namespace geometry.entities
             Debug.Assert(!double.IsNaN(u));
             var v = (vec.Dot(_vAxis.ScaledAxis) + _vAxis.Shift) / Material.Height;
             Debug.Assert(!double.IsNaN(v));
-            return new Vector2(u, v);
+
+            var uv = new Vector2(u, v);
+            return transform?.Apply(uv) ?? uv;
         }
     }
 }

@@ -11,13 +11,11 @@ namespace yavc
 
         public static int FindOrCreateMaterial(this Scene scene, VMT material)
         {
-            var materialName = material.Basename.ToLower();
-
             for (var i = 0; i < scene.Materials.Count; ++i)
-                if (scene.Materials[i].Name == materialName)
+                if (scene.Materials[i].Name == material.MaterialName)
                     return i;
 
-            var mat = new Material {Name = materialName, IsTwoSided = true};
+            var mat = new Material {Name = material.MaterialName, IsTwoSided = true};
             var texIndex = 0;
 
             void tryAddTexture(string filePath, TextureType type)

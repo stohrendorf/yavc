@@ -129,9 +129,11 @@ namespace geometry.entities
 
             var cos = vertexWindingIndices.Select(idx => _side.Polygon.Vertices.Co[idx]).ToArray();
             var steps32 = cos[3].StepsTo(cos[2], size).ToArray();
-            var uvSteps32 = side.CalcUV(cos[3]).StepsTo(side.CalcUV(cos[2]), size).ToArray();
+            var uvSteps32 = side.CalcUV(cos[3]).StepsTo(side.CalcUV(cos[2]), size)
+                .Select(uv => side.Material?.BaseTextureTransform.Apply(uv) ?? uv).ToArray();
             var steps01 = cos[0].StepsTo(cos[1], size).ToArray();
-            var uvSteps01 = side.CalcUV(cos[0]).StepsTo(side.CalcUV(cos[1]), size).ToArray();
+            var uvSteps01 = side.CalcUV(cos[0]).StepsTo(side.CalcUV(cos[1]), size)
+                .Select(uv => side.Material?.BaseTextureTransform.Apply(uv) ?? uv).ToArray();
 
             var vertices = new VertexCollection();
             var flatVertices = new VertexCollection();
