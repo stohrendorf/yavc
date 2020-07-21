@@ -131,8 +131,12 @@ namespace yavc
                 using (var f = File.CreateText(parsed.Value.Entities))
                 {
                     foreach (var entity in propsVisitor.Props)
+                    {
+                        var origin = entity.Origin;
+                        var rotation = entity.Rotation;
                         f.WriteLine(
-                            $"{entity.Model}:{entity.Skin} {entity.Color} {entity.Origin.X:F} {entity.Origin.Y:F} {entity.Origin.Z:F} {entity.Rotation.Z:F} {entity.Rotation.X:F} {entity.Rotation.Y:F}");
+                            $"{entity.Model}:{entity.Skin} {entity.Color} {origin.X:F} {origin.Y:F} {origin.Z:F} {rotation.Z:F} {rotation.X:F} {rotation.Y:F}");
+                    }
                 }
             }
         }

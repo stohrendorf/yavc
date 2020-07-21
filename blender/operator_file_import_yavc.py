@@ -28,14 +28,13 @@ class ImportYAVCEntities(Operator, ImportHelper):
 
         for line in lines:
             name, r, g, b, loc_x, loc_y, loc_z, rot_x, rot_y, rot_z = line.split()
-            
-            o = bpy.data.objects.new( name, None )
-            o.color = [float(r)/255.0, float(g)/255.0, float(b)/255.0, 1.0]
+
+            o = bpy.data.objects.new(name, None)
+            o.color = [float(r) / 255.0, float(g) / 255.0, float(b) / 255.0, 1.0]
             o.location = [float(loc_x), float(loc_y), float(loc_z)]
             o.rotation_euler = [float(rot_x), float(rot_y), float(rot_z)]
             o.instance_type = "COLLECTION"
             scene.collection.objects.link(o)
-
 
         return {'FINISHED'}
 
