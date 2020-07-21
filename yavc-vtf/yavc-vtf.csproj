@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.8.0" />
+        <PackageReference Include="NLog" Version="5.0.0-beta11" />
+        <PackageReference Include="NLog.Extensions.Logging" Version="1.6.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\geometry\geometry.csproj" />
+    </ItemGroup>
+
+</Project>

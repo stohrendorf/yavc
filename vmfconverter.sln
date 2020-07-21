@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "utility", "utility\utility.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "geometry", "geometry\geometry.csproj", "{BED73ADE-4ABD-4BF9-B014-2E4BC209B2CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "yavc-vtf", "yavc-vtf\yavc-vtf.csproj", "{99AED6B4-496E-4AC4-9C04-2C0D15DEF8A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{BED73ADE-4ABD-4BF9-B014-2E4BC209B2CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BED73ADE-4ABD-4BF9-B014-2E4BC209B2CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BED73ADE-4ABD-4BF9-B014-2E4BC209B2CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99AED6B4-496E-4AC4-9C04-2C0D15DEF8A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99AED6B4-496E-4AC4-9C04-2C0D15DEF8A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99AED6B4-496E-4AC4-9C04-2C0D15DEF8A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99AED6B4-496E-4AC4-9C04-2C0D15DEF8A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
