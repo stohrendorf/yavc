@@ -4,14 +4,17 @@ namespace geometry.components
 {
     public static class VertexCollectionUtils
     {
-        public static IEnumerable<Vertex> Cyclic(this VertexCollection vertexCollection)
+        public static IEnumerable<(Vertex a, Vertex b)> CyclicPairs(this VertexCollection vertexCollection)
         {
             if (vertexCollection.Count == 0)
                 yield break;
 
-            foreach (var element in vertexCollection) yield return element;
-
-            yield return vertexCollection[0];
+            var prev = vertexCollection[^1];
+            foreach (var element in vertexCollection)
+            {
+                yield return (prev, element);
+                prev = element;
+            }
         }
 
         public static VertexCollection ToVertexCollection(this IEnumerable<Vertex> vertices)

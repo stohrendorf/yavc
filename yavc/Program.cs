@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -34,9 +35,9 @@ namespace yavc
                     return;
                 }
 
-                logger.Info("Calculating Ropes");
                 var ropeVis = new RopeVisitor();
                 ropeVis.Visit(data);
+                logger.Info($"Calculating {ropeVis.Count} Ropes");
 
                 var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
 
@@ -73,13 +74,6 @@ namespace yavc
                 var decalVis = new DecalVisitor(parsed.Value.Materials);
                 decalVis.Visit(data);
 
-                logger.Info("Processing overlays");
-                var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
-                    converter.Vmf.Solids.SelectMany(_ => _.Sides).ToImmutableDictionary(_ => _.ID, _ => _));
-                overlaysVis.Visit(data);
-
-                foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
-
                 foreach (var decal in decalVis.Decals)
                 {
                     var candidates = converter.Vmf.Solids.Where(s => s.Contains(decal.Origin)).ToList();
@@ -98,8 +92,16 @@ namespace yavc
                     }
 
                     if (createdDecals == 0)
-                        logger.Warn($"Could not create decal {decal.ID}");
+                        logger.Warn(
+                            $"Could not create decal {decal.ID} at {decal.Origin} (material {decal.Material.Basename})");
                 }
+
+                logger.Info("Processing overlays");
+                var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
+                    converter.Vmf.Solids.SelectMany(_ => _.Sides).ToImmutableDictionary(_ => _.ID, _ => _));
+                overlaysVis.Visit(data);
+
+                foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
 
                 logger.Info("Building export scene");
 
@@ -134,8 +136,13 @@ namespace yavc
                     {
                         var origin = entity.Origin;
                         var rotation = entity.Rotation;
+                        var color = entity.Color.Split(' ');
+                        if (color.Length < 3)
+                            throw new Exception();
+
+                        color = color.Take(3).ToArray();
                         f.WriteLine(
-                            $"{entity.Model}:{entity.Skin} {entity.Color} {origin.X:F} {origin.Y:F} {origin.Z:F} {rotation.Z:F} {rotation.X:F} {rotation.Y:F}");
+                            $"{entity.Model.Replace(' ', '_')}:{entity.Skin} {string.Join(" ", color)} {origin.X:F} {origin.Y:F} {origin.Z:F} {rotation.Z:F} {rotation.X:F} {rotation.Y:F}");
                     }
                 }
             }

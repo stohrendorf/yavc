@@ -31,6 +31,7 @@ namespace geometry.materials
         public readonly TextureTransform BaseTextureTransform;
         public readonly TextureTransform BlendMaskTransform;
         public readonly TextureTransform BumpMapTransform;
+        public readonly string? FlowMap;
         public readonly string? NormalMap;
         public readonly string? NormalMap2;
 
@@ -71,6 +72,7 @@ namespace geometry.materials
             Type = rootChild.Typename;
             BaseTexture = findTexture(rootChild.GetOptionalValue("$basetexture"));
             BaseTexture2 = findTexture(rootChild.GetOptionalValue("$basetexture2"));
+            FlowMap = findTexture(rootChild.GetOptionalValue("$flowmap"));
             NormalMap = findTexture(rootChild.GetOptionalValue("$normalmap") ?? rootChild.GetOptionalValue("$bumpmap"));
             NormalMap2 =
                 findTexture(rootChild.GetOptionalValue("$normalmap2") ?? rootChild.GetOptionalValue("$bumpmap2"));
@@ -80,9 +82,10 @@ namespace geometry.materials
             BumpMapTransform = new TextureTransform(rootChild.GetOptionalValue("$bumpmaptransform"));
             BlendMaskTransform = new TextureTransform(rootChild.GetOptionalValue("$blendmasktransform"));
 
-            if ((BaseTexture ?? NormalMap) == null)
-                throw new Exception($"Material {subPath} contains neither $basetexture nor $normalmap");
-            VTF = VTFCache.Get(Path.Join(root, BaseTexture ?? NormalMap));
+            var refTexture = FlowMap ?? BaseTexture ?? NormalMap;
+            if (refTexture == null)
+                throw new Exception($"Material {subPath} contains no reference texture");
+            VTF = VTFCache.Get(Path.Join(root, refTexture));
         }
 
         public string MaterialName

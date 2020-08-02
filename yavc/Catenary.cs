@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using geometry.components;
+using NLog;
 
 namespace yavc
 {
     public static class Catenary
     {
-        private const int MaxIter = 1000;
+        private const int MaxIter = 100;
         private const double VerticalThreshold = 1e-6;
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
         private static IEnumerable<double> LinSpace(double a, double b, int n)
         {
@@ -35,6 +37,8 @@ namespace yavc
             var aN = r < 3 ? Math.Sqrt(6 * (r - 1)) : Math.Log(2 * r) + Math.Log(Math.Log(2 * r));
             for (var i = 0; i < MaxIter; ++i)
             {
+                if (i == MaxIter - 1)
+                    logger.Warn($"Reached maximum iteration count of {MaxIter} while calculating initial rope values");
                 var xx = r * aN - Math.Sinh(aN);
                 if (Math.Abs(xx / aN) <= 1e-15)
                     break;

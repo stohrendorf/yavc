@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using geometry.components;
 
@@ -7,26 +8,25 @@ namespace geometry.entities
     internal static class DecalComputation
     {
         public const double Eps = 4;
-        private static readonly double deg45 = Math.Sin(45 * Math.PI / 180);
+        private static readonly double sin45Deg = 1.0 / Math.Sqrt(2);
 
-        private static Vector[] ComputeDecalBasis(Vector n)
+        private static (Vector s, Vector t) ComputeDecalBasis(Vector n)
         {
-            Vector[] result = new Vector[2];
-            if (Math.Abs(n.Z) > deg45)
+            if (Math.Abs(n.Z) > sin45Deg)
             {
-                result[1] = Vector.UnitX.Cross(n).Normalized;
-                result[0] = n.Cross(result[1]).Normalized;
+                var t = Vector.UnitX.Cross(n);
+                var s = n.Cross(t);
+                return (s.Normalized, t.Normalized);
             }
             else
             {
-                result[0] = n.Cross(-Vector.UnitZ).Normalized;
-                result[1] = result[0].Cross(n).Normalized;
+                var s = Vector.UnitZ.Cross(n);
+                var t = s.Cross(n);
+                return (s.Normalized, t.Normalized);
             }
-
-            return result;
         }
 
-        private static Vertex ClampToUVEdge(Vertex a, Vertex b, int edge)
+        private static Vertex ClampToUVEdge(Vertex a, Vertex b, Edge edge)
         {
             var dUv = b.UV - a.UV;
             var dCo = b.Co - a.Co;
@@ -34,50 +34,48 @@ namespace geometry.entities
 
             var t = edge switch
             {
-                0 => (a.UV.X - 0) / dUv.X,
-                1 => (a.UV.X - 1) / dUv.X,
-                2 => (a.UV.Y - 0) / dUv.Y,
-                3 => (a.UV.Y - 1) / dUv.Y,
+                Edge.Left => (0 - a.UV.X) / dUv.X,
+                Edge.Right => (1 - a.UV.X) / dUv.X,
+                Edge.Top => (0 - a.UV.Y) / dUv.Y,
+                Edge.Bottom => (1 - a.UV.Y) / dUv.Y,
                 _ => throw new ArgumentException("Invalid edge", nameof(edge))
             };
 
-            return new Vertex(a.Co - dCo * t, a.UV - dUv * t, a.Alpha - dAlpha * t);
+            Debug.Assert(t >= 0 && t <= 1);
+
+            return new Vertex(a.Co + dCo * t, a.UV + dUv * t, a.Alpha + dAlpha * t);
         }
 
-        private static bool IsInsideUV(Vector2 uv, int edge)
+        private static bool IsInsideUVRect(Vector2 uv, Edge edge)
         {
             return edge switch
             {
-                0 => uv.X > 0.0,
-                1 => uv.X < 1.0,
-                2 => uv.Y > 0.0,
-                3 => uv.Y < 1.0,
+                Edge.Left => uv.X >= 0,
+                Edge.Right => uv.X <= 1,
+                Edge.Top => uv.Y >= 0,
+                Edge.Bottom => uv.Y <= 1,
                 _ => throw new ArgumentException("Invalid edge", nameof(edge))
             };
         }
 
-        private static VertexCollection ClampToUVRegion(VertexCollection vertices, int edge)
+        private static VertexCollection ClampToUVRegion(VertexCollection vertices, Edge edge)
         {
             var result = new VertexCollection();
             if (vertices.Count == 0)
                 return result;
 
-            var p0 = vertices[^1];
-            foreach (var p1 in vertices)
+            foreach (var (p0, p1) in vertices.CyclicPairs())
             {
-                if (IsInsideUV(p1.UV, edge))
-                {
-                    if (!IsInsideUV(p0.UV, edge))
-                        result.Add(ClampToUVEdge(p0, p1, edge));
-                    result.Add(p1);
-                }
-                else
-                {
-                    if (IsInsideUV(p0.UV, edge))
-                        result.Add(ClampToUVEdge(p1, p0, edge));
-                }
+                var p0Inside = IsInsideUVRect(p0.UV, edge);
+                var p1Inside = IsInsideUVRect(p1.UV, edge);
+                if (!p0Inside && !p1Inside)
+                    continue;
 
-                p0 = p1;
+                if (p0Inside)
+                    result.Add(p0);
+
+                if (p0Inside != p1Inside)
+                    result.Add(ClampToUVEdge(p0, p1, edge));
             }
 
             return result;
@@ -85,18 +83,17 @@ namespace geometry.entities
 
         internal static Polygon? CreateClippedPoly(Decal decal, Side side)
         {
-            var textureSpaceBasis = ComputeDecalBasis(side.Plane.Normal);
-
-            var u0 = textureSpaceBasis[0].Dot(decal.Origin) - decal.Material.DecalWidth / 2.0;
-            var v0 = textureSpaceBasis[1].Dot(decal.Origin) - decal.Material.DecalHeight / 2.0;
+            var (s, t) = ComputeDecalBasis(side.Plane.Normal);
             var clipped = side.Polygon.Vertices.Select(vert => new Vertex(vert.Co,
-                new Vector2((textureSpaceBasis[0].Dot(vert.Co) - u0) / decal.Material.DecalWidth,
-                    (textureSpaceBasis[1].Dot(vert.Co) - v0) / decal.Material.DecalHeight),
+                new Vector2(
+                    s.Dot(vert.Co - decal.Origin) / decal.Material.DecalWidth + 0.5,
+                    t.Dot(vert.Co - decal.Origin) / decal.Material.DecalHeight + 0.5
+                ),
                 vert.Alpha)).ToVertexCollection();
 
-            for (var i = 0; i < 4; ++i)
+            foreach (var edge in typeof(Edge).GetEnumValues())
             {
-                clipped = ClampToUVRegion(clipped, i);
+                clipped = ClampToUVRegion(clipped, (Edge) edge!);
                 if (clipped.Count == 0) return null;
             }
 
@@ -107,6 +104,14 @@ namespace geometry.entities
                 new Vertex(vert.Co + offset, decal.Material.BaseTextureTransform.Apply(vert.UV), vert.Alpha)))
                 poly.Add(p);
             return poly;
+        }
+
+        private enum Edge
+        {
+            Left,
+            Right,
+            Top,
+            Bottom
         }
     }
 }

@@ -42,9 +42,9 @@ namespace geometry.components
 
         public static bool In(this Vector v, Vector bbMin, Vector bbMax, double eps)
         {
-            return v.X + eps >= bbMin.X && v.X - eps <= bbMax.X &&
-                   v.Y + eps >= bbMin.Y && v.Y - eps <= bbMax.Y &&
-                   v.Z + eps >= bbMin.Z && v.Z - eps <= bbMax.Z;
+            return v.X >= bbMin.X - eps && v.X <= bbMax.X + eps &&
+                   v.Y >= bbMin.Y - eps && v.Y <= bbMax.Y + eps &&
+                   v.Z >= bbMin.Z - eps && v.Z <= bbMax.Z + eps;
         }
 
         public static bool CalcBarycentric(Vector p, Vector a, Vector b, Vector c, out double s, out double t,

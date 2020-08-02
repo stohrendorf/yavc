@@ -33,10 +33,18 @@ namespace yavc.visitors
 
                     var currentChain = new List<Vector>();
                     var pt = start;
+                    var visited = new HashSet<int>();
                     Vector? p0 = null;
                     while (pt.Next != null)
                     {
                         var next = _keyPoints[pt.Next];
+                        if (visited.Contains(next.ID))
+                        {
+                            logger.Warn($"Circular rope detected (containing rope keypoint {pt.ID})");
+                            break;
+                        }
+
+                        visited.Add(next.ID);
 
                         var points = Catenary.Calculate(pt.Origin, next.Origin, pt.AdditionalLength,
                             (pt.Subdivision + 1) * RopeSegmentFactor);
@@ -58,6 +66,8 @@ namespace yavc.visitors
                 }
             }
         }
+
+        public object Count => _starts.Count + _keyPoints.Count;
 
         public override void Visit(Entity entity)
         {

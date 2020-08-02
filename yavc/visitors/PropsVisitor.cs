@@ -36,7 +36,7 @@ namespace yavc.visitors
                     Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
                     Color = entity["rendercolor"],
                     Model = dropExtension(entity["model"].ToLower()),
-                    Skin = StringUtil.ParseInt(entity["skin"])
+                    Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0")
                 });
 
             entity.Accept(this);

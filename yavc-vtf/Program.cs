@@ -117,7 +117,7 @@ namespace yavc_vtf
                         continue;
                     }
 
-                    logger.Info($"({i + 1} of {files.Count}) {vtfPath} -> {tgaPath}");
+                    logger.Info($"({i + 1} of {files.Count}) {images[frame].Format} {vtfPath} -> {tgaPath}");
                     Directory.CreateDirectory(Path.GetDirectoryName(tgaPath));
                     WriteImage(tgaPath, images[frame]);
                 }
