@@ -16,7 +16,7 @@ namespace geometry.materials
     public class VMT : IEquatable<VMT>
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-        private static readonly Dictionary<string, VMT> cache = new Dictionary<string, VMT>();
+        private static readonly Dictionary<string, VMT?> cache = new Dictionary<string, VMT?>();
 
         private static readonly bool isCaseSensitiveFilesystem = CheckCaseSensitiveFilesystem();
 
@@ -150,13 +150,22 @@ namespace geometry.materials
             return path + "." + ext;
         }
 
-        public static VMT GetCached(string root, string vmtPath)
+        public static VMT? GetCached(string root, string vmtPath)
         {
             if (cache.TryGetValue(vmtPath, out var vmt))
                 return vmt;
 
-            vmt = new VMT(root, vmtPath);
-            cache.Add(vmtPath, vmt);
+            try
+            {
+                vmt = new VMT(root, vmtPath);
+            }
+            catch (FileNotFoundException)
+            {
+                logger.Warn($"Could not load material {vmtPath}");
+                cache.Add(vmtPath, null);
+                return null;
+            }
+
             return vmt;
         }
 

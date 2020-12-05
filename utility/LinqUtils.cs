@@ -1,15 +1,16 @@
+using System;
 using System.Collections.Generic;
 
 namespace utility
 {
     public static class LinqUtils
     {
-        public static IEnumerable<(T First, T Second)> Pairs<T>(this IList<T> enumerable)
+        public static T RequireNotNull<T>(this T? elem) where T:class
         {
-            if (enumerable.Count < 2)
-                yield break;
+            if(ReferenceEquals(elem, null))
+                throw new NullReferenceException();
 
-            for (var i = 0; i < enumerable.Count - 1; ++i) yield return (enumerable[i], enumerable[i + 1]);
+            return elem!;
         }
     }
 }

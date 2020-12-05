@@ -26,7 +26,7 @@ namespace yavc.visitors
                 _decals.Add(new Decal(
                     StringUtil.ParseInt(entity["id"]),
                     entity["origin"].ParseVector(),
-                    VMT.GetCached(_root, entity["texture"])
+                    VMT.GetCached(_root, entity["texture"]).RequireNotNull()
                 ));
 
             entity.Accept(this);

@@ -37,7 +37,11 @@ namespace yavc.visitors
                     Vector? p0 = null;
                     while (pt.Next != null)
                     {
-                        var next = _keyPoints[pt.Next];
+                        if (!_keyPoints.TryGetValue(pt.Next, out var next))
+                        {
+                            logger.Warn($"Keypoint {pt.Next} does not exist");
+                            break;
+                        }
                         if (visited.Contains(next.ID))
                         {
                             logger.Warn($"Circular rope detected (containing rope keypoint {pt.ID})");

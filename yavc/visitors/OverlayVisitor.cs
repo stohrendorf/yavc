@@ -5,6 +5,7 @@ using geometry.entities;
 using geometry.materials;
 using geometry.utils;
 using NLog;
+using utility;
 using VMFIO;
 
 namespace yavc.visitors
@@ -45,7 +46,7 @@ namespace yavc.visitors
                     BasisV = entity["BasisV"].ParseVector(),
                     TextureU = new Vector2(entity["StartU"].ParseDouble(), entity["EndU"].ParseDouble()),
                     TextureV = new Vector2(entity["StartV"].ParseDouble(), entity["EndV"].ParseDouble()),
-                    Material = VMT.GetCached(_root, entity["material"]),
+                    Material = VMT.GetCached(_root, entity["material"]).RequireNotNull(),
                     Sides = presentSides.Select(sideId => _sides[sideId]).ToArray(),
                     UVs = new[]
                     {
