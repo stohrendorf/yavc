@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using Assimp;
 using CommandLine;
+using Newtonsoft.Json;
 using NLog;
 using yavc.visitors;
 
@@ -107,8 +107,7 @@ namespace yavc
 
                 foreach (var node in converter.Vmf.Solids
                     .Select(solid => solid.Export(scene, material => material.ToLower().StartsWith("tools/"))).Where(
-                        _ =>
-                            _.HasMeshes))
+                        _ => _.HasMeshes))
                     scene.RootNode.Children.Add(node);
                 logger.Info("Writing DAE");
 
@@ -126,25 +125,39 @@ namespace yavc
 
             if (parsed.Value.Entities != null)
             {
-                logger.Info("Converting VMF entities");
+                logger.Info("Exporting VMF entities");
+
+                var export = new ExportData();
+
                 var propsVisitor = new PropsVisitor();
                 propsVisitor.Visit(data);
 
-                using (var f = File.CreateText(parsed.Value.Entities))
+                foreach (var exportEntity in propsVisitor.Props.Select(_ => new ExportEntity(_)))
                 {
-                    foreach (var entity in propsVisitor.Props)
-                    {
-                        var origin = entity.Origin;
-                        var rotation = entity.Rotation;
-                        var color = entity.Color.Split(' ');
-                        if (color.Length < 3)
-                            throw new Exception();
-
-                        color = color.Take(3).ToArray();
-                        f.WriteLine(
-                            $"{entity.Model.Replace(' ', '_')}:{entity.Skin} {string.Join(" ", color)} {origin.X:F} {origin.Y:F} {origin.Z:F} {rotation.Z:F} {rotation.X:F} {rotation.Y:F}");
-                    }
+                    export.Entities.Add(exportEntity);
                 }
+
+                foreach (var exportInstance in propsVisitor.Instances.Select(_ => new ExportInstance(_)))
+                {
+                    export.Instances.Add(exportInstance);
+                }
+
+                foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(_ => new ExportEnvCubemap(_)))
+                {
+                    export.EnvCubemaps.Add(exportCubemap);
+                }
+
+                var serializer = new JsonSerializer
+                {
+                    NullValueHandling = NullValueHandling.Include,
+#if DEBUG
+                    Formatting = Formatting.Indented
+#endif
+                };
+
+                using var sw = File.CreateText(parsed.Value.Entities);
+                using var jw = new JsonTextWriter(sw);
+                serializer.Serialize(jw, export);
             }
         }
 

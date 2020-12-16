@@ -21,8 +21,7 @@ namespace yavc.visitors
 
         public override void Visit(Entity entity)
         {
-            var classname = entity.Classname;
-            if (classname == "infodecal")
+            if (entity.Classname == "infodecal")
                 _decals.Add(new Decal(
                     StringUtil.ParseInt(entity["id"]),
                     entity["origin"].ParseVector(),

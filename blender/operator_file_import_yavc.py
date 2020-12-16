@@ -5,6 +5,7 @@ from bpy.props import StringProperty
 from bpy.types import Operator
 
 from pathlib import Path
+import json
 
 
 class ImportYAVCEntities(Operator, ImportHelper):
@@ -22,25 +23,70 @@ class ImportYAVCEntities(Operator, ImportHelper):
     )
 
     def execute(self, context):
-        lines = Path(self.filepath).read_text().splitlines()
+        data = json.loads(Path(self.filepath).read_text())
 
         scene = bpy.context.scene
 
-        for line in lines:
-            name, r, g, b, loc_x, loc_y, loc_z, rot_x, rot_y, rot_z = line.split()
+        for entity in data["Entities"]:
+            obj_name: str = entity["Model"]
+            if obj_name.startswith("models/"):
+                obj_name = obj_name.lower()[len("models/"):]
+            obj_name = f"{obj_name.replace(' ', '_')}:{entity['Skin']}"
 
-            o = bpy.data.objects.new(name, None)
-            o.color = [float(r) / 255.0, float(g) / 255.0, float(b) / 255.0, 1.0]
-            o.location = [float(loc_x), float(loc_y), float(loc_z)]
-            o.rotation_euler = [float(rot_x), float(rot_y), float(rot_z)]
+            o = bpy.data.objects.new(obj_name, None)
+            o.color = [x / 255.0 for x in entity["Color"]] + [1.0]
+            o.location = list(entity["Location"])
+            o.rotation_euler = list(entity["Rotation"])
             o.instance_type = "COLLECTION"
+
+            for src, dst in (
+                    ("Model", "model"),
+                    ("Skin", "skin"),
+            ):
+                o[f"yavc:{dst}"] = entity[src]
+
+            scene.collection.objects.link(o)
+
+        for instance in data["Instances"]:
+            obj_name: str = instance["File"]
+            if obj_name.lower().startswith("instances/"):
+                obj_name = obj_name[len("instances/"):]
+            obj_name = obj_name.replace(' ', '_')
+
+            o = bpy.data.objects.new(obj_name, None)
+            o.location = list(instance["Location"])
+            o.rotation_euler = list(instance["Rotation"])
+            o.instance_type = "COLLECTION"
+
+            for src, dst in (
+                    ("File", "filename"),
+            ):
+                o[f"yavc:{dst}"] = instance[src]
+
+            scene.collection.objects.link(o)
+
+        for i, cubemap in enumerate(data["EnvCubemaps"]):
+            lp_name = f"env_cubemap:{i}"
+            lp = bpy.data.lightprobes.new(lp_name, "CUBE")
+            # TODO just some random values here
+            lp.clip_end = 20000
+            lp.influence_distance = 200
+            lp.influence_type = "BOX"
+            o = bpy.data.objects.new(lp_name, lp)
+            o.location = list(cubemap["Location"])
+
+            for src, dst in (
+                    ("Sides", "sides"),
+            ):
+                o[f"yavc:{dst}"] = cubemap[src]
+
             scene.collection.objects.link(o)
 
         return {'FINISHED'}
 
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportYAVCEntities.bl_idname, text="Import YAVC Entities")
+    self.layout.operator(ImportYAVCEntities.bl_idname, text="YAVC Entities")
 
 
 def register():

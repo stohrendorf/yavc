@@ -14,7 +14,7 @@ namespace yavc_vtf
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
-        private static void WriteImage(string filename, Image img)
+        private static void WriteTGA(string filename, Image img)
         {
             var imgData = img.GetBGRA32Data();
             if (imgData == null)
@@ -119,7 +119,7 @@ namespace yavc_vtf
 
                     logger.Info($"({i + 1} of {files.Count}) {images[frame].Format} {vtfPath} -> {tgaPath}");
                     Directory.CreateDirectory(Path.GetDirectoryName(tgaPath));
-                    WriteImage(tgaPath, images[frame]);
+                    WriteTGA(tgaPath, images[frame]);
                 }
             }
         }
