@@ -18,7 +18,7 @@ namespace yavc
             var mat = new Material {Name = material.MaterialName, IsTwoSided = true};
             var texIndex = 0;
 
-            void tryAddTexture(string filePath, TextureType type)
+            void TryAddTexture(string filePath, TextureType type)
             {
                 var texture = new TextureSlot(filePath, type, texIndex++,
                     TextureMapping.FromUV, 0,
@@ -28,11 +28,11 @@ namespace yavc
                     throw new Exception($"Failed to add texture {filePath}");
             }
 
-            if (material.BaseTexture != null) tryAddTexture(material.BaseTexture, TextureType.Diffuse);
+            if (material.BaseTexture != null) TryAddTexture(material.BaseTexture, TextureType.Diffuse);
 
-            if (material.NormalMap != null) tryAddTexture(material.NormalMap, TextureType.Normals);
-            if (material.BaseTexture2 != null) tryAddTexture(material.BaseTexture2, TextureType.Diffuse);
-            if (material.NormalMap2 != null) tryAddTexture(material.NormalMap2, TextureType.Normals);
+            if (material.NormalMap != null) TryAddTexture(material.NormalMap, TextureType.Normals);
+            if (material.BaseTexture2 != null) TryAddTexture(material.BaseTexture2, TextureType.Diffuse);
+            if (material.NormalMap2 != null) TryAddTexture(material.NormalMap2, TextureType.Normals);
 
             if (texIndex == 0)
                 logger.Warn($"Material {material.Basename} has no textures");

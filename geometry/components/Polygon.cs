@@ -51,23 +51,23 @@ namespace geometry.components
 
         public Polygon Cut(Plane split)
         {
-            const double Epsilon = 1e-6;
+            const double epsilon = 1e-6;
 
             var vertices = new List<Vertex>();
 
-            void doSplit(Vertex p1, Vertex p2)
+            void DoSplit(Vertex p1, Vertex p2)
             {
                 var dot1 = split.DistanceTo(p1.Co);
                 var dot2 = split.DistanceTo(p2.Co);
-                if (dot1 <= 0 - Epsilon && dot2 < 0 - Epsilon)
+                if (dot1 <= 0 - epsilon && dot2 < 0 - epsilon)
                     // the edge is fully behind the plane
                     return;
 
-                if (dot1 >= 0 - Epsilon)
+                if (dot1 >= 0 - epsilon)
                     // keep points in front of the plane
                     vertices.Add(p1);
 
-                if (dot1 > 0 - Epsilon && dot2 >= 0 - Epsilon)
+                if (dot1 > 0 - epsilon && dot2 >= 0 - epsilon)
                     // the edge is fully in front of the plane
                     return;
 
@@ -92,7 +92,7 @@ namespace geometry.components
                     p1.Alpha + lambda * (p2.Alpha - p1.Alpha)));
             }
 
-            foreach (var (first, second) in Vertices.CyclicPairs()) doSplit(first, second);
+            foreach (var (first, second) in Vertices.CyclicPairs()) DoSplit(first, second);
 
             var result = new Polygon();
             if (vertices.Count == 0)

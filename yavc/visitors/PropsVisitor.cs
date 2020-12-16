@@ -27,7 +27,7 @@ namespace yavc.visitors
     public class VMFEnvCubemap
     {
         public Vector Origin;
-        public IList<int> Sides;
+        public IList<int> Sides = null!;
     }
 
     public class PropsVisitor : EntityVisitor
@@ -38,7 +38,7 @@ namespace yavc.visitors
 
         public override void Visit(Entity entity)
         {
-            static string dropExtension(string p)
+            static string DropExtension(string p)
             {
                 var dotIdx = p.LastIndexOf('.');
                 return dotIdx < 0 ? p : p.Substring(0, dotIdx);
@@ -52,7 +52,7 @@ namespace yavc.visitors
                     Origin = entity["origin"].ParseVector(),
                     Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
                     Color = entity["rendercolor"],
-                    Model = dropExtension(entity["model"].ToLower()),
+                    Model = DropExtension(entity["model"].ToLower()),
                     Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0")
                 });
             }

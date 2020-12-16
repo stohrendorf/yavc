@@ -89,7 +89,7 @@ namespace geometry.entities
             {
                 var matched = new Polygon();
 
-                bool tryProjectOnTriangle(Vertex overlayVertex, int i0, int i1, int i2)
+                bool TryProjectOnTriangle(Vertex overlayVertex, int i0, int i1, int i2)
                 {
                     var f0 = flatPolygon.Vertices[i0].Co;
                     var f1 = flatPolygon.Vertices[i1].Co;
@@ -124,9 +124,9 @@ namespace geometry.entities
                         continue;
                     }
 
-                    if (tryProjectOnTriangle(overlayVertex, 0, 1, 2))
+                    if (TryProjectOnTriangle(overlayVertex, 0, 1, 2))
                         continue;
-                    if (tryProjectOnTriangle(overlayVertex, 0, 2, 3))
+                    if (TryProjectOnTriangle(overlayVertex, 0, 2, 3))
                         continue;
 
                     break; // if at least one vertex can't be displaced, we're not using the right polygon

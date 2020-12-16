@@ -33,7 +33,7 @@ namespace geometry.entities
                 }
             }
 
-            int addVertex(Vertex v)
+            int AddVertex(Vertex v)
             {
                 var existing = _vertices.Data.Where(x => x.Key.FuzzyEquals(v)).Select(x => (int?) x.Value)
                     .FirstOrDefault();
@@ -48,7 +48,7 @@ namespace geometry.entities
 
                     var polygons = side.Displacement!.Convert(side);
                     foreach (var polygon in polygons)
-                        pi.Add(polygon.Vertices.Select(addVertex).ToList());
+                        pi.Add(polygon.Vertices.Select(AddVertex).ToList());
                 }
             else
                 foreach (var side in sides.Where(_ => _.Material != null))
@@ -57,7 +57,7 @@ namespace geometry.entities
                         pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
 
                     pi.Add(Enumerable.Range(0, side.Polygon.Count)
-                        .Select(fi => addVertex(side.Polygon.Vertices[fi])).ToList());
+                        .Select(fi => AddVertex(side.Polygon.Vertices[fi])).ToList());
                 }
 
             (_bBoxMin, _bBoxMax) = _vertices.Data.Select(kv => kv.Key.Co).GetBBox();

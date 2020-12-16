@@ -52,14 +52,14 @@ namespace yavc
             var b = dx / 2 - a * Math.Atanh(dy / length);
             var c = dy / 2 - length / (2 * Math.Tanh(aN));
 
-            double f(double x)
+            double F(double x)
             {
                 var result = a * Math.Cosh((x - b) / a) + c;
                 Debug.Assert(!double.IsNaN(result), $"x={x} aN={aN} a={a} b={b} c={c} dx={dx} dy={dy}");
                 return result;
             }
 
-            return LinSpace(0, 1, subdivisions).Select(x => new Vector2(x, f(x * dx)));
+            return LinSpace(0, 1, subdivisions).Select(x => new Vector2(x, F(x * dx)));
         }
 
         public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double additionalLength, int subdivisions)

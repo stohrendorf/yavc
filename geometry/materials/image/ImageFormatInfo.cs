@@ -418,9 +418,9 @@ namespace geometry.materials.image
 
         private static void TransformFp16(IList<ushort> shorts, int offset, float logAverageLuminance)
         {
-            const float Fp16HdrKey = 4.0f;
-            const float Fp16HdrShift = 0.0f;
-            const float Fp16HdrGamma = 2.25f;
+            const float fp16HdrKey = 4.0f;
+            const float fp16HdrShift = 0.0f;
+            const float fp16HdrGamma = 2.25f;
 
             float sR = shorts[offset + 0], sG = shorts[offset + 1], sB = shorts[offset + 2];
 
@@ -431,16 +431,16 @@ namespace geometry.materials.image
 
             var sTemp = sY;
 
-            sTemp = Fp16HdrKey * sTemp / logAverageLuminance;
+            sTemp = fp16HdrKey * sTemp / logAverageLuminance;
             sTemp /= 1.0f + sTemp;
             sTemp /= sY;
 
-            shorts[offset + 0] = clamp(Math.Pow((sY + 1.403f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
-            shorts[offset + 1] = clamp(Math.Pow((sY - 0.344f * sU - 0.714f * sV) * sTemp + Fp16HdrShift, Fp16HdrGamma) *
+            shorts[offset + 0] = Clamp(Math.Pow((sY + 1.403f * sV) * sTemp + fp16HdrShift, fp16HdrGamma) * 65535.0f);
+            shorts[offset + 1] = Clamp(Math.Pow((sY - 0.344f * sU - 0.714f * sV) * sTemp + fp16HdrShift, fp16HdrGamma) *
                                        65535.0f);
-            shorts[offset + 2] = clamp(Math.Pow((sY + 1.770f * sU) * sTemp + Fp16HdrShift, Fp16HdrGamma) * 65535.0f);
+            shorts[offset + 2] = Clamp(Math.Pow((sY + 1.770f * sU) * sTemp + fp16HdrShift, fp16HdrGamma) * 65535.0f);
 
-            static ushort clamp(double sValue)
+            static ushort Clamp(double sValue)
             {
                 if (sValue < ushort.MinValue) return ushort.MinValue;
                 if (sValue > ushort.MaxValue) return ushort.MaxValue;

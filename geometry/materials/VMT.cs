@@ -51,7 +51,7 @@ namespace geometry.materials
             subPath = subPath.Replace('\\', '/').ToLower();
             Basename = subPath;
 
-            string? findTexture(string? p)
+            string? FindTexture(string? p)
             {
                 if (p == null)
                     return null;
@@ -70,12 +70,12 @@ namespace geometry.materials
             Debug.Assert(e.Children.Count == 1);
             var rootChild = e.Children[0];
             Type = rootChild.Typename;
-            BaseTexture = findTexture(rootChild.GetOptionalValue("$basetexture"));
-            BaseTexture2 = findTexture(rootChild.GetOptionalValue("$basetexture2"));
-            FlowMap = findTexture(rootChild.GetOptionalValue("$flowmap"));
-            NormalMap = findTexture(rootChild.GetOptionalValue("$normalmap") ?? rootChild.GetOptionalValue("$bumpmap"));
+            BaseTexture = FindTexture(rootChild.GetOptionalValue("$basetexture"));
+            BaseTexture2 = FindTexture(rootChild.GetOptionalValue("$basetexture2"));
+            FlowMap = FindTexture(rootChild.GetOptionalValue("$flowmap"));
+            NormalMap = FindTexture(rootChild.GetOptionalValue("$normalmap") ?? rootChild.GetOptionalValue("$bumpmap"));
             NormalMap2 =
-                findTexture(rootChild.GetOptionalValue("$normalmap2") ?? rootChild.GetOptionalValue("$bumpmap2"));
+                FindTexture(rootChild.GetOptionalValue("$normalmap2") ?? rootChild.GetOptionalValue("$bumpmap2"));
             _decalScale = StringUtil.ParseDouble(rootChild.GetOptionalValue("$decalscale") ?? "0.25");
             BaseTextureTransform = new TextureTransform(rootChild.GetOptionalValue("$basetexturetransform"));
             BaseTexture2Transform = new TextureTransform(rootChild.GetOptionalValue("$texture2transform"));
