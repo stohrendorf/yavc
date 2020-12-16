@@ -1,62 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Text;
 using CommandLine;
 using geometry.materials.image;
 using NLog;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
+using VTFImage = geometry.materials.image.Image;
 
 namespace yavc_vtf
 {
     internal static class Program
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-
-        private static void WriteTGA(string filename, Image img)
-        {
-            var imgData = img.GetBGRA32Data();
-            if (imgData == null)
-            {
-                logger.Warn($"Could not write {filename}, no image data");
-                return;
-            }
-
-            var f = new BinaryWriter(File.Create(filename));
-            // header:
-            f.Write((byte) 0); // no image id
-            f.Write((byte) 0); // no palette
-            f.Write((byte) 2); // BGR uncompressed
-            // palette spec:
-            f.Write((ushort) 0); // palette start
-            f.Write((ushort) 0); // palette length
-            f.Write((byte) 0); // palette bpp
-            // image spec:
-            f.Write((ushort) 0); // x0
-            f.Write((ushort) 0); // y0
-            f.Write((ushort) img.Width);
-            f.Write((ushort) img.Height);
-            f.Write((byte) 32); // bpp
-            f.Write((byte) 8); // descriptor (8 bit alpha)
-            // no id
-            // no palette
-
-            Debug.Assert(f.BaseStream.Position == 18);
-
-            for (var i = 0; i < imgData.Length; i += 4)
-            {
-                f.Write(imgData[i + 0]);
-                f.Write(imgData[i + 1]);
-                f.Write(imgData[i + 2]);
-                f.Write(imgData[i + 3]);
-            }
-
-            // footer
-            f.Write((uint) 0); // extension area
-            f.Write((uint) 0); // dev directory
-            foreach (var b in Encoding.ASCII.GetBytes("TRUEVISION-XFILE.\0")) f.Write((byte) b);
-        }
 
         private static IList<string> CollectVTFFiles(string basePath)
         {
@@ -86,8 +45,7 @@ namespace yavc_vtf
 
         private static void Main(string[] args)
         {
-            var parsed = Parser.Default.ParseArguments<Options>(args) as Parsed<Options>;
-            if (parsed == null)
+            if (!(Parser.Default.ParseArguments<Options>(args) is Parsed<Options> parsed))
                 return;
 
             LogManager.ReconfigExistingLoggers();
@@ -106,20 +64,27 @@ namespace yavc_vtf
 
                 for (var frame = 0; frame < images.Count; frame++)
                 {
-                    var tgaPath = Path.Join(parsed.Value.Out, Path.GetRelativePath(parsed.Value.In, vtfPath));
-                    tgaPath = Path.Join(Path.GetDirectoryName(tgaPath),
-                        Path.GetFileNameWithoutExtension(tgaPath) +
-                        (images.Count == 1 ? ".tga" : $"-frame{frame}.tga"));
+                    var pngPath = Path.Join(parsed.Value.Out, Path.GetRelativePath(parsed.Value.In, vtfPath));
+                    pngPath = Path.Join(Path.GetDirectoryName(pngPath),
+                        Path.GetFileNameWithoutExtension(pngPath) +
+                        (images.Count == 1 ? ".png" : $"-frame{frame}.png"));
 
-                    if (File.Exists(tgaPath))
+                    if (File.Exists(pngPath))
                     {
-                        logger.Info($"Skipping (already exists): {tgaPath}");
+                        logger.Info($"Skipping (already exists): {pngPath}");
                         continue;
                     }
 
-                    logger.Info($"({i + 1} of {files.Count}) {images[frame].Format} {vtfPath} -> {tgaPath}");
-                    Directory.CreateDirectory(Path.GetDirectoryName(tgaPath));
-                    WriteTGA(tgaPath, images[frame]);
+                    logger.Info($"({i + 1} of {files.Count}) {images[frame].Format} {vtfPath} -> {pngPath}");
+                    Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+                    var img = images[frame];
+                    if (img.FormatInfo == null)
+                        throw new NullReferenceException();
+                    if (img.FormatInfo.AlphaBitsPerPixel > 0)
+                        Image.LoadPixelData<Bgra32>(img.GetBGRA32Data(), img.Width, img.Height).SaveAsPng(pngPath);
+                    else
+                        Image.LoadPixelData<Bgra32>(img.GetBGRA32Data(), img.Width, img.Height).CloneAs<Rgb24>()
+                            .SaveAsPng(pngPath);
                 }
             }
         }

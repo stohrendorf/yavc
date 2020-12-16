@@ -10,6 +10,8 @@ namespace geometry.materials.image
         /// </summary>
         public ImageFormat Format { get; set; }
 
+        public ImageFormatInfo? FormatInfo => ImageFormatInfo.FromFormat(Format);
+
         /// <summary>
         ///     The width of the image, in pixels
         /// </summary>
