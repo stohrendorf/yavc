@@ -14,12 +14,11 @@ namespace geometry.materials.image
 
         public readonly int Width;
 
-        public VTFFile(string filename) : this(new BinaryReader(File.Open(filename, FileMode.Open)))
-        {
-        }
 
-        public VTFFile(BinaryReader reader)
+        public VTFFile(string filename)
         {
+            using var reader = new BinaryReader(File.Open(filename, FileMode.Open));
+            
             var header = Encoding.ASCII.GetString(reader.ReadBytes(3));
             if (header != VTFHeaderID)
                 throw new Exception("Invalid VTF header. Expected '" + VTFHeaderID + "', got '" + header + "'.");

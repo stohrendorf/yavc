@@ -8,11 +8,11 @@ namespace VMFIO
     public static class Parser
     {
         private static readonly Regex kvPattern =
-            new Regex(@"^(?<keyq>""?)(?<key>[^""]+)\k<keyq>\s+(?<valueq>""?)(?<value>.*)\k<valueq>$",
+            new Regex(@"^(?<keyq>""?)(?<key>[^""]+)\k<keyq>(\s*""(?<value>.*)""|\s+(?<value>.+))(\s*//.*)?$",
                 RegexOptions.Compiled);
 
         private static readonly Regex
-            typenamePattern = new Regex(@"^(?<q>""?)(?<name>.+)\k<q>$", RegexOptions.Compiled);
+            typenamePattern = new Regex(@"^(?<q>""?)(?<name>[^""]+)\k<q>(\s*//.*)?$", RegexOptions.Compiled);
 
         private static Entity ReadEntity(string typename, LineEnumerator lineEnumerator)
         {

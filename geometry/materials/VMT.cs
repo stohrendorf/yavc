@@ -34,6 +34,7 @@ namespace geometry.materials
         public readonly string? FlowMap;
         public readonly string? NormalMap;
         public readonly string? NormalMap2;
+        public readonly bool SsBump;
 
         public readonly string Type;
         public readonly VTFFile? VTF;
@@ -46,7 +47,7 @@ namespace geometry.materials
             VTF = null;
         }
 
-        private VMT(string root, string subPath)
+        public VMT(string root, string subPath, bool ignoreMissingVTF = false)
         {
             subPath = subPath.Replace('\\', '/').ToLower();
             Basename = subPath;
@@ -58,7 +59,7 @@ namespace geometry.materials
 
                 var resolved = FindSubPath(root, EnsureExtension(p, "vtf"));
                 if (resolved != null)
-                    return resolved.Substring(root.Length);
+                    return Path.GetRelativePath(root, resolved);
 
                 logger.Warn($"Texture file {p} in material {subPath} not found");
                 return null;
@@ -76,6 +77,7 @@ namespace geometry.materials
             NormalMap = FindTexture(rootChild.GetOptionalValue("$normalmap") ?? rootChild.GetOptionalValue("$bumpmap"));
             NormalMap2 =
                 FindTexture(rootChild.GetOptionalValue("$normalmap2") ?? rootChild.GetOptionalValue("$bumpmap2"));
+            SsBump = int.Parse(rootChild.GetOptionalValue("$ssbump") ?? "0") != 0;
             _decalScale = StringUtil.ParseDouble(rootChild.GetOptionalValue("$decalscale") ?? "0.25");
             BaseTextureTransform = new TextureTransform(rootChild.GetOptionalValue("$basetexturetransform"));
             BaseTexture2Transform = new TextureTransform(rootChild.GetOptionalValue("$texture2transform"));
@@ -83,9 +85,19 @@ namespace geometry.materials
             BlendMaskTransform = new TextureTransform(rootChild.GetOptionalValue("$blendmasktransform"));
 
             var refTexture = FlowMap ?? BaseTexture ?? NormalMap;
-            if (refTexture == null)
+            if (refTexture == null && !ignoreMissingVTF)
                 throw new Exception($"Material {subPath} contains no reference texture");
-            VTF = VTFCache.Get(Path.Join(root, refTexture));
+            try
+            {
+                if(refTexture != null)
+                    VTF = VTFCache.Get(Path.Join(root, refTexture));
+            }
+            catch (FileNotFoundException) when (ignoreMissingVTF)
+            {
+            }
+            catch (DirectoryNotFoundException) when (ignoreMissingVTF)
+            {
+            }
         }
 
         public string MaterialName
