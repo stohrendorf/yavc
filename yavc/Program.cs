@@ -25,7 +25,7 @@ namespace yavc
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             logger.Info("Reading VMF");
-            var data = VMFIO.Parser.Parse(parsed!.Value.VMF);
+            var data = VMFIO.Parser.ParseFile(parsed!.Value.VMF);
 
             if (parsed.Value.DAE != null)
             {
@@ -37,7 +37,7 @@ namespace yavc
 
                 var ropeVis = new RopeVisitor();
                 ropeVis.Visit(data);
-                logger.Info($"Calculating {ropeVis.Count} Ropes");
+                logger.Info($"Connecting and calculating {ropeVis.Count} rope keypoints");
 
                 var scene = new Scene {RootNode = new Node(Path.GetFileName(parsed.Value.VMF))};
 

@@ -67,7 +67,7 @@ namespace geometry.materials
 
             _absolutePath = FindSubPath(root, EnsureExtension(subPath, "vmt")) ??
                             throw new ArgumentException($"Material {subPath} not found");
-            var e = Parser.Parse(_absolutePath);
+            var e = Parser.ParseFile(_absolutePath);
             Debug.Assert(e.Children.Count == 1);
             var rootChild = e.Children[0];
             Type = rootChild.Typename;
@@ -173,7 +173,7 @@ namespace geometry.materials
             }
             catch (FileNotFoundException)
             {
-                logger.Warn($"Could not load material {vmtPath}");
+                logger.Warn($"Could not find material {vmtPath}");
                 cache.Add(vmtPath, null);
                 return null;
             }
