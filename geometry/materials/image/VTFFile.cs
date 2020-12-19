@@ -15,7 +15,7 @@ namespace geometry.materials.image
         public readonly int Width;
 
 
-        public VTFFile(string filename)
+        public VTFFile(string filename, bool onlyHeaders = false)
         {
             using var reader = new BinaryReader(File.Open(filename, FileMode.Open));
             
@@ -143,7 +143,7 @@ namespace geometry.materials.image
                     Frame = frame,
                     Face = face,
                     Slice = slice,
-                    Data = reader.ReadBytes(size)
+                    Data = onlyHeaders ? null : reader.ReadBytes(size)
                 });
             }
         }

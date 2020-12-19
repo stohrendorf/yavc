@@ -90,7 +90,7 @@ namespace geometry.materials
             try
             {
                 if(refTexture != null)
-                    VTF = VTFCache.Get(Path.Join(root, refTexture));
+                    VTF = VTFInfoCache.Get(Path.Join(root, refTexture));
             }
             catch (FileNotFoundException) when (ignoreMissingVTF)
             {
