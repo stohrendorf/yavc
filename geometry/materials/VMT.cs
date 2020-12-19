@@ -111,10 +111,10 @@ namespace geometry.materials
         }
 
         public double DecalWidth => Width * _decalScale;
-        public double Width => VTF?.Width ?? 0;
+        public double Width => VTF?.Width ?? 1;
 
         public double DecalHeight => Height * _decalScale;
-        public double Height => VTF?.Height ?? 0;
+        public double Height => VTF?.Height ?? 1;
 
         public bool IsBlending => BaseTexture2 != null;
 

@@ -34,9 +34,9 @@ namespace geometry.entities
                 return new Vector2(0.0, 0.0);
 
             var u = (vec.Dot(_uAxis.ScaledAxis) + _uAxis.Shift) / Material.Width;
-            Debug.Assert(!double.IsNaN(u));
+            Debug.Assert(double.IsFinite(u));
             var v = (vec.Dot(_vAxis.ScaledAxis) + _vAxis.Shift) / Material.Height;
-            Debug.Assert(!double.IsNaN(v));
+            Debug.Assert(double.IsFinite(v));
 
             var uv = new Vector2(u, v);
             return transform?.Apply(uv) ?? uv;

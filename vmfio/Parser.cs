@@ -9,27 +9,15 @@ namespace VMFIO
 {
     public static class Parser
     {
-        public interface IToken
-        {
-        }
-
-        public class TokenString : IToken
+        private class Token
         {
             public readonly string Value;
+            public readonly bool Quoted;
 
-            public TokenString(string value)
+            public Token(string value, bool quoted)
             {
                 Value = value;
-            }
-        }
-
-        public class TokenOperator : IToken
-        {
-            public readonly char Value;
-
-            public TokenOperator(char value)
-            {
-                Value = value;
+                Quoted = quoted;
             }
         }
 
@@ -41,7 +29,7 @@ namespace VMFIO
 
         private static readonly Parser<char> whitespaceOrLineComments =
             Parse.WhiteSpace
-                .Or(lineComment)
+                .XOr(lineComment)
                 .Many()
                 .Return(' ')
                 .Named("whitespace or comment");
@@ -57,66 +45,65 @@ namespace VMFIO
         private static readonly Parser<char> sChar =
             Parse.AnyChar.Except(Parse.Chars("\\\"\r\n")).Or(escapeSequence);
 
-        private static readonly Parser<TokenString> sCharSequence =
-            from content in sChar.Many().Named("string literal").Text()
-            select new TokenString(content);
+        private static readonly Parser<string> sCharSequence =
+            sChar.Many().Named("string content").Text();
 
-        private static readonly Parser<TokenString> stringLiteralSingle =
+        private static readonly Parser<Token> quotedStringLiteralSingle =
             from start in Parse.Char('"')
             from content in sCharSequence
             from end in Parse.Char('"')
             from ws in whitespaceOrLineComments
-            select content;
+            select new Token(content, true);
 
-        private static readonly Parser<TokenString> stringLiteralMultiTail =
+        private static readonly Parser<Token> quotedStringLiteralMultiTail =
             from start in Parse.Char('+')
-            from content in stringLiteralSingle
+            from content in quotedStringLiteralSingle
             select content;
 
-        private static readonly Parser<IToken> stringLiteral =
-            from head in stringLiteralSingle
-            from tail in stringLiteralMultiTail.Many()
-            select new TokenString(string.Concat(Enumerable.Repeat(head.Value, 1).Concat(tail.Select(_ => _.Value))));
+        private static readonly Parser<Token> quotedStringLiteral =
+            from head in quotedStringLiteralSingle
+            from tail in quotedStringLiteralMultiTail.Many()
+            select new Token(string.Concat(Enumerable.Repeat(head.Value, 1).Concat(tail.Select(_ => _.Value))), true);
 
-        private static readonly Parser<TokenOperator> @operator =
+        private static readonly Parser<Token> @operator =
             from chr in Parse.Chars("@,!+&*$.=:[](){}\\").Named("operator")
-            select new TokenOperator(chr);
+            select new Token(chr.ToString(), false);
 
-        private static readonly Parser<TokenString> integer =
+        private static readonly Parser<Token> integer =
             from minus in Parse.Char('-').Optional()
             from digits in Parse.Digit.AtLeastOnce().Named("integer digits").Text()
             from valid in Parse.Letter.Or(Parse.Char('_')).Not()
-            select new TokenString(minus.IsDefined ? $"-{digits}" : digits);
+            select new Token(minus.IsDefined ? $"-{digits}" : digits, false);
 
-        private static readonly Parser<TokenString> floatingPoint =
+        private static readonly Parser<Token> floatingPoint =
             from minus in Parse.Char('-').Optional()
             from whole in Parse.Digit.AtLeastOnce().Text().Optional()
             from dot in Parse.Char('.')
             from fract in Parse.Digit.AtLeastOnce().Named("fractional digits").Text()
-            from valid in Parse.Letter.Or(Parse.Char('_')).Not()
-            select new TokenString(minus.IsDefined
+            from valid in Parse.Letter.XOr(Parse.Char('_')).Not()
+            select new Token(minus.IsDefined
                 ? $"-{whole.GetOrElse("")}.{fract}"
-                : $"{whole.GetOrElse("")}.{fract}");
+                : $"{whole.GetOrElse("")}.{fract}", false);
 
-        private static readonly Parser<TokenString> number =
+        private static readonly Parser<Token> number =
             floatingPoint.Or(integer).Named("number");
 
-        private static readonly Parser<IToken> identifier = (
-            from first in Parse.Letter.Or(Parse.Chars("_$"))
+        private static readonly Parser<Token> identifier = (
+            from first in Parse.Letter.XOr(Parse.Chars("_$"))
             from tail in Parse.AnyChar.Except(Parse.WhiteSpace).Many().Text()
-            select new TokenString(first + tail)
+            select new Token(first + tail, false)
         ).Named("identifier");
 
-        private static readonly Parser<IToken> token =
+        private static readonly Parser<Token> token =
             from ws in whitespaceOrLineComments.Optional()
             from token in
-                stringLiteral
-                    .Or(identifier)
-                    .Or(number)
-                    .Or(@operator)
+                quotedStringLiteral
+                    .XOr(identifier)
+                    .XOr(number)
+                    .XOr(@operator)
             select token;
 
-        private static readonly Parser<IEnumerable<IToken>> grammar = (
+        private static readonly Parser<IEnumerable<Token>> grammar = (
             from tokens in token.Many()
             from ws in whitespaceOrLineComments.Optional()
             select tokens
@@ -126,19 +113,8 @@ namespace VMFIO
         public static void TestIdentifier()
         {
             var parsed = identifier.End().Parse("water");
-            Assert.That(parsed, Is.TypeOf<TokenString>());
-            Assert.That(((TokenString) parsed).Value, Is.EqualTo("water"));
-            Assert.Throws<ParseException>(() => identifier.End().Parse("_some123Identifier**"));
-        }
-
-        [Test]
-        public static void TestInteger()
-        {
-            var parsed = integer.End().Parse("123");
-            Assert.That(parsed.Value, Is.EqualTo("123"));
-            Assert.Throws<ParseException>(() => integer.End().Parse("123_"));
-            parsed = (from i in integer from o in @operator select i).End().Parse("123*");
-            Assert.That(parsed.Value, Is.EqualTo("123"));
+            Assert.That(parsed.Value, Is.EqualTo("water"));
+            Assert.That(parsed.Quoted, Is.False);
         }
 
         [Test]
@@ -153,70 +129,71 @@ namespace VMFIO
         [Test]
         public static void TestStringLiteral()
         {
-            var parsed = stringLiteral.End().Parse("\"abc 123...\"\n  ");
-            Assert.That(parsed, Is.TypeOf<TokenString>());
-            Assert.That(((TokenString) parsed).Value, Is.EqualTo("abc 123..."));
+            var parsed = quotedStringLiteral.End().Parse("\"abc 123...\"\n  ");
+            Assert.That(parsed.Value, Is.EqualTo("abc 123..."));
+            Assert.That(parsed.Quoted, Is.True);
 
-            parsed = stringLiteral.End().Parse("\"abc\"\n  +\"\\n123\\\"\\a\"");
-            Assert.That(parsed, Is.TypeOf<TokenString>());
-            Assert.That(((TokenString) parsed).Value, Is.EqualTo("abc\n123\"a"));
+            parsed = quotedStringLiteral.End().Parse("\"abc\"\n  +\"\\n123\\\"\\a\"");
+            Assert.That(parsed.Value, Is.EqualTo("abc\n123\"a"));
+            Assert.That(parsed.Quoted, Is.True);
         }
 
         [Test]
         public static void TestComplex()
         {
             token.End().Parse("water");
-            grammar.Parse("water{}");
+            var parsed = grammar.Parse("water{}").ToList();
+            Assert.That(parsed.Count, Is.EqualTo(1));
+            Assert.That(parsed[0].Value, Is.EqualTo("water{}"));
+            
+            parsed = grammar.Parse("water {}").ToList();
+            Assert.That(parsed.Count, Is.EqualTo(3));
+            Assert.That(parsed[0].Value, Is.EqualTo("water"));
+            Assert.That(parsed[1].Value, Is.EqualTo("{"));
+            Assert.That(parsed[2].Value, Is.EqualTo("}"));
+
+            parsed = grammar.Parse("hello world { }").ToList();
+            Assert.That(parsed.Count, Is.EqualTo(4));
         }
 
-        private static T? Consume<T>(this IEnumerator<IToken> tokens) where T : class, IToken
+        private static Token? Consume(this IEnumerator<Token> tokens)
         {
-            tokens.MoveNext();
-            var result = tokens.Current;
-            if (result == null)
-                return null;
-
-            if (!(result is T casted))
-                throw new Exception();
-
-            return casted;
+            return !tokens.MoveNext() ? null : tokens.Current;
         }
 
-        private static T ConsumeRequired<T>(this IEnumerator<IToken> tokens) where T : class, IToken
+        private static Token ConsumeRequired(this IEnumerator<Token> tokens)
         {
-            var result = tokens.Consume<T>();
+            var result = tokens.Consume();
             if (result == null)
                 throw new NullReferenceException();
             return result;
         }
 
-        private static Entity ReadEntity(string typename, IEnumerator<IToken> tokens)
+        private static Entity ReadEntity(string typename, IEnumerator<Token> tokens)
         {
             var kvs = new List<KeyValue>();
             var children = new List<Entity>();
             while (true)
             {
-                var first = tokens.ConsumeRequired<IToken>();
-
-                switch (first)
+                var first = tokens.ConsumeRequired();
+                if (first.Value == "}")
                 {
-                    case TokenOperator {Value: '}'}:
-                        return new Entity(typename, kvs, children);
-                    case TokenOperator firstOp:
-                        throw new Exception($"Invalid operator {firstOp.Value}");
+                    if (first.Quoted)
+                        throw new Exception("Quoted '}' found");
+                    return new Entity(typename, kvs, children);
                 }
 
-                var next = tokens.ConsumeRequired<IToken>();
+                var next = tokens.ConsumeRequired();
 
-                if (next is TokenOperator op)
+                if (next.Value == "{")
                 {
-                    if (op.Value != '{')
-                        throw new Exception();
-                    children.Add(ReadEntity(((TokenString) first).Value, tokens));
+                    if (next.Quoted)
+                        throw new Exception("Quoted '{' found");
+                    children.Add(ReadEntity(first.Value, tokens));
                 }
                 else
                 {
-                    kvs.Add(new KeyValue(((TokenString) first).Value, ((TokenString) next).Value));
+                    kvs.Add(new KeyValue(first.Value, next.Value));
                 }
             }
         }
@@ -229,11 +206,11 @@ namespace VMFIO
                 using var tokens = grammar.Parse(File.ReadAllText(filename)).GetEnumerator();
                 while (true)
                 {
-                    var typename = tokens.Consume<TokenString>();
+                    var typename = tokens.Consume();
                     if (typename == null)
                         break;
-                    var open = tokens.ConsumeRequired<TokenOperator>();
-                    if (open.Value != '{')
+                    var open = tokens.ConsumeRequired();
+                    if (open.Value != "{" || open.Quoted)
                         throw new Exception();
                     result.Add(ReadEntity(typename.Value, tokens));
                 }

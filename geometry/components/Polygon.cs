@@ -81,7 +81,7 @@ namespace geometry.components
 
                 var d = p2.Co - p1.Co;
                 var lambda = -dot1 / split.Normal.Dot(d);
-                if (double.IsNaN(lambda))
+                if (!double.IsFinite(lambda))
                     return;
 
                 // as both points are now on opposite sides of the plane, the intersection point must be on the edge

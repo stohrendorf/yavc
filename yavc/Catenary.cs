@@ -43,7 +43,7 @@ namespace yavc
                 if (Math.Abs(xx / aN) <= 1e-15)
                     break;
 
-                if (double.IsInfinity(aN) || double.IsNaN(aN))
+                if (!double.IsFinite(aN))
                     throw new ArithmeticException("aN calculation gave NaN");
                 aN += xx / (Math.Cosh(aN) - r);
             }
@@ -55,7 +55,7 @@ namespace yavc
             double F(double x)
             {
                 var result = a * Math.Cosh((x - b) / a) + c;
-                Debug.Assert(!double.IsNaN(result), $"x={x} aN={aN} a={a} b={b} c={c} dx={dx} dy={dy}");
+                Debug.Assert(double.IsFinite(result), $"x={x} aN={aN} a={a} b={b} c={c} dx={dx} dy={dy}");
                 return result;
             }
 
