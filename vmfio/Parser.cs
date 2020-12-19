@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Sprache;
+using Pidgin;
+using static Pidgin.Parser;
+using static Pidgin.Parser<char>;
 
 namespace VMFIO
 {
@@ -21,139 +23,141 @@ namespace VMFIO
             }
         }
 
-        private static readonly Parser<char> lineComment =
-            Parse.String("//")
-                .Then(_ => Parse.AnyChar.Until(Parse.LineTerminator))
-                .Return('/')
-                .Named("line comment");
+        private static readonly Parser<char, Unit> lineComment =
+            String("//")
+                .Then(_ => Any.SkipUntil(
+                    OneOf(
+                        End,
+                        EndOfLine.IgnoreResult()
+                    )
+                ));
 
-        private static readonly Parser<char> whitespaceOrLineComments =
-            Parse.WhiteSpace
-                .XOr(lineComment)
-                .Many()
-                .Return(' ')
-                .Named("whitespace or comment");
+        private static readonly Parser<char, Unit> whitespaceOrLineComment =
+            OneOf(
+                    Whitespace.IgnoreResult(),
+                    lineComment
+                )
+                .SkipAtLeastOnce();
 
-        private static readonly Parser<char> escapeSequence =
-            from _ in Parse.Char('\\')
-            from chr in Parse.AnyChar
-                .Except(Parse.Char('n'))
-                .Or(Parse.Char('n').Return('\n'))
-                .Named("escape sequence")
-            select chr;
+        private static readonly Parser<char, char> escapeSequence =
+            Char('\\')
+                .Then(
+                    Any.Map(c => c == 'n' ? '\n' : c)
+                );
 
-        private static readonly Parser<char> sChar =
-            Parse.AnyChar.Except(Parse.Chars("\\\"\r\n")).Or(escapeSequence);
+        private static readonly Parser<char, char> quotedStringCharacter =
+            OneOf(
+                AnyCharExcept("\\\"\r\n"),
+                escapeSequence
+            );
 
-        private static readonly Parser<string> sCharSequence =
-            sChar.Many().Named("string content").Text();
-
-        private static readonly Parser<Token> quotedStringLiteralSingle =
-            from start in Parse.Char('"')
-            from content in sCharSequence
-            from end in Parse.Char('"')
-            from ws in whitespaceOrLineComments
+        private static readonly Parser<char, Token> quotedStringSingle =
+            from content in quotedStringCharacter
+                .ManyString()
+                .Between(Char('"'))
+                .Labelled("quoted string")
             select new Token(content, true);
 
-        private static readonly Parser<Token> quotedStringLiteralMultiTail =
-            from start in Parse.Char('+')
-            from content in quotedStringLiteralSingle
-            select content;
+        private static readonly Parser<char, Token> quotedString =
+            quotedStringSingle.Before(whitespaceOrLineComment.Optional())
+                .SeparatedAtLeastOnce(
+                    Char('+').Before(whitespaceOrLineComment.Optional()).Labelled("concatenation operator")
+                )
+                .Labelled("quoted string concatenation")
+                .Map(_ => new Token(string.Concat(_.Select(t => t.Value)), true));
 
-        private static readonly Parser<Token> quotedStringLiteral =
-            from head in quotedStringLiteralSingle
-            from tail in quotedStringLiteralMultiTail.Many()
-            select new Token(string.Concat(Enumerable.Repeat(head.Value, 1).Concat(tail.Select(_ => _.Value))), true);
+        private static readonly Parser<char, Token> unquotedString =
+            from content in Any
+                .AtLeastOnceUntil(
+                    OneOf(
+                        End,
+                        whitespaceOrLineComment
+                    )
+                )
+                .Labelled("unquoted string")
+            select new Token(string.Concat(content), false);
 
-        private static readonly Parser<Token> @operator =
-            from chr in Parse.Chars("@,!+&*$.=:[](){}\\").Named("operator")
-            select new Token(chr.ToString(), false);
+        private static readonly Parser<char, Token> token =
+            from ws1 in whitespaceOrLineComment.SkipMany()
+            from result in OneOf(quotedString, unquotedString)
+            from ws2 in whitespaceOrLineComment.SkipMany()
+            select result;
 
-        private static readonly Parser<Token> integer =
-            from minus in Parse.Char('-').Optional()
-            from digits in Parse.Digit.AtLeastOnce().Named("integer digits").Text()
-            from valid in Parse.Letter.Or(Parse.Char('_')).Not()
-            select new Token(minus.IsDefined ? $"-{digits}" : digits, false);
-
-        private static readonly Parser<Token> floatingPoint =
-            from minus in Parse.Char('-').Optional()
-            from whole in Parse.Digit.AtLeastOnce().Text().Optional()
-            from dot in Parse.Char('.')
-            from fract in Parse.Digit.AtLeastOnce().Named("fractional digits").Text()
-            from valid in Parse.Letter.XOr(Parse.Char('_')).Not()
-            select new Token(minus.IsDefined
-                ? $"-{whole.GetOrElse("")}.{fract}"
-                : $"{whole.GetOrElse("")}.{fract}", false);
-
-        private static readonly Parser<Token> number =
-            floatingPoint.Or(integer).Named("number");
-
-        private static readonly Parser<Token> identifier = (
-            from first in Parse.Letter.XOr(Parse.Chars("_$"))
-            from tail in Parse.AnyChar.Except(Parse.WhiteSpace).Many().Text()
-            select new Token(first + tail, false)
-        ).Named("identifier");
-
-        private static readonly Parser<Token> token =
-            from ws in whitespaceOrLineComments.Optional()
-            from token in
-                quotedStringLiteral
-                    .XOr(identifier)
-                    .XOr(number)
-                    .XOr(@operator)
-            select token;
-
-        private static readonly Parser<IEnumerable<Token>> grammar = (
-            from tokens in token.Many()
-            from ws in whitespaceOrLineComments.Optional()
-            select tokens
-        ).End();
+        private static readonly Parser<char, IEnumerable<Token>> grammar =
+            token.Many().Before(End);
 
         [Test]
-        public static void TestIdentifier()
+        public static void TestWhitespaceComments()
         {
-            var parsed = identifier.End().Parse("water");
-            Assert.That(parsed.Value, Is.EqualTo("water"));
-            Assert.That(parsed.Quoted, Is.False);
+            Assert.That(whitespaceOrLineComment.Optional().Before(End).Parse("").Success, Is.True);
+            Assert.That(whitespaceOrLineComment.Before(End).Parse("  \t \n\t").Success, Is.True);
+            Assert.That(whitespaceOrLineComment.Before(End).Parse("  \t // comment123...\n   ").Success, Is.True);
+            Assert.That(whitespaceOrLineComment.Before(End).Parse("// comment123...").Success, Is.True);
+            Assert.That(whitespaceOrLineComment.Before(End).Parse("// comment123...").Success, Is.True);
         }
 
         [Test]
-        public static void TestWhitespace()
+        public static void TestQuotedStrings()
         {
-            whitespaceOrLineComments.End().Parse("");
-            whitespaceOrLineComments.End().Parse("  \t \n\t");
-            whitespaceOrLineComments.End().Parse("  \t // comment123...\n   ");
-            whitespaceOrLineComments.End().Parse("// comment123...");
+            var parsed = quotedString.Before(End).Parse("\"abc 123...\"");
+            Assert.That(parsed.Success, Is.True);
+            Assert.That(parsed.Value.Value, Is.EqualTo("abc 123..."));
+            Assert.That(parsed.Value.Quoted, Is.True);
+
+            parsed = quotedString.Before(End).Parse("\"abc\"\n  +\"\\n123\\\"\\a\"");
+            Assert.That(parsed.Success, Is.True);
+            Assert.That(parsed.Value.Value, Is.EqualTo("abc\n123\"a"));
+            Assert.That(parsed.Value.Quoted, Is.True);
         }
 
         [Test]
-        public static void TestStringLiteral()
+        public static void TestUnquotedStrings()
         {
-            var parsed = quotedStringLiteral.End().Parse("\"abc 123...\"\n  ");
-            Assert.That(parsed.Value, Is.EqualTo("abc 123..."));
-            Assert.That(parsed.Quoted, Is.True);
+            var parsed = unquotedString.Before(End).Parse("abc");
+            Assert.That(parsed.Success, Is.True);
+            Assert.That(parsed.Value.Value, Is.EqualTo("abc"));
+            Assert.That(parsed.Value.Quoted, Is.False);
 
-            parsed = quotedStringLiteral.End().Parse("\"abc\"\n  +\"\\n123\\\"\\a\"");
-            Assert.That(parsed.Value, Is.EqualTo("abc\n123\"a"));
-            Assert.That(parsed.Quoted, Is.True);
+            parsed = unquotedString.Before(End).Parse("abc def");
+            Assert.That(parsed.Success, Is.False);
         }
 
         [Test]
-        public static void TestComplex()
+        public static void TestGrammar()
         {
-            token.End().Parse("water");
-            var parsed = grammar.Parse("water{}").ToList();
-            Assert.That(parsed.Count, Is.EqualTo(1));
-            Assert.That(parsed[0].Value, Is.EqualTo("water{}"));
-            
-            parsed = grammar.Parse("water {}").ToList();
-            Assert.That(parsed.Count, Is.EqualTo(3));
-            Assert.That(parsed[0].Value, Is.EqualTo("water"));
-            Assert.That(parsed[1].Value, Is.EqualTo("{"));
-            Assert.That(parsed[2].Value, Is.EqualTo("}"));
+            var parsed = grammar.Parse("water{}");
+            Assert.That(parsed.Success, Is.True);
+            var data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(1));
+            Assert.That(data[0].Value, Is.EqualTo("water{}"));
 
-            parsed = grammar.Parse("hello world { }").ToList();
-            Assert.That(parsed.Count, Is.EqualTo(4));
+            parsed = grammar.Parse("water{}");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(1));
+
+            parsed = grammar.Parse("water {}");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data[0].Value, Is.EqualTo("water"));
+            Assert.That(data[1].Value, Is.EqualTo("{}"));
+
+            parsed = grammar.Parse("hello world { }");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(4));
+            Assert.That(data[0].Value, Is.EqualTo("hello"));
+            Assert.That(data[1].Value, Is.EqualTo("world"));
+            Assert.That(data[2].Value, Is.EqualTo("{"));
+            Assert.That(data[3].Value, Is.EqualTo("}"));
+
+            parsed = grammar.Parse("\"abc\" \"def\"");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data[0].Value, Is.EqualTo("abc"));
+            Assert.That(data[1].Value, Is.EqualTo("def"));
         }
 
         private static Token? Consume(this IEnumerator<Token> tokens)
@@ -203,7 +207,16 @@ namespace VMFIO
             var result = new List<Entity>();
             try
             {
-                using var tokens = grammar.Parse(File.ReadAllText(filename)).GetEnumerator();
+                Result<char, IEnumerable<Token>> parsed;
+                using (var f = File.OpenText(filename))
+                    parsed = grammar.Parse(f);
+
+                if (!parsed.Success)
+                {
+                    throw new IOException($"Failed to parse {filename}: {parsed.Error!}");
+                }
+
+                using var tokens = parsed.Value.GetEnumerator();
                 while (true)
                 {
                     var typename = tokens.Consume();
@@ -214,6 +227,10 @@ namespace VMFIO
                         throw new Exception();
                     result.Add(ReadEntity(typename.Value, tokens));
                 }
+            }
+            catch (IOException)
+            {
+                throw;
             }
             catch (Exception e)
             {
