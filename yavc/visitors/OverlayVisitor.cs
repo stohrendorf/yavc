@@ -38,23 +38,31 @@ namespace yavc.visitors
                         logger.Warn($"Overlay {entity["id"]} references side {side}, which does not exist");
                     else
                         presentSides.Add(side);
-                var o = new Overlay
+                var vmt = VMT.GetCached(_root, entity["material"]);
+                if (vmt == null)
                 {
-                    BasisNormal = entity["BasisNormal"].ParseVector(),
-                    BasisOrigin = entity["BasisOrigin"].ParseVector(),
-                    BasisU = entity["BasisU"].ParseVector(),
-                    BasisV = entity["BasisV"].ParseVector(),
-                    TextureU = new Vector2(entity["StartU"].ParseDouble(), entity["EndU"].ParseDouble()),
-                    TextureV = new Vector2(entity["StartV"].ParseDouble(), entity["EndV"].ParseDouble()),
-                    Material = VMT.GetCached(_root, entity["material"]).RequireNotNull(),
-                    Sides = presentSides.Select(sideId => _sides[sideId]).ToArray(),
-                    UVs = new[]
+                    logger.Warn($"Material {entity["material"]} in info_overlay {entity["id"]} not found");
+                }
+                else
+                {
+                    var o = new Overlay
                     {
-                        entity["uv0"].ParseVector().AsVector2(), entity["uv1"].ParseVector().AsVector2(),
-                        entity["uv2"].ParseVector().AsVector2(), entity["uv3"].ParseVector().AsVector2()
-                    }
-                };
-                _overlays.Add(o);
+                        BasisNormal = entity["BasisNormal"].ParseVector(),
+                        BasisOrigin = entity["BasisOrigin"].ParseVector(),
+                        BasisU = entity["BasisU"].ParseVector(),
+                        BasisV = entity["BasisV"].ParseVector(),
+                        TextureU = new Vector2(entity["StartU"].ParseDouble(), entity["EndU"].ParseDouble()),
+                        TextureV = new Vector2(entity["StartV"].ParseDouble(), entity["EndV"].ParseDouble()),
+                        Material = vmt,
+                        Sides = presentSides.Select(sideId => _sides[sideId]).ToArray(),
+                        UVs = new[]
+                        {
+                            entity["uv0"].ParseVector().AsVector2(), entity["uv1"].ParseVector().AsVector2(),
+                            entity["uv2"].ParseVector().AsVector2(), entity["uv3"].ParseVector().AsVector2()
+                        }
+                    };
+                    _overlays.Add(o);
+                }
             }
 
             entity.Accept(this);
