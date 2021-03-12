@@ -37,9 +37,9 @@ namespace yavc.visitors
                     Vector? p0 = null;
                     while (pt.Next != null)
                     {
-                        if (!_keyPoints.TryGetValue(pt.Next, out var next))
+                        if(!_keyPoints.TryGetValue(pt.Next, out var next))
                         {
-                            logger.Warn($"Keypoint {pt.Next} does not exist");
+                            logger.Warn($"Rope keypoint {pt.Next} not found");
                             break;
                         }
                         if (visited.Contains(next.ID))

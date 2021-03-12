@@ -85,7 +85,7 @@ namespace geometry.components
                     return;
 
                 // as both points are now on opposite sides of the plane, the intersection point must be on the edge
-                if (lambda < 0 - 1e-6 || lambda > 1 + 1e-6)
+                if (lambda < 0 - 1e-2 || lambda > 1 + 1e-2)
                     throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
 
                 vertices.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV),

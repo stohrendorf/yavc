@@ -28,7 +28,7 @@ namespace yavc.visitors
         public override void Visit(Entity entity)
         {
             var classname = entity.Classname;
-            if (classname == "info_overlay")
+            if (classname == "info_overlay" && entity["sides"] != "")
             {
                 var sides = entity["sides"].Split(' ').Select(_ => _.ParseInt()).ToList();
                 var presentSides = new List<int>();

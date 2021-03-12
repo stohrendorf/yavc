@@ -43,7 +43,7 @@ namespace yavc.visitors
             entity.Accept(this);
 
             var material = entity["material"];
-            var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.GetCached(_vtfBasePath, material + ".vmt");
+            var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.TryGetCached(_vtfBasePath, material + ".vmt");
 
             var side = new Side(entity["id"].ParseInt(), plane, vmt, uAxis, vAxis, _displacement);
 

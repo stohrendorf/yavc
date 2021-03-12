@@ -151,7 +151,11 @@ namespace geometry.entities
             for (var j = 0; j < size; j++)
             {
                 var normal = Normals[i][j] * Distances[i][j];
-                var offset = Offsets[i][j] + OffsetNormals[i][j];
+                Vector offset;
+                if (Offsets[i].Count == 0 || OffsetNormals[i].Count == 0)
+                    offset = Vector.Zero;
+                else
+                    offset = Offsets[i][j] + OffsetNormals[i][j];
 
                 vertices.Co[i * size + j] += side.Plane.Normal * Elevation + normal + offset;
             }

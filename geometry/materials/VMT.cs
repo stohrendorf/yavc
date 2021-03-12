@@ -66,7 +66,7 @@ namespace geometry.materials
             }
 
             _absolutePath = FindSubPath(root, EnsureExtension(subPath, "vmt")) ??
-                            throw new ArgumentException($"Material {subPath} not found");
+                            throw new FileNotFoundException($"Material {subPath} not found");
             var e = Parser.ParseFile(_absolutePath);
             Debug.Assert(e.Children.Count == 1);
             var rootChild = e.Children[0];
@@ -86,7 +86,7 @@ namespace geometry.materials
 
             var refTexture = FlowMap ?? BaseTexture ?? NormalMap;
             if (refTexture == null && !ignoreMissingVTF)
-                throw new Exception($"Material {subPath} contains no reference texture");
+                throw new FileNotFoundException($"Material {subPath} contains no reference texture");
             try
             {
                 if(refTexture != null)
@@ -160,6 +160,18 @@ namespace geometry.materials
                 return path;
 
             return path + "." + ext;
+        }
+
+        public static VMT? TryGetCached(string root, string vmtPath)
+        {
+            try
+            {
+                return GetCached(root, vmtPath);
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         public static VMT? GetCached(string root, string vmtPath)
