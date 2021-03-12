@@ -24,7 +24,7 @@ namespace VMFIO
         }
 
         private static readonly Parser<char, Unit> lineComment =
-            String("//")
+            Try(String("//"))
                 .Then(_ => Any.SkipUntil(
                     OneOf(
                         End,
@@ -120,6 +120,12 @@ namespace VMFIO
 
             parsed = unquotedString.Before(End).Parse("abc def");
             Assert.That(parsed.Success, Is.False);
+
+            parsed = unquotedString.Before(End).Parse("some_underscore");
+            Assert.That(parsed.Success, Is.True);
+
+            parsed = unquotedString.Before(End).Parse("some/slash");
+            Assert.That(parsed.Success, Is.True);
         }
 
         [Test]
@@ -158,6 +164,13 @@ namespace VMFIO
             Assert.That(data.Count, Is.EqualTo(2));
             Assert.That(data[0].Value, Is.EqualTo("abc"));
             Assert.That(data[1].Value, Is.EqualTo("def"));
+
+            parsed = grammar.Parse("$normal path/with_underscore");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data[0].Value, Is.EqualTo("$normal"));
+            Assert.That(data[1].Value, Is.EqualTo("path/with_underscore"));
         }
 
         private static Token? Consume(this IEnumerator<Token> tokens)
