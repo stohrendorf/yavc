@@ -189,6 +189,12 @@ namespace geometry.materials
                 cache.Add(vmtPath, null);
                 return null;
             }
+            catch (DirectoryNotFoundException)
+            {
+                logger.Warn($"Could not find material {vmtPath}");
+                cache.Add(vmtPath, null);
+                return null;
+            }
 
             return vmt;
         }

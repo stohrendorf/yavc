@@ -5,7 +5,6 @@ using geometry.entities;
 using geometry.materials;
 using geometry.utils;
 using NLog;
-using utility;
 using VMFIO;
 
 namespace yavc.visitors

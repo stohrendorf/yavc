@@ -144,12 +144,12 @@ namespace yavc_vtf
                 return;
 
             LogManager.ReconfigExistingLoggers();
-            var files = CollectFiles(parsed.Value.In, ".vmt");
+            var vmts = CollectFiles(parsed.Value.In, ".vmt");
 
-            for (var i = 0; i < files.Count; i++)
+            for (var i = 0; i < vmts.Count; i++)
             {
-                var vmtPath = files[i];
-                logger.Info($"({i + 1} of {files.Count}) {vmtPath}");
+                var vmtPath = vmts[i];
+                logger.Info($"({i + 1} of {vmts.Count}) {vmtPath}");
                 var vmt = new VMT(parsed.Value.In, Path.GetRelativePath(parsed.Value.In, vmtPath), true);
 
                 if (vmt.BaseTexture != null)
