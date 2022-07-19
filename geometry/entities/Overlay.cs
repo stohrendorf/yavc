@@ -52,8 +52,7 @@ namespace geometry.entities
                     }
 
                     // clamp the overlay to the side it's projected onto
-                    var cutPoly = side.Polygon.EdgePlanes.Aggregate(overlayPolygon,
-                        (current, edgePlane) => current.Cut(edgePlane));
+                    var cutPoly = side.Polygon.EdgePlanes.Aggregate(overlayPolygon, static (current, edgePlane) => current.Cut(edgePlane));
                     if (side.Displacement == null)
                     {
                         var result = new Polygon();
@@ -72,7 +71,7 @@ namespace geometry.entities
 
                     Debug.Assert(subdividedPolygons.All(poly =>
                         poly.Vertices.Co.All(co => side.Plane.DistanceTo(co) < 1e-6)));
-                    Debug.Assert(subdividedPolygons.All(poly => poly.Count >= 3));
+                    Debug.Assert(subdividedPolygons.All(static poly => poly.Count >= 3));
 
                     // now that we have the overlay polygons corresponding to the subdivided base polygons, we
                     // project each one to its displaced polygon.
@@ -114,7 +113,7 @@ namespace geometry.entities
                     // fast path: most overlay vertices will exactly match with a base vertex
                     var displacedMatches = flatPolygon.Vertices.Zip(displacedPolygon.Vertices)
                         .Where(fv => overlayVertex.Co.Distance(fv.First.Co) < VectorUtils.Epsilon)
-                        .Select(_ => _.Second.Co).ToList();
+                        .Select(static _ => _.Second.Co).ToList();
                     if (displacedMatches.Count > 1)
                         throw new Exception();
 

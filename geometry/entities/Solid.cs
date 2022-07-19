@@ -35,13 +35,13 @@ namespace geometry.entities
 
             int AddVertex(Vertex v)
             {
-                var existing = _vertices.Data.Where(x => x.Key.FuzzyEquals(v)).Select(x => (int?) x.Value)
+                var existing = _vertices.Data.Where(x => x.Key.FuzzyEquals(v)).Select(static x => (int?) x.Value)
                     .FirstOrDefault();
                 return existing ?? _vertices.Add(v);
             }
 
-            if (sides.Any(_ => _.Displacement != null))
-                foreach (var side in sides.Where(_ => _.Displacement != null && _.Material != null))
+            if (sides.Any(static _ => _.Displacement != null))
+                foreach (var side in sides.Where(static _ => _.Displacement != null && _.Material != null))
                 {
                     if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
                         pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
@@ -51,7 +51,7 @@ namespace geometry.entities
                         pi.Add(polygon.Vertices.Select(AddVertex).ToList());
                 }
             else
-                foreach (var side in sides.Where(_ => _.Material != null))
+                foreach (var side in sides.Where(static _ => _.Material != null))
                 {
                     if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
                         pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
@@ -60,7 +60,7 @@ namespace geometry.entities
                         .Select(fi => AddVertex(side.Polygon.Vertices[fi])).ToList());
                 }
 
-            (_bBoxMin, _bBoxMax) = _vertices.Data.Select(kv => kv.Key.Co).GetBBox();
+            (_bBoxMin, _bBoxMax) = _vertices.Data.Select(static kv => kv.Key.Co).GetBBox();
         }
 
         public int ID { get; }

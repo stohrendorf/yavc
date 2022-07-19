@@ -20,10 +20,10 @@ namespace yavc.visitors
         {
             get
             {
-                var allReferences = _keyPoints.Values.Where(_ => _.Next != null).Select(_ => _.Next!)
-                    .Concat(_starts.Where(s => s.Next != null).Select(s => s.Next!)).ToHashSet();
-                var namedStarts = _keyPoints.Where(kv => !allReferences.Contains(kv.Key)).Select(kv => kv.Value);
-                foreach (var start in _starts.Where(_ => _.Next != null).Concat(namedStarts))
+                var allReferences = _keyPoints.Values.Where(static _ => _.Next != null).Select(static _ => _.Next!)
+                    .Concat(_starts.Where(static s => s.Next != null).Select(static s => s.Next!)).ToHashSet();
+                var namedStarts = _keyPoints.Where(kv => !allReferences.Contains(kv.Key)).Select(static kv => kv.Value);
+                foreach (var start in _starts.Where(static _ => _.Next != null).Concat(namedStarts))
                 {
                     if (start.Next == null)
                     {

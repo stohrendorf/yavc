@@ -18,7 +18,7 @@ namespace geometry.materials.image
         public VTFFile(string filename, bool onlyHeaders = false)
         {
             using var reader = new BinaryReader(File.Open(filename, FileMode.Open));
-            
+             
             var header = Encoding.ASCII.GetString(reader.ReadBytes(3));
             if (header != VTFHeaderID)
                 throw new Exception("Invalid VTF header. Expected '" + VTFHeaderID + "', got '" + header + "'.");

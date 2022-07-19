@@ -217,7 +217,7 @@ namespace geometry.materials.image
                 new Mask('g', greenBitsPerPixel, greenIndex),
                 new Mask('b', blueBitsPerPixel, blueIndex),
                 new Mask('a', alphaBitsPerPixel, alphaIndex)
-            }.OrderBy(x => x.Index).ToList();
+            }.OrderBy(static x => x.Index).ToList();
 
             var offset = bitsPerPixel;
             foreach (var m in masks)
@@ -226,7 +226,7 @@ namespace geometry.materials.image
                 m.Offset = offset;
             }
 
-            var dict = masks.ToDictionary(x => x.Component, x => x);
+            var dict = masks.ToDictionary(static x => x.Component, static x => x);
             _masks = new[] {dict['b'], dict['g'], dict['r'], dict['a']};
         }
 

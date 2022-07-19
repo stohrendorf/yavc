@@ -66,11 +66,11 @@ namespace yavc.visitors
             );
             _displacement.Elevation = StringUtil.ParseDouble(entity["elevation"]);
             var n = (1 << _displacement.Power) + 1;
-            _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
-            _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
-            _displacement.Offsets.AddRange(Enumerable.Range(0, n).Select(_ => new List<Vector>()));
-            _displacement.Distances.AddRange(Enumerable.Range(0, n).Select(_ => new List<double>()));
-            _displacement.Alphas.AddRange(Enumerable.Range(0, n).Select(_ => new List<double>()));
+            _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
+            _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
+            _displacement.Offsets.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
+            _displacement.Distances.AddRange(Enumerable.Range(0, n).Select(static _ => new List<double>()));
+            _displacement.Alphas.AddRange(Enumerable.Range(0, n).Select(static _ => new List<double>()));
             entity.Accept(this);
         }
 

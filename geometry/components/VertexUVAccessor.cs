@@ -21,7 +21,7 @@ namespace geometry.components
 
         public IEnumerator<Vector2> GetEnumerator()
         {
-            return _vertices.Select(_ => _.UV).GetEnumerator();
+            return _vertices.Select(static _ => _.UV).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

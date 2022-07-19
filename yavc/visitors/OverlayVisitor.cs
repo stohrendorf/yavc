@@ -29,7 +29,7 @@ namespace yavc.visitors
             var classname = entity.Classname;
             if (classname == "info_overlay" && entity["sides"] != "")
             {
-                var sides = entity["sides"].Split(' ').Select(_ => _.ParseInt()).ToList();
+                var sides = entity["sides"].Split(' ').Select(static _ => _.ParseInt()).ToList();
                 var presentSides = new List<int>();
 
                 foreach (var side in sides)

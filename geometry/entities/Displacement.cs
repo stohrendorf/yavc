@@ -139,10 +139,8 @@ namespace geometry.entities
             var flatVertices = new VertexCollection();
             for (var s = 0; s < size; s++)
             {
-                vertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size),
-                    (co, uv) => new Vertex(co, uv, 1)));
-                flatVertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size),
-                    (co, uv) => new Vertex(co, uv, 1)));
+                vertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size), static (co, uv) => new Vertex(co, uv, 1)));
+                flatVertices.AddRange(steps01[s].StepsTo(steps32[s], size).Zip(uvSteps01[s].StepsTo(uvSteps32[s], size), static (co, uv) => new Vertex(co, uv, 1)));
             }
 
             Debug.Assert(vertices.Count == size * size);

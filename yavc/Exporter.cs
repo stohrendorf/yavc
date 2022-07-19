@@ -15,7 +15,7 @@ namespace yavc
 
             foreach (var (material, polygons) in solid.PolygonIndicesByMaterial)
             {
-                if (!polygons.Any(_ => _.Count > 0))
+                if (!polygons.Any(static _ => _.Count > 0))
                     continue;
 
                 if (materialSkipPredicate(material.Basename))
@@ -27,11 +27,11 @@ namespace yavc
                 };
 
                 mesh.Vertices.AddRange(solid.Vertices
-                    .Select(vertex => vertex.Co.ToAssimp()));
+                    .Select(static vertex => vertex.Co.ToAssimp()));
                 mesh.VertexColorChannels[0]
-                    .AddRange(solid.Vertices.Select(vertex => new Color4D((float) vertex.Alpha / 255, 1, 1, 1)));
+                    .AddRange(solid.Vertices.Select(static vertex => new Color4D((float) vertex.Alpha / 255, 1, 1, 1)));
                 mesh.TextureCoordinateChannels[0].AddRange(solid.Vertices
-                    .Select(vertex => vertex.UV.ToAssimpUV()));
+                    .Select(static vertex => vertex.UV.ToAssimpUV()));
 
                 foreach (var indices in polygons)
                     mesh.Faces.Add(new Face(indices.ToArray()));
@@ -50,8 +50,8 @@ namespace yavc
             {
                 MaterialIndex = scene.FindOrCreateMaterial(material)
             };
-            mesh.Vertices.AddRange(polygon.Vertices.Co.Select(_ => _.ToAssimp()));
-            mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(_ => _.ToAssimpUV()));
+            mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static _ => _.ToAssimp()));
+            mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static _ => _.ToAssimpUV()));
             mesh.Faces.Add(new Face(Enumerable.Range(0, polygon.Vertices.Count).ToArray()));
 
             scene.Meshes.Add(mesh);
@@ -70,8 +70,8 @@ namespace yavc
             foreach (var polygon in overlay.Polygons)
             {
                 var i0 = mesh.Vertices.Count;
-                mesh.Vertices.AddRange(polygon.Vertices.Co.Select(_ => _.ToAssimp()));
-                mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(_ => _.ToAssimpUV()));
+                mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static _ => _.ToAssimp()));
+                mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static _ => _.ToAssimpUV()));
                 mesh.Faces.Add(new Face(Enumerable.Range(i0, polygon.Vertices.Count).ToArray()));
             }
 

@@ -84,7 +84,7 @@ namespace yavc.visitors
                     {
                         Origin = entity["origin"].ParseVector(),
                         Sides = (entity.GetOptionalValue("sides") ?? "").Split(' ')
-                            .Where(_ => !string.IsNullOrWhiteSpace(_)).Select(int.Parse).ToList()
+                            .Where(static _ => !string.IsNullOrWhiteSpace(_)).Select(int.Parse).ToList()
                     });
                     break;
                 case "entity" when entity.Classname == "light":

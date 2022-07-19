@@ -29,9 +29,9 @@ namespace geometry.entities
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
-            Assert.That(cos.Select(_ => _.Co.X).NotInRange(-161, -87.9), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Y).NotInRange(6848, 7020.3862), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Z).NotInRange(-3248, -3024), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.X).NotInRange(-161, -87.9), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Y).NotInRange(6848, 7020.3862), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Z).NotInRange(-3248, -3024), Is.Empty);
         }
 
         [Test]
@@ -53,9 +53,9 @@ namespace geometry.entities
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
-            Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 5), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Y).NotInRange(0, 3), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Z).NotInRange(0, 1), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.X).NotInRange(0, 5), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Y).NotInRange(0, 3), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Z).NotInRange(0, 1), Is.Empty);
         }
 
         [Test]
@@ -74,7 +74,7 @@ namespace geometry.entities
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
-            Assert.That(cos.Select(_ => _.Co.Z).NotInRange(0, 1), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Z).NotInRange(0, 1), Is.Empty);
         }
 
         [Test]
@@ -97,9 +97,9 @@ namespace geometry.entities
             var solid = new Solid(2, sides);
             var cos = solid.Vertices.ToList();
             Assert.That(cos.Count, Is.EqualTo(8));
-            Assert.That(cos.Select(_ => _.Co.X).NotInRange(0, 1), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Y).NotInRange(0, 1), Is.Empty);
-            Assert.That(cos.Select(_ => _.Co.Z).NotInRange(0, 1), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.X).NotInRange(0, 1), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Y).NotInRange(0, 1), Is.Empty);
+            Assert.That(cos.Select(static _ => _.Co.Z).NotInRange(0, 1), Is.Empty);
         }
     }
 }

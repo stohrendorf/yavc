@@ -57,7 +57,7 @@ namespace yavc
                     };
                     var mesh = new Mesh($"rope:{id0}-{scene.Meshes.Count}", PrimitiveType.Line) {MaterialIndex = 0};
 
-                    mesh.Vertices.AddRange(points.Select(v => v.ToAssimp()));
+                    mesh.Vertices.AddRange(points.Select(static v => v.ToAssimp()));
 
                     for (var i = 0; i < points.Count - 1; ++i) mesh.Faces.Add(new Face(new[] {i, i + 1}));
 
@@ -85,7 +85,7 @@ namespace yavc
 
                     var createdDecals = 0;
                     foreach (var poly in candidates.Select(candidate => decal.TryConvert(candidate))
-                        .Where(poly => poly != null))
+                        .Where(static poly => poly != null))
                     {
                         createdDecals++;
                         scene.RootNode.Children.Add(poly!.ExportDecal(decal.Material, scene));
@@ -98,7 +98,7 @@ namespace yavc
 
                 logger.Info("Processing overlays");
                 var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
-                    converter.Vmf.Solids.SelectMany(_ => _.Sides).ToImmutableDictionary(_ => _.ID, _ => _));
+                    converter.Vmf.Solids.SelectMany(static _ => _.Sides).ToImmutableDictionary(static _ => _.ID, static _ => _));
                 overlaysVis.Visit(data);
 
                 foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
@@ -106,8 +106,7 @@ namespace yavc
                 logger.Info("Building export scene");
 
                 foreach (var node in converter.Vmf.Solids
-                    .Select(solid => solid.Export(scene, material => material.ToLower().StartsWith("tools/"))).Where(
-                        _ => _.HasMeshes))
+                    .Select(solid => solid.Export(scene, static material => material.ToLower().StartsWith("tools/"))).Where(static _ => _.HasMeshes))
                     scene.RootNode.Children.Add(node);
                 logger.Info("Writing DAE");
 
@@ -116,8 +115,8 @@ namespace yavc
                     ctx.ExportFile(scene, parsed.Value.DAE, "collada");
                 }
 
-                var totalFaces = scene.Meshes.Sum(_ => _.FaceCount);
-                var totalVertices = scene.Meshes.Sum(_ => _.VertexCount);
+                var totalFaces = scene.Meshes.Sum(static _ => _.FaceCount);
+                var totalVertices = scene.Meshes.Sum(static _ => _.VertexCount);
 
                 logger.Info(
                     $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {decalVis.Decals.Count} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
@@ -132,22 +131,22 @@ namespace yavc
                 var propsVisitor = new PropsVisitor();
                 propsVisitor.Visit(data);
 
-                foreach (var exportEntity in propsVisitor.Props.Select(_ => new ExportEntity(_)))
+                foreach (var exportEntity in propsVisitor.Props.Select(static _ => new ExportEntity(_)))
                 {
                     export.Entities.Add(exportEntity);
                 }
 
-                foreach (var exportInstance in propsVisitor.Instances.Select(_ => new ExportInstance(_)))
+                foreach (var exportInstance in propsVisitor.Instances.Select(static _ => new ExportInstance(_)))
                 {
                     export.Instances.Add(exportInstance);
                 }
 
-                foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(_ => new ExportEnvCubemap(_)))
+                foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(static _ => new ExportEnvCubemap(_)))
                 {
                     export.EnvCubemaps.Add(exportCubemap);
                 }
 
-                foreach (var light in propsVisitor.Lights.Select(_ => new ExportLight(_)))
+                foreach (var light in propsVisitor.Lights.Select(static _ => new ExportLight(_)))
                 {
                     export.Lights.Add(light);
                 }

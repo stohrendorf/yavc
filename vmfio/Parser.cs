@@ -25,7 +25,7 @@ namespace VMFIO
 
         private static readonly Parser<char, Unit> lineComment =
             Try(String("//"))
-                .Then(_ => Any.SkipUntil(
+                .Then(static _ => Any.SkipUntil(
                     OneOf(
                         End,
                         EndOfLine.IgnoreResult()
@@ -42,12 +42,12 @@ namespace VMFIO
         private static readonly Parser<char, string> escapeSequence =
             Char('\\')
                 .Then(
-                    Any.Map(c => c == 'n' ? "\n" : c == '"' ? "\"" : "\\" + c)
+                    Any.Map(static c => c == 'n' ? "\n" : c == '"' ? "\"" : "\\" + c)
                 );
 
         private static readonly Parser<char, string> quotedStringCharacter =
             OneOf(
-                AnyCharExcept("\\\"\r\n").Select(c => c.ToString()),
+                AnyCharExcept("\\\"\r\n").Select(static c => c.ToString()),
                 escapeSequence
             );
 
@@ -64,7 +64,7 @@ namespace VMFIO
                     Char('+').Before(whitespaceOrLineComment.Optional()).Labelled("concatenation operator")
                 )
                 .Labelled("quoted string concatenation")
-                .Map(_ => new Token(string.Concat(_.Select(t => t.Value)), true));
+                .Map(static _ => new Token(string.Concat(_.Select(static t => t.Value)), true));
 
         private static readonly Parser<char, Token> unquotedString =
             from content in Any

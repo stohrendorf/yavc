@@ -92,7 +92,7 @@ namespace yavc_vtf
                 return;
             }
 
-            var images = vtf.Images.Where(_ => _.Mipmap == 0).ToList();
+            var images = vtf.Images.Where(static _ => _.Mipmap == 0).ToList();
             if (images.Count == 0)
             {
                 logger.Warn($"{vtfPath} does not contain any image with mipmap level 0");
