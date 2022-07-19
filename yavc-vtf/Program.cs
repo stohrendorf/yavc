@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using CommandLine;
 using geometry.materials;
 using geometry.materials.image;
@@ -71,7 +72,7 @@ internal static class Program
     return files;
   }
 
-  private static void ConvertVTF(string vtfPath, string materialsDir, string destination,
+  private static async Task ConvertVTF(string vtfPath, string materialsDir, string destination,
     bool convertSsBump = false)
   {
     logger.Info($"Processing {vtfPath}");
@@ -121,23 +122,24 @@ internal static class Program
       if (convertSsBump)
       {
         logger.Info("SSBump conversion");
-        var converted = new Image<Rgba32>(img.Width, img.Height);
-        for (int y = 0; y < img.Height; ++y)
-        for (int x = 0; x < img.Width; ++x)
-          converted[x, y] = SSBumpToNormal(data[x, y]);
-        converted.SaveAsPng(pngPath);
+        data = await Task.Run(() =>
+        {
+          var converted = new Image<Rgba32>(img.Width, img.Height);
+          for (int y = 0; y < img.Height; ++y)
+          for (int x = 0; x < img.Width; ++x)
+            converted[x, y] = SSBumpToNormal(data[x, y]);
+          return converted.CloneAs<Bgra32>();
+        });
       }
+
+      if (img.FormatInfo.AlphaBitsPerPixel > 0)
+        await data.SaveAsPngAsync(pngPath);
       else
-      {
-        if (img.FormatInfo.AlphaBitsPerPixel > 0)
-          data.SaveAsPng(pngPath);
-        else
-          data.CloneAs<Rgb24>().SaveAsPng(pngPath);
-      }
+        await data.CloneAs<Rgb24>().SaveAsPngAsync(pngPath);
     }
   }
 
-  private static void Main(string[] args)
+  private static async Task Main(string[] args)
   {
     if (Parser.Default.ParseArguments<Options>(args) is not Parsed<Options> parsed)
       return;
@@ -152,17 +154,17 @@ internal static class Program
       var vmt = new VMT(parsed.Value.In, Path.GetRelativePath(parsed.Value.In, vmtPath), true);
 
       if (vmt.BaseTexture != null)
-        ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
+        await ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
       if (vmt.BaseTexture2 != null)
-        ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
+        await ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
       if (vmt.NormalMap != null)
-        ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
+        await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
       if (vmt.NormalMap2 != null)
-        ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
+        await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
       if (vmt.NormalMap != null)
-        ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
+        await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
       if (vmt.NormalMap2 != null)
-        ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
+        await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
     }
   }
 
