@@ -89,14 +89,18 @@ namespace geometry.materials
                 throw new FileNotFoundException($"Material {subPath} contains no reference texture");
             try
             {
-                if(refTexture != null)
+                if (refTexture != null)
                     VTF = VTFInfoCache.Get(Path.Join(root, refTexture));
             }
-            catch (FileNotFoundException) when (ignoreMissingVTF)
+            catch (FileNotFoundException ex)
             {
+                logger.Error($"Texture file {ex.FileName} not found");
+                if (!ignoreMissingVTF) throw;
             }
-            catch (DirectoryNotFoundException) when (ignoreMissingVTF)
+            catch (DirectoryNotFoundException)
             {
+                logger.Error($"Texture file directory {Path.Join(root, refTexture)} not found");
+                if (!ignoreMissingVTF) throw;
             }
         }
 
@@ -203,7 +207,7 @@ namespace geometry.materials
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((VMT) obj);
+            return obj.GetType() == GetType() && Equals((VMT)obj);
         }
 
         public override int GetHashCode()
