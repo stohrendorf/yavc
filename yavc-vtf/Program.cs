@@ -26,24 +26,23 @@ internal static class Program
   [SuppressMessage("ReSharper", "InconsistentNaming")]
   private static Rgba32 SSBumpToNormal(Bgra32 p)
   {
-    var R = p.R / 255.0f;
-    var G = p.G / 255.0f;
-    var B = p.B / 255.0f;
+    var rgba = p.ToVector4();
 
-    var N = (baseG.Z * baseR.X - baseR.Z * baseG.X) / (baseG.Y * baseR.X);
-    var P = (G * baseR.X - R * baseG.X) / (baseG.Y * baseR.X);
-    var S = baseB.Z - baseR.Z * baseB.X / baseR.X - N * baseB.Y;
-    var T = (B - P * baseB.Y) / S - (R * baseB.X) / (S * baseR.X);
-    var U = (R - T * baseR.Z) / baseR.X;
+    var M = baseG.Y - baseR.Y * baseG.X / baseR.X;
+    var N = (baseG.Z * baseR.X - baseR.Z * baseG.X) / (M * baseR.X);
+    var P = (rgba.Y * baseR.X - rgba.X * baseG.X) / (M * baseR.X);
+    var Q = baseB.Y - baseR.Y * baseB.X / baseR.X;
+    var S = baseB.Z - baseR.Z * baseB.X / baseR.X - N * Q;
+    var T = (rgba.Z - P * Q) / S - (rgba.X * baseB.X) / (S * baseR.X);
+    var U = (rgba.X - T * baseR.Z) / baseR.X;
 
-    var n = Vector3.Normalize(new Vector3(U, P - T * N, T)) + Vector3.One;
-    n /= 2.0f;
+    Vector3 n;
+    n.X = U - (baseR.Y / baseR.X) * (P - T * N);
+    n.Y = P - T * N;
+    n.Z = T;
+    n = (Vector3.Normalize(n) + Vector3.One) / 2.0f;
 
-    return new Rgba32(
-      checked((byte)Math.Round(n.X * 255)),
-      checked((byte)Math.Round(n.Y * 255)),
-      checked((byte)Math.Round(n.Z * 255)),
-      p.A);
+    return new Rgba32(new Vector4(n, rgba.W));
   }
 
   private static IList<string> CollectFiles(string basePath, string extension)
