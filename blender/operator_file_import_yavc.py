@@ -82,6 +82,15 @@ class ImportYAVCEntities(Operator, ImportHelper):
 
             scene.collection.objects.link(o)
 
+        for i, light in enumerate(data["Lights"]):
+            l_name = f"light:{i}"
+            l = bpy.data.lights.new(l_name, "POINT")
+            l.color = [float(x)/255.0 for x in light["Color"]]
+            l.energy = light["Strength"]
+            o = bpy.data.objects.new(l_name, l)
+            o.location = list(light["Location"])
+            scene.collection.objects.link(o)
+
         return {'FINISHED'}
 
 

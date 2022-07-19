@@ -59,10 +59,25 @@ namespace yavc
         public IList<int> Sides;
     }
 
+    internal class ExportLight
+    {
+        public ExportLight(VMFLight light)
+        {
+            Location = new List<double> {light.Origin.X, light.Origin.Y, light.Origin.Z};
+            Color = new List<double> {light.Color.X, light.Color.Y, light.Color.Z};
+            Strength = light.Strength;
+        }
+
+        public IList<double> Location;
+        public IList<double> Color;
+        public double Strength;
+    }
+
     internal class ExportData
     {
         public readonly IList<ExportEntity> Entities = new List<ExportEntity>();
         public readonly IList<ExportInstance> Instances = new List<ExportInstance>();
         public readonly IList<ExportEnvCubemap> EnvCubemaps = new List<ExportEnvCubemap>();
+        public readonly IList<ExportLight> Lights = new List<ExportLight>();
     }
 }

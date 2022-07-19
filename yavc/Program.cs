@@ -147,6 +147,11 @@ namespace yavc
                     export.EnvCubemaps.Add(exportCubemap);
                 }
 
+                foreach (var light in propsVisitor.Lights.Select(_ => new ExportLight(_)))
+                {
+                    export.Lights.Add(light);
+                }
+
                 var serializer = new JsonSerializer
                 {
                     NullValueHandling = NullValueHandling.Include,
