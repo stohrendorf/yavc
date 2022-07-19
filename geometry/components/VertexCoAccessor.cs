@@ -2,31 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace geometry.components
+namespace geometry.components;
+
+public class VertexCoAccessor : IEnumerable<Vector>
 {
-    public class VertexCoAccessor : IEnumerable<Vector>
-    {
-        private readonly IList<Vertex> _vertices;
+  private readonly IList<Vertex> _vertices;
 
-        public VertexCoAccessor(IList<Vertex> vertices)
-        {
-            _vertices = vertices;
-        }
+  internal VertexCoAccessor(IList<Vertex> vertices)
+  {
+    _vertices = vertices;
+  }
 
-        public Vector this[int i]
-        {
-            get => _vertices[i].Co;
-            set => _vertices[i].Co = value;
-        }
+  internal Vector this[int i]
+  {
+    get => _vertices[i].Co;
+    set => _vertices[i].Co = value;
+  }
 
-        public IEnumerator<Vector> GetEnumerator()
-        {
-            return _vertices.Select(static _ => _.Co).GetEnumerator();
-        }
+  public IEnumerator<Vector> GetEnumerator()
+  {
+    return _vertices.Select(static _ => _.Co).GetEnumerator();
+  }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-    }
+  IEnumerator IEnumerable.GetEnumerator()
+  {
+    return GetEnumerator();
+  }
 }

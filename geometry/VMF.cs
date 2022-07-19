@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using geometry.entities;
 
-namespace geometry
+namespace geometry;
+
+public class VMF
 {
-    public class VMF
-    {
-        public readonly List<Solid> Solids = new List<Solid>();
-    }
+  public readonly List<Solid> Solids = new();
 }

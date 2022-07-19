@@ -1,8 +1,7 @@
-namespace geometry.materials.image
+namespace geometry.materials.image;
+
+public class Resource
 {
-    public class Resource
-    {
-        public ResourceType Type { get; set; }
-        public uint Data { get; set; }
-    }
+  internal ResourceType Type { get; set; }
+  internal uint Data { get; set; }
 }

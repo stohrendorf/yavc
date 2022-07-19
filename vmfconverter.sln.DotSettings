@@ -15,4 +15,6 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=UVWQ/@EntryIndexedValue">UVWQ</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=VMT/@EntryIndexedValue">VMT</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=VTF/@EntryIndexedValue">VTF</s:String>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Bluescreen/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Bluescreen/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Bumpmap/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Cubemaps/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

@@ -1,19 +1,18 @@
-﻿namespace VMFIO
+﻿namespace VMFIO;
+
+internal sealed class KeyValue
 {
-    public sealed class KeyValue
-    {
-        public readonly string Key;
-        public readonly string Value;
+  internal readonly string Key;
+  internal readonly string Value;
 
-        public KeyValue(string key, string value)
-        {
-            Key = key.ToLower();
-            Value = value;
-        }
+  internal KeyValue(string key, string value)
+  {
+    Key = key.ToLower();
+    Value = value;
+  }
 
-        public override string ToString()
-        {
-            return $"{Key} = {Value}";
-        }
-    }
+  public override string ToString()
+  {
+    return $"{Key} = {Value}";
+  }
 }

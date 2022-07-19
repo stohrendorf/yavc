@@ -6,102 +6,94 @@ using geometry.utils;
 using utility;
 using VMFIO;
 
-namespace yavc.visitors
+namespace yavc.visitors;
+
+internal class VMFProp
 {
-    public class VMFProp
+  internal string Color = null!;
+  internal string Model = null!;
+  internal Vector Origin;
+  internal Vector Rotation;
+  internal int Skin;
+}
+
+internal class VMFInstance
+{
+  internal string File = null!;
+  internal Vector Origin;
+  internal Vector Angles;
+}
+
+internal class VMFEnvCubemap
+{
+  internal Vector Origin;
+  internal IList<int> Sides = null!;
+}
+
+internal class VMFLight
+{
+  internal Vector Origin;
+  internal Vector Color;
+  internal double Strength;
+}
+
+internal class PropsVisitor : EntityVisitor
+{
+  public readonly List<VMFProp> Props = new();
+  public readonly List<VMFInstance> Instances = new();
+  public readonly List<VMFEnvCubemap> EnvCubemaps = new();
+  public readonly List<VMFLight> Lights = new();
+
+  public override void Visit(Entity entity)
+  {
+    static string DropExtension(string p)
     {
-        public string Color = null!;
-        public string Model = null!;
-        public Vector Origin;
-        public Vector Rotation;
-        public int Skin;
+      var dotIdx = p.LastIndexOf('.');
+      return dotIdx < 0 ? p : p[..dotIdx];
     }
 
-    public class VMFInstance
+    switch (entity.Typename)
     {
-        public string File = null!;
-        public Vector Origin;
-        public Vector Angles;
-    }
-
-    public class VMFEnvCubemap
-    {
-        public Vector Origin;
-        public IList<int> Sides = null!;
-    }
-
-    public class VMFLight
-    {
-        public Vector Origin;
-        public Vector Color;
-        public double Strength;
-    }
-
-    public class PropsVisitor : EntityVisitor
-    {
-        public readonly List<VMFProp> Props = new List<VMFProp>();
-        public readonly List<VMFInstance> Instances = new List<VMFInstance>();
-        public readonly List<VMFEnvCubemap> EnvCubemaps = new List<VMFEnvCubemap>();
-        public readonly List<VMFLight> Lights = new List<VMFLight>();
-
-        public override void Visit(Entity entity)
+      case "entity" when entity.Classname is "prop_static" or "prop_dynamic" or "prop_physics_override" or "prop_physics_multiplayer" or "prop_dynamic_override" or "prop_detail" or "prop_physics" or "prop_ragdoll":
+        Props.Add(new VMFProp
         {
-            static string DropExtension(string p)
-            {
-                var dotIdx = p.LastIndexOf('.');
-                return dotIdx < 0 ? p : p.Substring(0, dotIdx);
-            }
+          Origin = entity["origin"].ParseVector(),
+          Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
+          Color = entity.GetOptionalValue("rendercolor") ?? "255 255 255",
+          Model = DropExtension(entity["model"].ToLower()),
+          Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0"),
+        });
+        break;
+      case "entity" when entity.Classname == "func_instance":
+        Instances.Add(new VMFInstance
+        {
+          File = entity["file"].RequireNotNull(),
+          Angles = entity["angles"].ParseVector() * Math.PI / 180.0,
+          Origin = entity["origin"].ParseVector(),
+        });
+        break;
+      case "entity" when entity.Classname == "env_cubemap":
+        EnvCubemaps.Add(new VMFEnvCubemap
+        {
+          Origin = entity["origin"].ParseVector(),
+          Sides = (entity.GetOptionalValue("sides") ?? "").Split(' ')
+            .Where(static _ => !string.IsNullOrWhiteSpace(_)).Select(int.Parse).ToList(),
+        });
+        break;
+      case "entity" when entity.Classname == "light":
+      {
+        var cols = entity["_light"].Split(" ").Select(double.Parse).ToArray();
 
-            switch (entity.Typename)
-            {
-                case "entity" when entity.Classname == "prop_static" ||
-                                   entity.Classname == "prop_dynamic" ||
-                                   entity.Classname == "prop_physics_override" ||
-                                   entity.Classname == "prop_physics_multiplayer" ||
-                                   entity.Classname == "prop_dynamic_override" ||
-                                   entity.Classname == "prop_detail" ||
-                                   entity.Classname == "prop_physics" ||
-                                   entity.Classname == "prop_ragdoll":
-                    Props.Add(new VMFProp
-                    {
-                        Origin = entity["origin"].ParseVector(),
-                        Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
-                        Color = entity.GetOptionalValue("rendercolor") ?? "255 255 255",
-                        Model = DropExtension(entity["model"].ToLower()),
-                        Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0")
-                    });
-                    break;
-                case "entity" when entity.Classname == "func_instance":
-                    Instances.Add(new VMFInstance
-                    {
-                        File = entity["file"].RequireNotNull(),
-                        Angles = entity["angles"].ParseVector() * Math.PI / 180.0,
-                        Origin = entity["origin"].ParseVector()
-                    });
-                    break;
-                case "entity" when entity.Classname == "env_cubemap":
-                    EnvCubemaps.Add(new VMFEnvCubemap
-                    {
-                        Origin = entity["origin"].ParseVector(),
-                        Sides = (entity.GetOptionalValue("sides") ?? "").Split(' ')
-                            .Where(static _ => !string.IsNullOrWhiteSpace(_)).Select(int.Parse).ToList()
-                    });
-                    break;
-                case "entity" when entity.Classname == "light":
-                {
-                    var cols = entity["_light"].Split(" ").Select(double.Parse).ToArray();
-
-                    Lights.Add(new VMFLight()
-                    {
-                        Origin = entity["origin"].ParseVector(),
-                        Color = new Vector(cols[0], cols[1], cols[2]),
-                        Strength = cols[3]
-                    });
-                    break;
-                }
-            }
-
-            entity.Accept(this);
-        }
+        Lights.Add(new VMFLight
+        {
+          Origin = entity["origin"].ParseVector(),
+          Color = new Vector(cols[0], cols[1], cols[2]),
+          Strength = cols[3],
+        });
+        break;
+      }
     }
+
+    entity.Accept(this);
+  }
 }

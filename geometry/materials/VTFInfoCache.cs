@@ -1,18 +1,17 @@
 using System.Collections.Generic;
 using geometry.materials.image;
 
-namespace geometry.materials
+namespace geometry.materials;
+
+internal static class VTFInfoCache
 {
-    public static class VTFInfoCache
-    {
-        private static readonly Dictionary<string, VTFFile> cache = new Dictionary<string, VTFFile>();
+  private static readonly Dictionary<string, VTFFile> cache = new();
 
-        public static VTFFile Get(string filename)
-        {
-            if (!cache.TryGetValue(filename, out var file))
-                file = cache[filename] = new VTFFile(filename, true);
+  public static VTFFile Get(string filename)
+  {
+    if (!cache.TryGetValue(filename, out var file))
+      file = cache[filename] = new VTFFile(filename, true);
 
-            return file;
-        }
-    }
+    return file;
+  }
 }
