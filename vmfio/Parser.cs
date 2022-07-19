@@ -39,15 +39,15 @@ namespace VMFIO
                 )
                 .SkipAtLeastOnce();
 
-        private static readonly Parser<char, char> escapeSequence =
+        private static readonly Parser<char, string> escapeSequence =
             Char('\\')
                 .Then(
-                    Any.Map(c => c == 'n' ? '\n' : c)
+                    Any.Map(c => c == 'n' ? "\n" : c == '"' ? "\"" : "\\" + c)
                 );
 
-        private static readonly Parser<char, char> quotedStringCharacter =
+        private static readonly Parser<char, string> quotedStringCharacter =
             OneOf(
-                AnyCharExcept("\\\"\r\n"),
+                AnyCharExcept("\\\"\r\n").Select(c => c.ToString()),
                 escapeSequence
             );
 
@@ -106,7 +106,7 @@ namespace VMFIO
 
             parsed = quotedString.Before(End).Parse("\"abc\"\n  +\"\\n123\\\"\\a\"");
             Assert.That(parsed.Success, Is.True);
-            Assert.That(parsed.Value.Value, Is.EqualTo("abc\n123\"a"));
+            Assert.That(parsed.Value.Value, Is.EqualTo("abc\n123\"\\a"));
             Assert.That(parsed.Value.Quoted, Is.True);
         }
 
@@ -126,6 +126,10 @@ namespace VMFIO
 
             parsed = unquotedString.Before(End).Parse("some/slash");
             Assert.That(parsed.Success, Is.True);
+
+            parsed = unquotedString.Before(End).Parse("some\\backslash");
+            Assert.That(parsed.Success, Is.True);
+            Assert.That(parsed.Value.Value, Is.EqualTo("some\\backslash"));
         }
 
         [Test]
@@ -165,12 +169,19 @@ namespace VMFIO
             Assert.That(data[0].Value, Is.EqualTo("abc"));
             Assert.That(data[1].Value, Is.EqualTo("def"));
 
-            parsed = grammar.Parse("$normal path/with_underscore");
+            parsed = grammar.Parse("$normal path\\with_underscore");
             Assert.That(parsed.Success, Is.True);
             data = parsed.Value.ToList();
             Assert.That(data.Count, Is.EqualTo(2));
             Assert.That(data[0].Value, Is.EqualTo("$normal"));
-            Assert.That(data[1].Value, Is.EqualTo("path/with_underscore"));
+            Assert.That(data[1].Value, Is.EqualTo("path\\with_underscore"));
+
+            parsed = grammar.Parse("$normal \"path\\with_underscore\"");
+            Assert.That(parsed.Success, Is.True);
+            data = parsed.Value.ToList();
+            Assert.That(data.Count, Is.EqualTo(2));
+            Assert.That(data[0].Value, Is.EqualTo("$normal"));
+            Assert.That(data[1].Value, Is.EqualTo("path\\with_underscore"));
         }
 
         private static Token? Consume(this IEnumerator<Token> tokens)
