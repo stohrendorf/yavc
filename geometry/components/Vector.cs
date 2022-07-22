@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace geometry.components;
 
+[DebuggerDisplay("{X} {Y} {Z}")]
 public readonly struct Vector : IEquatable<Vector>
 {
   public readonly double X;
