@@ -12,8 +12,8 @@ public class Side
   internal readonly Displacement? Displacement;
   public readonly int ID;
   internal readonly VMT? Material;
-  internal readonly Plane Plane;
-  internal Polygon Polygon;
+  public readonly Plane Plane;
+  public Polygon Polygon;
 
   public Side(int id, Plane plane, VMT? material, TextureAxis uAxis, TextureAxis vAxis,
     Displacement? displacement)

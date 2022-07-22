@@ -113,7 +113,9 @@ internal static class Program
       }
 
       logger.Info($"{images[frame].Format} {vtfPath} -> {pngPath}");
-      Directory.CreateDirectory(Path.GetDirectoryName(pngPath));
+      Directory.CreateDirectory(Path.GetDirectoryName(pngPath) ??
+                                throw new InvalidOperationException(
+                                  $"Could not extract directory name from {pngPath}"));
       var img = images[frame];
       if (img.FormatInfo == null)
         throw new NullReferenceException();

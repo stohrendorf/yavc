@@ -17,7 +17,7 @@ public readonly struct Vector2 : IEquatable<Vector2>
     Y = y;
   }
 
-  internal static readonly Vector2 Zero = new(0, 0);
+  public static readonly Vector2 Zero = new(0, 0);
   internal static readonly Vector2 One = new(1, 1);
 
   public override bool Equals(object? obj)

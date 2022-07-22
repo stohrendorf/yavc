@@ -1,6 +1,7 @@
+using geometry.utils;
 using NUnit.Framework;
 
-namespace geometry.utils;
+namespace geometry.test.utils;
 
 [TestFixture]
 public static class ParserUtilTest

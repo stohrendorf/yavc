@@ -13,7 +13,7 @@ public class VertexCoAccessor : IEnumerable<Vector>
     _vertices = vertices;
   }
 
-  internal Vector this[int i]
+  public Vector this[int i]
   {
     get => _vertices[i].Co;
     set => _vertices[i].Co = value;

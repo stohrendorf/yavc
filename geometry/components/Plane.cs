@@ -5,10 +5,10 @@ namespace geometry.components;
 
 public readonly struct Plane : IEquatable<Plane>
 {
-  internal readonly Vector Normal;
-  internal readonly double D;
+  public readonly Vector Normal;
+  public readonly double D;
 
-  internal Plane(Vector normal, double d)
+  public Plane(Vector normal, double d)
   {
     Normal = normal;
     D = d;
@@ -16,7 +16,7 @@ public readonly struct Plane : IEquatable<Plane>
 
   internal Vector Origin => -Normal * D;
 
-  internal static Plane CreateFromVertices(Vector origin, Vector p1, Vector p2)
+  public static Plane CreateFromVertices(Vector origin, Vector p1, Vector p2)
   {
     var n = (p1 - origin).Cross(p2 - origin).Normalized;
     var d = -n.Dot(origin);

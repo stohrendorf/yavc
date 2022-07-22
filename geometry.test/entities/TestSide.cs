@@ -1,9 +1,9 @@
 using geometry.components;
+using geometry.entities;
 using NUnit.Framework;
 
-namespace geometry.entities;
+namespace geometry.test.entities;
 
-[TestFixture]
 public static class TestSide
 {
   [Test]

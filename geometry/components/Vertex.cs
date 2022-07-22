@@ -9,7 +9,7 @@ public class Vertex : IEquatable<Vertex>
   public Vector Co;
   public Vector2 UV;
 
-  internal Vertex(Vector co, Vector2 uv, double alpha)
+  public Vertex(Vector co, Vector2 uv, double alpha)
   {
     Co = co;
     UV = uv;

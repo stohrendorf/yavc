@@ -21,10 +21,10 @@ public readonly struct Vector : IEquatable<Vector>
   }
 
   public static Vector Zero => new();
-  internal static Vector One => new(1, 1, 1);
-  internal static Vector UnitX => new(1, 0, 0);
-  internal static Vector UnitY => new(0, 1, 0);
-  internal static Vector UnitZ => new(0, 0, 1);
+  public static Vector One => new(1, 1, 1);
+  public static Vector UnitX => new(1, 0, 0);
+  public static Vector UnitY => new(0, 1, 0);
+  public static Vector UnitZ => new(0, 0, 1);
 
   public override bool Equals(object? obj)
   {

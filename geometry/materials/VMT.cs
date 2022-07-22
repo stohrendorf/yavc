@@ -20,7 +20,7 @@ public class VMT : IEquatable<VMT>
 
   private static readonly bool isCaseSensitiveFilesystem = CheckCaseSensitiveFilesystem();
 
-  internal static readonly VMT Empty = new();
+  public static readonly VMT Empty = new();
   private readonly string _absolutePath;
   private readonly double _decalScale;
   public readonly string Basename;

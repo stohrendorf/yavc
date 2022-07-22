@@ -11,7 +11,7 @@ public class TextureAxis
 
   internal readonly double Shift;
 
-  internal TextureAxis(Vector axis, double shift, double scale)
+  public TextureAxis(Vector axis, double shift, double scale)
   {
     _axis = axis;
     Shift = shift;

@@ -1,13 +1,12 @@
-using System.Linq;
 using geometry.components;
+using geometry.entities;
 using geometry.materials;
 using geometry.utils;
 using NUnit.Framework;
 using utility;
 
-namespace geometry.entities;
+namespace geometry.test.entities;
 
-[TestFixture]
 public static class TestSolid
 {
   [Test]

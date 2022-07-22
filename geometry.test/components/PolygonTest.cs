@@ -1,8 +1,8 @@
+using geometry.components;
 using NUnit.Framework;
 
-namespace geometry.components;
+namespace geometry.test.components;
 
-[TestFixture]
 public static class PolygonTest
 {
   [Test]

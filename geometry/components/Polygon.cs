@@ -10,7 +10,7 @@ public class Polygon
 {
   public readonly VertexCollection Vertices = new();
 
-  internal int Count => Vertices.Count;
+  public int Count => Vertices.Count;
 
   internal IEnumerable<Plane> EdgePlanes
   {
@@ -30,7 +30,7 @@ public class Polygon
     }
   }
 
-  internal void Add(Vertex v)
+  public void Add(Vertex v)
   {
     Vertices.Add(v);
   }
@@ -49,7 +49,7 @@ public class Polygon
     Debug.Assert(a.Count >= 3 || b.Count >= 3);
   }
 
-  internal Polygon Cut(Plane split)
+  public Polygon Cut(Plane split)
   {
     const double epsilon = 1e-6;
 
