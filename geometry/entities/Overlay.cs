@@ -7,7 +7,7 @@ using geometry.materials;
 
 namespace geometry.entities;
 
-public class Overlay
+public sealed class Overlay
 {
   public Vector BasisNormal { get; init; }
   public Vector BasisOrigin { get; init; }
@@ -68,7 +68,8 @@ public class Overlay
         // split the cut polygon at the displacement edges
         var subdividedPolygons = new List<Polygon> { cutPoly };
         subdividedPolygons = side.Displacement.EdgePlanes
-          .Aggregate(subdividedPolygons, static (current, plane) => current.SelectMany(poly => poly.Split(plane)).ToList());
+          .Aggregate(subdividedPolygons,
+            static (current, plane) => current.SelectMany(poly => poly.Split(plane)).ToList());
 
         Debug.Assert(subdividedPolygons.All(poly =>
           poly.Vertices.Co.All(co => side.Plane.DistanceTo(co) < 1e-6)));

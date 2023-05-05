@@ -96,7 +96,7 @@ internal class RopeVisitor : EntityVisitor
     entity.Accept(this);
   }
 
-  private class RopeKeyPoint
+  private sealed class RopeKeyPoint
   {
     public readonly double AdditionalLength;
     public readonly int ID;

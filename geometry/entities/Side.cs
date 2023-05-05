@@ -31,7 +31,9 @@ public class Side
   internal Vector2 CalcUV(Vector vec, VMT.TextureTransform? transform = null)
   {
     if (Material == null)
+    {
       return new Vector2(0.0, 0.0);
+    }
 
     var u = (vec.Dot(_uAxis.ScaledAxis) + _uAxis.Shift) / Material.Width;
     Debug.Assert(double.IsFinite(u));

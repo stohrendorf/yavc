@@ -6,7 +6,7 @@ using System.Linq;
 namespace geometry.materials.image;
 
 // Uses logic from the excellent (LGPL-licensed) VtfLib, courtesy of Neil Jedrzejewski & Ryan Gregg
-public class ImageFormatInfo
+public sealed class ImageFormatInfo
 {
   private static readonly Dictionary<ImageFormat, ImageFormatInfo?> imageFormats =
     new()
@@ -157,6 +157,8 @@ public class ImageFormatInfo
     };
 
   private readonly bool _is16Aligned;
+
+  // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
   private readonly bool _is32Aligned;
 
   private readonly bool _is8Aligned;
@@ -489,7 +491,7 @@ public class ImageFormatInfo
 
   private delegate void TransformPixel(byte[] data, int offset, int count);
 
-  private class Mask
+  private sealed class Mask
   {
     public Mask(char component, int size, int index)
     {

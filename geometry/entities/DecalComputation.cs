@@ -94,9 +94,9 @@ internal static class DecalComputation
       ),
       vert.Alpha)).ToVertexCollection();
 
-    foreach (var edge in typeof(Edge).GetEnumValues())
+    foreach (var edge in typeof(Edge).GetEnumValues().Cast<Edge>())
     {
-      clipped = ClampToUVRegion(clipped, (Edge)edge!);
+      clipped = ClampToUVRegion(clipped, edge);
       if (clipped.Count == 0) return null;
     }
 

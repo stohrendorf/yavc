@@ -55,11 +55,15 @@ public class VMT : IEquatable<VMT>
     string? FindTexture(string? p)
     {
       if (p == null)
+      {
         return null;
+      }
 
       var resolved = FindSubPath(root, EnsureExtension(p, "vtf"));
       if (resolved != null)
+      {
         return Path.GetRelativePath(root, resolved);
+      }
 
       logger.Warn($"Texture file {p} in material {subPath} not found");
       return null;
@@ -86,21 +90,32 @@ public class VMT : IEquatable<VMT>
 
     var refTexture = FlowMap ?? BaseTexture ?? NormalMap;
     if (refTexture == null && !ignoreMissingVTF)
+    {
       throw new FileNotFoundException($"Material {subPath} contains no reference texture");
+    }
+
     try
     {
       if (refTexture != null)
+      {
         VTF = VTFInfoCache.Get(Path.Join(root, refTexture));
+      }
     }
     catch (FileNotFoundException ex)
     {
       logger.Error($"Texture file {ex.FileName} not found");
-      if (!ignoreMissingVTF) throw;
+      if (!ignoreMissingVTF)
+      {
+        throw;
+      }
     }
     catch (DirectoryNotFoundException)
     {
       logger.Error($"Texture file directory {Path.Join(root, refTexture)} not found");
-      if (!ignoreMissingVTF) throw;
+      if (!ignoreMissingVTF)
+      {
+        throw;
+      }
     }
   }
 
@@ -124,14 +139,18 @@ public class VMT : IEquatable<VMT>
 
   public bool Equals(VMT? other)
   {
-    if (ReferenceEquals(null, other)) return false;
+    if (ReferenceEquals(null, other))
+    {
+      return false;
+    }
+
     return ReferenceEquals(this, other) ||
            string.Equals(_absolutePath, other._absolutePath, StringComparison.OrdinalIgnoreCase);
   }
 
   private static bool CheckCaseSensitiveFilesystem()
   {
-    string file = Path.GetTempPath() + "yavc_case_test";
+    var file = Path.GetTempPath() + "yavc_case_test";
     File.CreateText(file).Close();
     var isCaseInsensitive = File.Exists(file.ToUpper());
     File.Delete(file);
@@ -141,7 +160,9 @@ public class VMT : IEquatable<VMT>
   private static string? FindSubPath(string root, string subPath)
   {
     if (!isCaseSensitiveFilesystem)
+    {
       return Path.Join(root, subPath);
+    }
 
     var components = subPath.Replace("\\", "/").TrimEnd('/').Split("/");
     var realPath = root;
@@ -151,7 +172,10 @@ public class VMT : IEquatable<VMT>
       var found = Directory.EnumerateFileSystemEntries(realPath).SingleOrDefault(_ =>
         string.Equals(_, absComponent, StringComparison.CurrentCultureIgnoreCase));
       if (string.IsNullOrEmpty(found))
+      {
         return null;
+      }
+
       realPath = found;
     }
 
@@ -161,7 +185,9 @@ public class VMT : IEquatable<VMT>
   private static string EnsureExtension(string path, string ext)
   {
     if (path.ToLower().EndsWith("." + ext))
+    {
       return path;
+    }
 
     return path + "." + ext;
   }
@@ -181,7 +207,9 @@ public class VMT : IEquatable<VMT>
   public static VMT? GetCached(string root, string vmtPath)
   {
     if (cache.TryGetValue(vmtPath, out var vmt))
+    {
       return vmt;
+    }
 
     try
     {
@@ -205,8 +233,16 @@ public class VMT : IEquatable<VMT>
 
   public override bool Equals(object? obj)
   {
-    if (ReferenceEquals(null, obj)) return false;
-    if (ReferenceEquals(this, obj)) return true;
+    if (ReferenceEquals(null, obj))
+    {
+      return false;
+    }
+
+    if (ReferenceEquals(this, obj))
+    {
+      return true;
+    }
+
     return obj.GetType() == GetType() && Equals((VMT)obj);
   }
 
@@ -243,8 +279,10 @@ public class VMT : IEquatable<VMT>
       {
         var transformMatch = transformRe.Match(transformString);
         if (!transformMatch.Success)
+        {
           throw new ArgumentException($"Invalid texture transform '{transformString}'",
             nameof(transformString));
+        }
 
         Center = transformMatch.Groups["center"].Value.ParseVector2();
         Rotate = transformMatch.Groups["rotate"].Value.ParseDouble() / 90 * Math.PI;
@@ -265,7 +303,9 @@ public class VMT : IEquatable<VMT>
     internal Vector2 Apply(Vector2 uv)
     {
       if (_isIdentity)
+      {
         return uv;
+      }
 
       uv -= Center;
       var c = Math.Cos(Rotate);

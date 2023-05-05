@@ -5,7 +5,7 @@ public class TextureAxis
   private readonly Vector _axis;
 
   /// <summary>
-  ///     World units per texel.
+  ///   World units per texel.
   /// </summary>
   private readonly double _scale;
 

@@ -11,7 +11,9 @@ public class IndexedSet<T> where T : notnull
   public int Add(T key)
   {
     if (_data.TryGetValue(key, out var idx))
+    {
       return idx;
+    }
 
     idx = _data.Count;
     _data.Add(key, idx);
@@ -21,7 +23,10 @@ public class IndexedSet<T> where T : notnull
   public IEnumerable<T> GetOrdered()
   {
     var reversed = new SortedDictionary<int, T>();
-    foreach (var (key, value) in _data) reversed.Add(value, key);
+    foreach (var (key, value) in _data)
+    {
+      reversed.Add(value, key);
+    }
 
     return reversed.Values;
   }

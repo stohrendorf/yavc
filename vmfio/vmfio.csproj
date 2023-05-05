@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NLog" Version="5.0.1" />
-      <PackageReference Include="NLog.Extensions.Logging" Version="5.0.1" />
-      <PackageReference Include="Pidgin" Version="3.2.0" />
+      <PackageReference Include="NLog" Version="5.1.4" />
+      <PackageReference Include="NLog.Extensions.Logging" Version="5.2.3" />
+      <PackageReference Include="Pidgin" Version="3.2.1" />
     </ItemGroup>
 
 </Project>

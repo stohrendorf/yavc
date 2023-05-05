@@ -19,9 +19,9 @@ internal class VMFProp
 
 internal class VMFInstance
 {
+  internal Vector Angles;
   internal string File = null!;
   internal Vector Origin;
-  internal Vector Angles;
 }
 
 internal class VMFEnvCubemap
@@ -32,17 +32,17 @@ internal class VMFEnvCubemap
 
 internal class VMFLight
 {
-  internal Vector Origin;
   internal Vector Color;
+  internal Vector Origin;
   internal double Strength;
 }
 
 internal class PropsVisitor : EntityVisitor
 {
-  public readonly List<VMFProp> Props = new();
-  public readonly List<VMFInstance> Instances = new();
   public readonly List<VMFEnvCubemap> EnvCubemaps = new();
+  public readonly List<VMFInstance> Instances = new();
   public readonly List<VMFLight> Lights = new();
+  public readonly List<VMFProp> Props = new();
 
   public override void Visit(Entity entity)
   {
@@ -54,7 +54,8 @@ internal class PropsVisitor : EntityVisitor
 
     switch (entity.Typename)
     {
-      case "entity" when entity.Classname is "prop_static" or "prop_dynamic" or "prop_physics_override" or "prop_physics_multiplayer" or "prop_dynamic_override" or "prop_detail" or "prop_physics" or "prop_ragdoll":
+      case "entity" when entity.Classname is "prop_static" or "prop_dynamic" or "prop_physics_override"
+        or "prop_physics_multiplayer" or "prop_dynamic_override" or "prop_detail" or "prop_physics" or "prop_ragdoll":
         Props.Add(new VMFProp
         {
           Origin = entity["origin"].ParseVector(),

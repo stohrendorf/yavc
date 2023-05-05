@@ -87,7 +87,10 @@ internal static class DxtFormat
     for (var y = 0; y < height; y += 4)
     for (var x = 0; x < width; x += 4)
     {
-      for (var i = 0; i < 8; i++) a[i] = data[pos++];
+      for (var i = 0; i < 8; i++)
+      {
+        a[i] = data[pos++];
+      }
 
       int c0 = data[pos++];
       c0 |= data[pos++] << 8;
@@ -178,7 +181,10 @@ internal static class DxtFormat
       }
 
       var aIndex = 0L;
-      for (var i = 0; i < 6; i++) aIndex |= (long)data[pos++] << (8 * i);
+      for (var i = 0; i < 6; i++)
+      {
+        aIndex |= (long)data[pos++] << (8 * i);
+      }
 
       int c0 = data[pos++];
       c0 |= data[pos++] << 8;

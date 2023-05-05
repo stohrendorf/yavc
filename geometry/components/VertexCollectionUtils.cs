@@ -7,7 +7,9 @@ internal static class VertexCollectionUtils
   public static IEnumerable<(Vertex a, Vertex b)> CyclicPairs(this VertexCollection vertexCollection)
   {
     if (vertexCollection.Count == 0)
+    {
       yield break;
+    }
 
     var prev = vertexCollection[^1];
     foreach (var element in vertexCollection)

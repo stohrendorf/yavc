@@ -11,7 +11,8 @@ public static class ParserTest
   {
     Assert.That(Parser.WhitespaceOrLineComment.Optional().Before(Parser<char>.End).Parse("").Success, Is.True);
     Assert.That(Parser.WhitespaceOrLineComment.Before(Parser<char>.End).Parse("  \t \n\t").Success, Is.True);
-    Assert.That(Parser.WhitespaceOrLineComment.Before(Parser<char>.End).Parse("  \t // comment123...\n   ").Success, Is.True);
+    Assert.That(Parser.WhitespaceOrLineComment.Before(Parser<char>.End).Parse("  \t // comment123...\n   ").Success,
+      Is.True);
     Assert.That(Parser.WhitespaceOrLineComment.Before(Parser<char>.End).Parse("// comment123...").Success, Is.True);
     Assert.That(Parser.WhitespaceOrLineComment.Before(Parser<char>.End).Parse("// comment123...").Success, Is.True);
   }
@@ -47,9 +48,9 @@ public static class ParserTest
     parsed = Parser.UnquotedString.Before(Parser<char>.End).Parse("some/slash");
     Assert.That(parsed.Success, Is.True);
 
-    parsed = Parser.UnquotedString.Before(Parser<char>.End).Parse("some\\backslash");
+    parsed = Parser.UnquotedString.Before(Parser<char>.End).Parse(@"some\backslash");
     Assert.That(parsed.Success, Is.True);
-    Assert.That(parsed.Value.Value, Is.EqualTo("some\\backslash"));
+    Assert.That(parsed.Value.Value, Is.EqualTo(@"some\backslash"));
   }
 
   [Test]

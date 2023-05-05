@@ -6,7 +6,7 @@ using utility;
 
 namespace geometry.entities;
 
-public class Solid
+public sealed class Solid
 {
   private readonly Vector _bBoxMax;
   private readonly Vector _bBoxMin;

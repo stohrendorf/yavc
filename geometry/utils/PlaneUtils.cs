@@ -41,7 +41,9 @@ internal static class PlaneUtils
     Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DistanceTo(_)) < 1e-3));
 
     for (var i = 0; i < 4; i++)
+    {
       polygon.Vertices.UV[i] = side.CalcUV(polygon.Vertices.Co[i], side.Material?.BaseTextureTransform);
+    }
 
     polygon.Vertices.NormalizeUV();
 

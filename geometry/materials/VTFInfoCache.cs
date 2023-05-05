@@ -10,7 +10,9 @@ internal static class VTFInfoCache
   public static VTFFile Get(string filename)
   {
     if (!cache.TryGetValue(filename, out var file))
+    {
       file = cache[filename] = new VTFFile(filename, true);
+    }
 
     return file;
   }

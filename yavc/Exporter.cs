@@ -16,10 +16,14 @@ internal static class Exporter
     foreach (var (material, polygons) in solid.PolygonIndicesByMaterial)
     {
       if (!polygons.Any(static _ => _.Count > 0))
+      {
         continue;
+      }
 
       if (materialSkipPredicate(material.Basename))
+      {
         continue;
+      }
 
       var mesh = new Mesh($"solid:{solid.ID}-{scene.Meshes.Count}", PrimitiveType.Polygon)
       {
@@ -34,7 +38,9 @@ internal static class Exporter
         .Select(static vertex => vertex.UV.ToAssimpUV()));
 
       foreach (var indices in polygons)
+      {
         mesh.Faces.Add(new Face(indices.ToArray()));
+      }
 
       scene.Meshes.Add(mesh);
       node.MeshIndices.Add(scene.Meshes.Count - 1);
