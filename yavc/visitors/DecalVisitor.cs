@@ -8,7 +8,7 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal class DecalVisitor : EntityVisitor
+internal sealed class DecalVisitor : EntityVisitor
 {
   private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -35,7 +35,7 @@ internal class DecalVisitor : EntityVisitor
       {
         _decals.Add(new Decal(
           StringUtil.ParseInt(entity["id"]),
-          entity["origin"].ParseVector(),
+          entity["origin"].ParseToVector(),
           vmt
         ));
       }

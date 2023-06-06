@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace geometry.components;
 
-public class Vertex : IEquatable<Vertex>
+public sealed class Vertex : IEquatable<Vertex>
 {
   public double Alpha;
   public Vector Co;

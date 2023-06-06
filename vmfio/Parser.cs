@@ -10,21 +10,9 @@ namespace VMFIO;
 
 public static class Parser
 {
-  public class Token
-  {
-    public readonly string Value;
-    public readonly bool Quoted;
-
-    internal Token(string value, bool quoted)
-    {
-      Value = value;
-      Quoted = quoted;
-    }
-  }
-
   private static readonly Parser<char, Unit> lineComment =
     Try(String("//"))
-      .Then(static _ => Any.SkipUntil(
+      .Then(static tokenIgnored => Any.SkipUntil(
         OneOf(
           End,
           EndOfLine.IgnoreResult()
@@ -68,7 +56,7 @@ public static class Parser
         Char('+').Before(WhitespaceOrLineComment.Optional()).Labelled("concatenation operator")
       )
       .Labelled("quoted string concatenation")
-      .Map(static _ => new Token(string.Concat(_.Select(static t => t.Value)), true));
+      .Map(static str => new Token(string.Concat(str.Select(static t => t.Value)), true));
 
   public static readonly Parser<char, Token> UnquotedString =
     from content in Any
@@ -99,7 +87,10 @@ public static class Parser
   {
     var result = tokens.Consume();
     if (result == null)
+    {
       throw new NullReferenceException();
+    }
+
     return result;
   }
 
@@ -113,7 +104,10 @@ public static class Parser
       if (first.Value == "}")
       {
         if (first.Quoted)
+        {
           throw new Exception("Quoted '}' found");
+        }
+
         return new Entity(typename, kvs, children);
       }
 
@@ -122,7 +116,10 @@ public static class Parser
       if (next.Value == "{")
       {
         if (next.Quoted)
+        {
           throw new Exception("Quoted '{' found");
+        }
+
         children.Add(ReadEntity(first.Value, tokens));
       }
       else
@@ -139,7 +136,9 @@ public static class Parser
     {
       Result<char, IEnumerable<Token>> parsed;
       using (var f = File.OpenText(filename))
+      {
         parsed = Grammar.Parse(f);
+      }
 
       if (!parsed.Success)
       {
@@ -151,10 +150,16 @@ public static class Parser
       {
         var typename = tokens.Consume();
         if (typename == null)
+        {
           break;
+        }
+
         var open = tokens.ConsumeRequired();
         if (open.Value != "{" || open.Quoted)
+        {
           throw new Exception();
+        }
+
         result.Add(ReadEntity(typename.Value, tokens));
       }
     }
@@ -168,5 +173,17 @@ public static class Parser
     }
 
     return new Entity("<root>", new List<KeyValue>(), result);
+  }
+
+  public sealed class Token
+  {
+    public readonly bool Quoted;
+    public readonly string Value;
+
+    internal Token(string value, bool quoted)
+    {
+      Value = value;
+      Quoted = quoted;
+    }
   }
 }

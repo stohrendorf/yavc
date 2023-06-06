@@ -4,7 +4,7 @@ using geometry.materials;
 
 namespace geometry.entities;
 
-public class Decal
+public sealed class Decal
 {
   public readonly int ID;
   public readonly VMT Material;

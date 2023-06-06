@@ -8,7 +8,7 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal class RopeVisitor : EntityVisitor
+internal sealed class RopeVisitor : EntityVisitor
 {
   private const int RopeSegmentFactor = 4;
   private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
@@ -20,10 +20,11 @@ internal class RopeVisitor : EntityVisitor
   {
     get
     {
-      var allReferences = _keyPoints.Values.Where(static _ => _.Next != null).Select(static _ => _.Next!)
+      var allReferences = _keyPoints.Values.Where(static keyPoint => keyPoint.Next != null)
+        .Select(static keyPoint => keyPoint.Next!)
         .Concat(_starts.Where(static s => s.Next != null).Select(static s => s.Next!)).ToHashSet();
       var namedStarts = _keyPoints.Where(kv => !allReferences.Contains(kv.Key)).Select(static kv => kv.Value);
-      foreach (var start in _starts.Where(static _ => _.Next != null).Concat(namedStarts))
+      foreach (var start in _starts.Where(static start => start.Next != null).Concat(namedStarts))
       {
         if (start.Next == null)
         {
@@ -55,14 +56,18 @@ internal class RopeVisitor : EntityVisitor
             (pt.Subdivision + 1) * RopeSegmentFactor);
 
           if (!ReferenceEquals(pt, start))
+          {
             points = points
               .Skip(1); // the first point of any segment equals the last point of the previous segments
+          }
           else
+          {
             p0 = start.Origin;
+          }
 
           Debug.Assert(p0 != null);
 
-          currentChain.AddRange(points.Select(_ => _ - p0.Value));
+          currentChain.AddRange(points.Select(point => point - p0.Value));
           pt = next;
         }
 
@@ -81,16 +86,20 @@ internal class RopeVisitor : EntityVisitor
     {
       var name = entity.GetOptionalValue("targetname");
       var nextName = entity.GetOptionalValue("NextKey");
-      var origin = entity["origin"].ParseVector();
-      var additionalLength = entity["Slack"].ParseDouble() / 16.0;
-      var subdivision = entity["Subdiv"].ParseInt();
-      var id = entity["id"].ParseInt();
+      var origin = entity["origin"].ParseToVector();
+      var additionalLength = entity["Slack"].ParseToDouble() / 16.0;
+      var subdivision = entity["Subdiv"].ParseToInt();
+      var id = entity["id"].ParseToInt();
       var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, additionalLength,
         subdivision);
       if (name == null)
+      {
         _starts.Add(keyPoint);
+      }
       else
+      {
         _keyPoints.Add(name, keyPoint);
+      }
     }
 
     entity.Accept(this);

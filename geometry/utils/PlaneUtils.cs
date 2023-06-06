@@ -38,7 +38,7 @@ internal static class PlaneUtils
     polygon.Add(new Vertex(origin + b - a, Vector2.Zero, 1));
     polygon.Add(new Vertex(origin - b - a, Vector2.Zero, 1));
 
-    Debug.Assert(polygon.Vertices.Co.All(_ => Math.Abs(plane.DistanceTo(_)) < 1e-3));
+    Debug.Assert(polygon.Vertices.Co.All(v => Math.Abs(plane.DistanceTo(v)) < 1e-3));
 
     for (var i = 0; i < 4; i++)
     {

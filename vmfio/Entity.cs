@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace VMFIO;
 
-public class Entity
+public sealed class Entity
 {
   private readonly List<KeyValue> _keyValues;
 
@@ -23,7 +23,10 @@ public class Entity
 
   public void Accept(EntityVisitor visitor)
   {
-    foreach (var child in Children) visitor.Visit(child);
+    foreach (var child in Children)
+    {
+      visitor.Visit(child);
+    }
   }
 
   public string? GetOptionalValue(string key)
@@ -37,7 +40,10 @@ public class Entity
   {
     var value = GetOptionalValue(key);
     if (value == null)
+    {
       throw new KeyNotFoundException($"Key {key} not found");
+    }
+
     return value;
   }
 

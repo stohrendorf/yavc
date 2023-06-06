@@ -15,7 +15,7 @@ public static class ParserUtil
       @"^\(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\)$",
       RegexOptions.Compiled);
 
-  public static Plane ParsePlaneString(this string data)
+  public static Plane ParseToPlane(this string data)
   {
     var match = planePattern.Match(data);
     if (!match.Success)
@@ -27,16 +27,16 @@ public static class ParserUtil
     for (var i = 0; i < 3; ++i)
     {
       plane[i] = new Vector(
-        ParseDouble(match.Groups[3 * i + 1].Value),
-        ParseDouble(match.Groups[3 * i + 2].Value),
-        ParseDouble(match.Groups[3 * i + 3].Value)
+        ParseToDouble(match.Groups[3 * i + 1].Value),
+        ParseToDouble(match.Groups[3 * i + 2].Value),
+        ParseToDouble(match.Groups[3 * i + 3].Value)
       );
     }
 
     return Plane.CreateFromVertices(plane[1], plane[0], plane[2]);
   }
 
-  public static TextureAxis ParseTextureAxis(this string data)
+  public static TextureAxis ParseToTextureAxis(this string data)
   {
     var match = axisPattern.Match(data);
     if (!match.Success)
@@ -45,11 +45,11 @@ public static class ParserUtil
     }
 
     var axis = new Vector(
-      ParseDouble(match.Groups[1].Value),
-      ParseDouble(match.Groups[2].Value),
-      ParseDouble(match.Groups[3].Value));
-    var shift = ParseDouble(match.Groups[4].Value);
-    var scale = ParseDouble(match.Groups[5].Value);
+      ParseToDouble(match.Groups[1].Value),
+      ParseToDouble(match.Groups[2].Value),
+      ParseToDouble(match.Groups[3].Value));
+    var shift = ParseToDouble(match.Groups[4].Value);
+    var scale = ParseToDouble(match.Groups[5].Value);
     if (Math.Abs(scale) < 1e-6)
     {
       scale = 0.25;
@@ -58,19 +58,19 @@ public static class ParserUtil
     return new TextureAxis(axis, shift, scale);
   }
 
-  public static double ParseDouble(this string value)
+  public static double ParseToDouble(this string value)
   {
     return double.Parse(value,
       NumberStyles.AllowLeadingSign | NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint,
       CultureInfo.InvariantCulture);
   }
 
-  public static int ParseInt(this string value)
+  public static int ParseToInt(this string value)
   {
     return int.Parse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture);
   }
 
-  public static Vector ParseVector(this string data)
+  public static Vector ParseToVector(this string data)
   {
     var cols = data.Split(" ");
     if (cols.Length != 3)
@@ -79,13 +79,13 @@ public static class ParserUtil
     }
 
     return new Vector(
-      ParseDouble(cols[0]),
-      ParseDouble(cols[1]),
-      ParseDouble(cols[2])
+      ParseToDouble(cols[0]),
+      ParseToDouble(cols[1]),
+      ParseToDouble(cols[2])
     );
   }
 
-  internal static Vector2 ParseVector2(this string data)
+  internal static Vector2 ParseToVector2(this string data)
   {
     var cols = data.Split(" ");
     if (cols.Length != 2)
@@ -94,8 +94,8 @@ public static class ParserUtil
     }
 
     return new Vector2(
-      ParseDouble(cols[0]),
-      ParseDouble(cols[1])
+      ParseToDouble(cols[0]),
+      ParseToDouble(cols[1])
     );
   }
 }

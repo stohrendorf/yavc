@@ -9,7 +9,7 @@ using yavc.visitors;
 
 namespace yavc;
 
-internal class ExportEntity
+internal sealed class ExportEntity
 {
   public IList<double> Color;
   public IList<double> Location;
@@ -36,7 +36,7 @@ internal class ExportEntity
   }
 }
 
-internal class ExportInstance
+internal sealed class ExportInstance
 {
   public string File;
   public IList<double> Location;
@@ -50,7 +50,7 @@ internal class ExportInstance
   }
 }
 
-internal class ExportEnvCubemap
+internal sealed class ExportEnvCubemap
 {
   public IList<double> Location;
   public IList<int> Sides;
@@ -62,7 +62,7 @@ internal class ExportEnvCubemap
   }
 }
 
-internal class ExportLight
+internal sealed class ExportLight
 {
   public IList<double> Color;
 
@@ -77,7 +77,7 @@ internal class ExportLight
   }
 }
 
-internal class ExportData
+internal sealed class ExportData
 {
   public readonly IList<ExportEntity> Entities = new List<ExportEntity>();
   public readonly IList<ExportEnvCubemap> EnvCubemaps = new List<ExportEnvCubemap>();

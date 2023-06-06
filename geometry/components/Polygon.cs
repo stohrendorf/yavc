@@ -6,7 +6,7 @@ using geometry.utils;
 
 namespace geometry.components;
 
-public class Polygon
+public sealed class Polygon
 {
   public readonly VertexCollection Vertices = new();
 
@@ -38,14 +38,22 @@ public class Polygon
   internal IEnumerable<Polygon> Split(Plane split)
   {
     if (Count == 0)
+    {
       yield break;
+    }
 
     var a = Cut(split);
     if (a.Count >= 3)
+    {
       yield return a;
+    }
+
     var b = Cut(split.NormalFlipped());
     if (b.Count >= 3)
+    {
       yield return b;
+    }
+
     Debug.Assert(a.Count >= 3 || b.Count >= 3);
   }
 
@@ -72,7 +80,9 @@ public class Polygon
 
       if (dot1 > 0 - epsilon && dot2 >= 0 - epsilon)
         // the edge is fully in front of the plane
+      {
         return;
+      }
 
       // plane: dot(p.normal, x) - p.d == 0
       // edge: x = e0 + lambda*eDir
@@ -85,27 +95,39 @@ public class Polygon
       var d = p2.Co - p1.Co;
       var lambda = -dot1 / split.Normal.Dot(d);
       if (!double.IsFinite(lambda))
+      {
         return;
+      }
 
       // as both points are now on opposite sides of the plane, the intersection point must be on the edge
       if (lambda is < 0 - 1e-2 or > 1 + 1e-2)
+      {
         throw new Exception($"Lambda not on edge: p1=({p1}) p2=({p2}) lambda={lambda} split={split}");
+      }
 
       vertices.Add(new Vertex(p1.Co + lambda * d, p1.UV + lambda * (p2.UV - p1.UV),
         p1.Alpha + lambda * (p2.Alpha - p1.Alpha)));
     }
 
-    foreach (var (first, second) in Vertices.CyclicPairs()) DoSplit(first, second);
+    foreach (var (first, second) in Vertices.CyclicPairs())
+    {
+      DoSplit(first, second);
+    }
 
     var result = new Polygon();
     if (vertices.Count == 0)
+    {
       return result;
+    }
 
     var prev = vertices[^1];
     foreach (var vertex in vertices)
     {
       if (prev.FuzzyEquals(vertex))
+      {
         continue;
+      }
+
       prev = vertex;
       result.Add(vertex);
     }

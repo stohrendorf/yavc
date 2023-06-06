@@ -12,7 +12,7 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal class SolidVisitor : EntityVisitor
+internal sealed class SolidVisitor : EntityVisitor
 {
   private readonly string _vtfBasePath;
   public readonly VMF Vmf = new();
@@ -35,9 +35,9 @@ internal class SolidVisitor : EntityVisitor
 
   private void ReadSide(Entity entity)
   {
-    var plane = entity["plane"].ParsePlaneString();
-    var uAxis = entity["uaxis"].ParseTextureAxis();
-    var vAxis = entity["vaxis"].ParseTextureAxis();
+    var plane = entity["plane"].ParseToPlane();
+    var uAxis = entity["uaxis"].ParseToTextureAxis();
+    var vAxis = entity["vaxis"].ParseToTextureAxis();
 
     _displacement = null;
     entity.Accept(this);
@@ -45,7 +45,7 @@ internal class SolidVisitor : EntityVisitor
     var material = entity["material"];
     var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.TryGetCached(_vtfBasePath, material + ".vmt");
 
-    var side = new Side(entity["id"].ParseInt(), plane, vmt, uAxis, vAxis, _displacement);
+    var side = new Side(entity["id"].ParseToInt(), plane, vmt, uAxis, vAxis, _displacement);
 
     _displacement = null;
 
@@ -58,7 +58,10 @@ internal class SolidVisitor : EntityVisitor
     _displacement = new Displacement { Power = int.Parse(entity["power"]) };
     var cols = entity["startposition"].Replace("[", "").Replace("]", "").Split(" ");
     if (cols.Length != 3)
+    {
       throw new Exception();
+    }
+
     _displacement.StartPosition = new Vector(
       StringUtil.ParseDouble(cols[0]),
       StringUtil.ParseDouble(cols[1]),
@@ -66,11 +69,11 @@ internal class SolidVisitor : EntityVisitor
     );
     _displacement.Elevation = StringUtil.ParseDouble(entity["elevation"]);
     var n = (1 << _displacement.Power) + 1;
-    _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
-    _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
-    _displacement.Offsets.AddRange(Enumerable.Range(0, n).Select(static _ => new List<Vector>()));
-    _displacement.Distances.AddRange(Enumerable.Range(0, n).Select(static _ => new List<double>()));
-    _displacement.Alphas.AddRange(Enumerable.Range(0, n).Select(static _ => new List<double>()));
+    _displacement.Normals.AddRange(Enumerable.Range(0, n).Select(static idx => new List<Vector>()));
+    _displacement.OffsetNormals.AddRange(Enumerable.Range(0, n).Select(static idx => new List<Vector>()));
+    _displacement.Offsets.AddRange(Enumerable.Range(0, n).Select(static idx => new List<Vector>()));
+    _displacement.Distances.AddRange(Enumerable.Range(0, n).Select(static idx => new List<double>()));
+    _displacement.Alphas.AddRange(Enumerable.Range(0, n).Select(static idx => new List<double>()));
     entity.Accept(this);
   }
 
@@ -87,14 +90,18 @@ internal class SolidVisitor : EntityVisitor
       }
 
       if (row.Length != n * 3)
+      {
         throw new Exception($"{n * 3} != {row.Length}");
+      }
 
       for (var j = 0; j < n; ++j)
+      {
         dest[i].Add(new Vector(
           StringUtil.ParseDouble(row[j * 3 + 0]),
           StringUtil.ParseDouble(row[j * 3 + 1]),
           StringUtil.ParseDouble(row[j * 3 + 2])
         ));
+      }
     }
   }
 
@@ -111,10 +118,14 @@ internal class SolidVisitor : EntityVisitor
       }
 
       if (row.Length != n)
+      {
         throw new Exception($"{n} != {row.Length}");
+      }
 
       for (var j = 0; j < n; ++j)
+      {
         dest[i].AddRange(row.Select(StringUtil.ParseDouble));
+      }
     }
   }
 

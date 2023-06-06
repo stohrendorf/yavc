@@ -59,7 +59,9 @@ public sealed class Overlay
           var result = new Polygon();
           var offset = side.Plane.Normal.Normalized * 0.1;
           foreach (var matchedVertex in cutPoly.Vertices)
+          {
             result.Add(new Vertex(matchedVertex.Co + offset, matchedVertex.UV, matchedVertex.Alpha));
+          }
 
           yield return result;
           continue;
@@ -78,7 +80,9 @@ public sealed class Overlay
         // now that we have the overlay polygons corresponding to the subdivided base polygons, we
         // project each one to its displaced polygon.
         foreach (var subdividedPolygon in subdividedPolygons)
+        {
           yield return CalcDisplacedPoly(subdividedPolygon, side);
+        }
       }
     }
   }
@@ -99,7 +103,9 @@ public sealed class Overlay
         // try to find the barycentric values for the displacement coordinates
         if (!VectorUtils.CalcBarycentric(overlayVertex.Co, f0, f1, f2, out var s,
               out var t, out var u))
+        {
           return false;
+        }
 
         var dp0 = displacedPolygon.Vertices[i0].Co;
         var dp1 = displacedPolygon.Vertices[i1].Co;
@@ -115,7 +121,7 @@ public sealed class Overlay
         // fast path: most overlay vertices will exactly match with a base vertex
         var displacedMatches = flatPolygon.Vertices.Zip(displacedPolygon.Vertices)
           .Where(fv => overlayVertex.Co.Distance(fv.First.Co) < VectorUtils.Epsilon)
-          .Select(static _ => _.Second.Co).ToList();
+          .Select(static vertices => vertices.Second.Co).ToList();
         switch (displacedMatches.Count)
         {
           case > 1:
@@ -126,20 +132,29 @@ public sealed class Overlay
         }
 
         if (TryProjectOnTriangle(overlayVertex, 0, 1, 2))
+        {
           continue;
+        }
+
         if (TryProjectOnTriangle(overlayVertex, 0, 2, 3))
+        {
           continue;
+        }
 
         break; // if at least one vertex can't be displaced, we're not using the right polygon
       }
 
       if (overlayPolygon.Count != matched.Count)
+      {
         continue;
+      }
 
       var result = new Polygon();
       var offset = side.Plane.Normal.Normalized * 0.1;
       foreach (var matchedVertex in matched.Vertices)
+      {
         result.Add(new Vertex(matchedVertex.Co + offset, matchedVertex.UV, matchedVertex.Alpha));
+      }
 
       return result;
     }

@@ -7,7 +7,7 @@ using geometry.components;
 
 namespace geometry.materials.image;
 
-public class VTFFile
+public sealed class VTFFile
 {
   private const string VTFHeaderID = "VTF";
   internal readonly int Height;
@@ -21,9 +21,14 @@ public class VTFFile
 
     var header = Encoding.ASCII.GetString(reader.ReadBytes(3));
     if (header != VTFHeaderID)
+    {
       throw new Exception("Invalid VTF header. Expected '" + VTFHeaderID + "', got '" + header + "'.");
+    }
+
     if (reader.ReadByte() != 0)
+    {
       throw new Exception();
+    }
 
 
     var v1 = reader.ReadUInt32();
@@ -57,7 +62,10 @@ public class VTFFile
     ushort depth = 1;
     uint numResources = 0;
 
-    if (version >= 7.2m) depth = reader.ReadUInt16();
+    if (version >= 7.2m)
+    {
+      depth = reader.ReadUInt16();
+    }
 
     if (version >= 7.3m)
     {
@@ -67,7 +75,10 @@ public class VTFFile
     }
 
     var faces = 1;
-    if (Header.Flags.HasFlag(ImageFlags.Envmap)) faces = version < 7.5m && firstFrame != 0xFFFF ? 7 : 6;
+    if (Header.Flags.HasFlag(ImageFlags.Envmap))
+    {
+      faces = version < 7.5m && firstFrame != 0xFFFF ? 7 : 6;
+    }
 
     var highResFormatInfo = ImageFormatInfo.FromFormat(highResImageFormat);
     Debug.Assert(highResFormatInfo != null);
@@ -156,7 +167,11 @@ public class VTFFile
   private static int GetMipSize(int input, int level)
   {
     var res = input >> level;
-    if (res < 1) res = 1;
+    if (res < 1)
+    {
+      res = 1;
+    }
+
     return res;
   }
 }

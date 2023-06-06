@@ -7,7 +7,7 @@ using geometry.utils;
 
 namespace geometry.entities;
 
-public class Displacement
+public sealed class Displacement
 {
   public readonly List<List<double>> Alphas = new();
   public readonly List<List<double>> Distances = new();
@@ -54,7 +54,9 @@ public class Displacement
         var distance = _side.Polygon.Vertices.Co[i].Distance(StartPosition);
 
         if (distance >= bestDistance)
+        {
           continue;
+        }
 
         vertexWindingIndices[0] = i;
         vertexWindingIndices[1] = (i + 1) % 4;
@@ -94,13 +96,18 @@ public class Displacement
   internal IEnumerable<Polygon> Convert(Side side)
   {
     if (side.Polygon.Count != 4)
+    {
       throw new ArgumentException($"Expected polygon with 4 vertices, got {side.Polygon.Count}");
+    }
 
     if (_side != null)
     {
       Debug.Assert(_polygons != null);
       if (_side != side)
+      {
         throw new ArgumentException();
+      }
+
       return _polygons;
     }
 
@@ -115,7 +122,9 @@ public class Displacement
       var distance = side.Polygon.Vertices.Co[i].Distance(StartPosition);
 
       if (distance >= bestDistance)
+      {
         continue;
+      }
 
       vertexWindingIndices[0] = i;
       vertexWindingIndices[1] = (i + 1) % 4;
@@ -125,7 +134,9 @@ public class Displacement
     }
 
     if (vertexWindingIndices[0] == -1)
+    {
       throw new Exception("Failed to determine starting vertex index");
+    }
 
     var cos = vertexWindingIndices.Select(idx => _side.Polygon.Vertices.Co[idx]).ToArray();
     var steps32 = cos[3].StepsTo(cos[2], size).ToArray();
@@ -153,9 +164,13 @@ public class Displacement
       var normal = Normals[i][j] * Distances[i][j];
       Vector offset;
       if (Offsets[i].Count == 0 || OffsetNormals[i].Count == 0)
+      {
         offset = Vector.Zero;
+      }
       else
+      {
         offset = Offsets[i][j] + OffsetNormals[i][j];
+      }
 
       vertices.Co[i * size + j] += side.Plane.Normal * Elevation + normal + offset;
     }

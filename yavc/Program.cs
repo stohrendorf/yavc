@@ -59,7 +59,10 @@ internal static class Program
 
         mesh.Vertices.AddRange(points.Select(static v => v.ToAssimp()));
 
-        for (var i = 0; i < points.Count - 1; ++i) mesh.Faces.Add(new Face(new[] { i, i + 1 }));
+        for (var i = 0; i < points.Count - 1; ++i)
+        {
+          mesh.Faces.Add(new Face(new[] { i, i + 1 }));
+        }
 
         scene.Meshes.Add(mesh);
         node.MeshIndices.Add(scene.Meshes.Count - 1);
@@ -92,23 +95,32 @@ internal static class Program
         }
 
         if (createdDecals == 0)
+        {
           logger.Warn(
             $"Could not create decal {decal.ID} at {decal.Origin} (material {decal.Material.Basename})");
+        }
       }
 
       logger.Info("Processing overlays");
       var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
-        converter.Vmf.Solids.SelectMany(static _ => _.Sides).ToImmutableDictionary(static _ => _.ID, static _ => _));
+        converter.Vmf.Solids.SelectMany(static solid => solid.Sides)
+          .ToImmutableDictionary(static side => side.ID, static side => side));
       overlaysVis.Visit(data);
 
-      foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
+      foreach (var overlay in overlaysVis.Overlays)
+      {
+        scene.RootNode.Children.Add(overlay.Export(scene));
+      }
 
       logger.Info("Building export scene");
 
       foreach (var node in converter.Vmf.Solids
                  .Select(solid => solid.Export(scene, static material => material.ToLower().StartsWith("tools/")))
-                 .Where(static _ => _.HasMeshes))
+                 .Where(static node => node.HasMeshes))
+      {
         scene.RootNode.Children.Add(node);
+      }
+
       logger.Info("Writing DAE");
 
       using (var ctx = new AssimpContext())
@@ -116,8 +128,8 @@ internal static class Program
         ctx.ExportFile(scene, parsed.Value.DAE, "collada");
       }
 
-      var totalFaces = scene.Meshes.Sum(static _ => _.FaceCount);
-      var totalVertices = scene.Meshes.Sum(static _ => _.VertexCount);
+      var totalFaces = scene.Meshes.Sum(static mesh => mesh.FaceCount);
+      var totalVertices = scene.Meshes.Sum(static mesh => mesh.VertexCount);
 
       logger.Info(
         $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {decalVis.Decals.Count} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
@@ -132,22 +144,23 @@ internal static class Program
       var propsVisitor = new PropsVisitor();
       propsVisitor.Visit(data);
 
-      foreach (var exportEntity in propsVisitor.Props.Select(static _ => new ExportEntity(_)))
+      foreach (var exportEntity in propsVisitor.Props.Select(static prop => new ExportEntity(prop)))
       {
         export.Entities.Add(exportEntity);
       }
 
-      foreach (var exportInstance in propsVisitor.Instances.Select(static _ => new ExportInstance(_)))
+      foreach (var exportInstance in propsVisitor.Instances.Select(static instance => new ExportInstance(instance)))
       {
         export.Instances.Add(exportInstance);
       }
 
-      foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(static _ => new ExportEnvCubemap(_)))
+      foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(static envCubemap =>
+                 new ExportEnvCubemap(envCubemap)))
       {
         export.EnvCubemaps.Add(exportCubemap);
       }
 
-      foreach (var light in propsVisitor.Lights.Select(static _ => new ExportLight(_)))
+      foreach (var light in propsVisitor.Lights.Select(static light => new ExportLight(light)))
       {
         export.Lights.Add(light);
       }

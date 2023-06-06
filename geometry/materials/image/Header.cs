@@ -2,7 +2,7 @@ using geometry.components;
 
 namespace geometry.materials.image;
 
-public class Header
+public sealed class Header
 {
   internal decimal Version { get; set; }
   internal ImageFlags Flags { get; set; }

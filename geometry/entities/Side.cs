@@ -5,7 +5,7 @@ using geometry.utils;
 
 namespace geometry.entities;
 
-public class Side
+public sealed class Side
 {
   private readonly TextureAxis _uAxis;
   private readonly TextureAxis _vAxis;

@@ -13,7 +13,7 @@ using VMFIO;
 
 namespace geometry.materials;
 
-public class VMT : IEquatable<VMT>
+public sealed class VMT : IEquatable<VMT>
 {
   private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
   private static readonly Dictionary<string, VMT?> cache = new();
@@ -166,11 +166,10 @@ public class VMT : IEquatable<VMT>
 
     var components = subPath.Replace("\\", "/").TrimEnd('/').Split("/");
     var realPath = root;
-    foreach (var component in components)
+    foreach (var found in components.Select(component => Path.Join(realPath, component)).Select(absComponent =>
+               Directory.EnumerateFileSystemEntries(realPath).SingleOrDefault(path =>
+                 string.Equals(path, absComponent, StringComparison.CurrentCultureIgnoreCase))))
     {
-      var absComponent = Path.Join(realPath, component);
-      var found = Directory.EnumerateFileSystemEntries(realPath).SingleOrDefault(_ =>
-        string.Equals(_, absComponent, StringComparison.CurrentCultureIgnoreCase));
       if (string.IsNullOrEmpty(found))
       {
         return null;
@@ -284,10 +283,10 @@ public class VMT : IEquatable<VMT>
             nameof(transformString));
         }
 
-        Center = transformMatch.Groups["center"].Value.ParseVector2();
-        Rotate = transformMatch.Groups["rotate"].Value.ParseDouble() / 90 * Math.PI;
-        Scale = transformMatch.Groups["scale"].Value.ParseVector2();
-        Translate = transformMatch.Groups["translate"].Value.ParseVector2();
+        Center = transformMatch.Groups["center"].Value.ParseToVector2();
+        Rotate = transformMatch.Groups["rotate"].Value.ParseToDouble() / 90 * Math.PI;
+        Scale = transformMatch.Groups["scale"].Value.ParseToVector2();
+        Translate = transformMatch.Groups["translate"].Value.ParseToVector2();
         _isIdentity = Math.Abs(Rotate) < 1e-4 && Translate == Vector2.Zero && Scale == Vector2.One;
       }
       else

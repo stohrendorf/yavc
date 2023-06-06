@@ -16,7 +16,7 @@ using VTFImage = geometry.materials.image.Image;
 
 namespace yavc_vtf;
 
-internal static class Program
+file static class Program
 {
   private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -34,11 +34,11 @@ internal static class Program
     var P = (rgba.Y * baseR.X - rgba.X * baseG.X) / (M * baseR.X);
     var Q = baseB.Y - baseR.Y * baseB.X / baseR.X;
     var S = baseB.Z - baseR.Z * baseB.X / baseR.X - N * Q;
-    var T = (rgba.Z - P * Q) / S - (rgba.X * baseB.X) / (S * baseR.X);
+    var T = (rgba.Z - P * Q) / S - rgba.X * baseB.X / (S * baseR.X);
     var U = (rgba.X - T * baseR.Z) / baseR.X;
 
     Vector3 n;
-    n.X = U - (baseR.Y / baseR.X) * (P - T * N);
+    n.X = U - baseR.Y / baseR.X * (P - T * N);
     n.Y = P - T * N;
     n.Z = T;
     n = (Vector3.Normalize(n) + Vector3.One) / 2.0f;
@@ -55,6 +55,7 @@ internal static class Program
     var files = new List<string>();
 
     while (queue.TryDequeue(out var p))
+    {
       foreach (var subPath in Directory.EnumerateFileSystemEntries(p))
       {
         if (Directory.Exists(subPath))
@@ -64,10 +65,13 @@ internal static class Program
         }
 
         if (Path.GetExtension(subPath).ToLower() != extension)
+        {
           continue;
+        }
 
         files.Add(subPath);
       }
+    }
 
     return files;
   }
@@ -92,7 +96,7 @@ internal static class Program
       return;
     }
 
-    var images = vtf.Images.Where(static _ => _.Mipmap == 0).ToList();
+    var images = vtf.Images.Where(static image => image.Mipmap == 0).ToList();
     if (images.Count == 0)
     {
       logger.Warn($"{vtfPath} does not contain any image with mipmap level 0");
@@ -118,7 +122,9 @@ internal static class Program
                                   $"Could not extract directory name from {pngPath}"));
       var img = images[frame];
       if (img.FormatInfo == null)
+      {
         throw new NullReferenceException();
+      }
 
       var data = Image.LoadPixelData<Bgra32>(img.GetBGRA32Data(), img.Width, img.Height);
       if (convertSsBump)
@@ -127,24 +133,33 @@ internal static class Program
         data = await Task.Run(() =>
         {
           var converted = new Image<Rgba32>(img.Width, img.Height);
-          for (int y = 0; y < img.Height; ++y)
-          for (int x = 0; x < img.Width; ++x)
+          for (var y = 0; y < img.Height; ++y)
+          for (var x = 0; x < img.Width; ++x)
+          {
             converted[x, y] = SSBumpToNormal(data[x, y]);
+          }
+
           return converted.CloneAs<Bgra32>();
         });
       }
 
       if (img.FormatInfo.AlphaBitsPerPixel > 0)
+      {
         await data.SaveAsPngAsync(pngPath);
+      }
       else
+      {
         await data.CloneAs<Rgb24>().SaveAsPngAsync(pngPath);
+      }
     }
   }
 
   private static async Task Main(string[] args)
   {
     if (Parser.Default.ParseArguments<Options>(args) is not Parsed<Options> parsed)
+    {
       return;
+    }
 
     LogManager.ReconfigExistingLoggers();
     var vmts = CollectFiles(parsed.Value.In, ".vmt");
@@ -156,17 +171,34 @@ internal static class Program
       var vmt = new VMT(parsed.Value.In, Path.GetRelativePath(parsed.Value.In, vmtPath), true);
 
       if (vmt.BaseTexture != null)
+      {
         await ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
+      }
+
       if (vmt.BaseTexture2 != null)
+      {
         await ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
+      }
+
       if (vmt.NormalMap != null)
+      {
         await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
+      }
+
       if (vmt.NormalMap2 != null)
+      {
         await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
+      }
+
       if (vmt.NormalMap != null)
+      {
         await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
+      }
+
       if (vmt.NormalMap2 != null)
+      {
         await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
+      }
     }
   }
 

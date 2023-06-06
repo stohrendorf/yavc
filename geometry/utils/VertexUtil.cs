@@ -13,9 +13,9 @@ internal static class VertexUtil
       return;
     }
 
-    var minX = vertices.Select(static _ => _.UV.X).Min();
+    var minX = vertices.Select(static v => v.UV.X).Min();
     minX = Math.Floor(minX);
-    var minY = vertices.Select(static _ => _.UV.Y).Min();
+    var minY = vertices.Select(static v => v.UV.Y).Min();
     minY = Math.Floor(minY);
 
     foreach (var vertex in vertices)

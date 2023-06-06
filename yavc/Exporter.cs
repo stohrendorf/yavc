@@ -15,7 +15,7 @@ internal static class Exporter
 
     foreach (var (material, polygons) in solid.PolygonIndicesByMaterial)
     {
-      if (!polygons.Any(static _ => _.Count > 0))
+      if (!polygons.Any(static polygon => polygon.Count > 0))
       {
         continue;
       }
@@ -56,8 +56,8 @@ internal static class Exporter
     {
       MaterialIndex = scene.FindOrCreateMaterial(material),
     };
-    mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static _ => _.ToAssimp()));
-    mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static _ => _.ToAssimpUV()));
+    mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static co => co.ToAssimp()));
+    mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static uv => uv.ToAssimpUV()));
     mesh.Faces.Add(new Face(Enumerable.Range(0, polygon.Vertices.Count).ToArray()));
 
     scene.Meshes.Add(mesh);
@@ -76,8 +76,8 @@ internal static class Exporter
     foreach (var polygon in overlay.Polygons)
     {
       var i0 = mesh.Vertices.Count;
-      mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static _ => _.ToAssimp()));
-      mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static _ => _.ToAssimpUV()));
+      mesh.Vertices.AddRange(polygon.Vertices.Co.Select(static co => co.ToAssimp()));
+      mesh.TextureCoordinateChannels[0].AddRange(polygon.Vertices.UV.Select(static uv => uv.ToAssimpUV()));
       mesh.Faces.Add(new Face(Enumerable.Range(i0, polygon.Vertices.Count).ToArray()));
     }
 

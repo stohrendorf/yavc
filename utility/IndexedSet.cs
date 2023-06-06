@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace utility;
 
-public class IndexedSet<T> where T : notnull
+public sealed class IndexedSet<T> where T : notnull
 {
   private readonly Dictionary<T, int> _data = new();
 

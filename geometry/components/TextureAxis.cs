@@ -1,6 +1,6 @@
 namespace geometry.components;
 
-public class TextureAxis
+public sealed class TextureAxis
 {
   private readonly Vector _axis;
 

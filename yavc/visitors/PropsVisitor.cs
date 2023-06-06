@@ -8,7 +8,7 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal class VMFProp
+internal sealed class VMFProp
 {
   internal string Color = null!;
   internal string Model = null!;
@@ -17,27 +17,27 @@ internal class VMFProp
   internal int Skin;
 }
 
-internal class VMFInstance
+internal sealed class VMFInstance
 {
   internal Vector Angles;
   internal string File = null!;
   internal Vector Origin;
 }
 
-internal class VMFEnvCubemap
+internal sealed class VMFEnvCubemap
 {
   internal Vector Origin;
   internal IList<int> Sides = null!;
 }
 
-internal class VMFLight
+internal sealed class VMFLight
 {
   internal Vector Color;
   internal Vector Origin;
   internal double Strength;
 }
 
-internal class PropsVisitor : EntityVisitor
+internal sealed class PropsVisitor : EntityVisitor
 {
   public readonly List<VMFEnvCubemap> EnvCubemaps = new();
   public readonly List<VMFInstance> Instances = new();
@@ -58,8 +58,8 @@ internal class PropsVisitor : EntityVisitor
         or "prop_physics_multiplayer" or "prop_dynamic_override" or "prop_detail" or "prop_physics" or "prop_ragdoll":
         Props.Add(new VMFProp
         {
-          Origin = entity["origin"].ParseVector(),
-          Rotation = entity["angles"].ParseVector() * Math.PI / 180.0,
+          Origin = entity["origin"].ParseToVector(),
+          Rotation = entity["angles"].ParseToVector() * Math.PI / 180.0,
           Color = entity.GetOptionalValue("rendercolor") ?? "255 255 255",
           Model = DropExtension(entity["model"].ToLower()),
           Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0"),
@@ -69,16 +69,16 @@ internal class PropsVisitor : EntityVisitor
         Instances.Add(new VMFInstance
         {
           File = entity["file"].RequireNotNull(),
-          Angles = entity["angles"].ParseVector() * Math.PI / 180.0,
-          Origin = entity["origin"].ParseVector(),
+          Angles = entity["angles"].ParseToVector() * Math.PI / 180.0,
+          Origin = entity["origin"].ParseToVector(),
         });
         break;
       case "entity" when entity.Classname == "env_cubemap":
         EnvCubemaps.Add(new VMFEnvCubemap
         {
-          Origin = entity["origin"].ParseVector(),
+          Origin = entity["origin"].ParseToVector(),
           Sides = (entity.GetOptionalValue("sides") ?? "").Split(' ')
-            .Where(static _ => !string.IsNullOrWhiteSpace(_)).Select(int.Parse).ToList(),
+            .Where(static sideId => !string.IsNullOrWhiteSpace(sideId)).Select(int.Parse).ToList(),
         });
         break;
       case "entity" when entity.Classname == "light":
@@ -87,7 +87,7 @@ internal class PropsVisitor : EntityVisitor
 
         Lights.Add(new VMFLight
         {
-          Origin = entity["origin"].ParseVector(),
+          Origin = entity["origin"].ParseToVector(),
           Color = new Vector(cols[0], cols[1], cols[2]),
           Strength = cols[3],
         });

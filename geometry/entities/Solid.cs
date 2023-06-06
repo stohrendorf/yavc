@@ -25,11 +25,15 @@ public sealed class Solid
       for (var j = 0; j < sides.Count; j++)
       {
         if (j == i)
+        {
           continue;
+        }
 
         side.Polygon = side.Polygon.Cut(sides[j].Plane.NormalFlipped());
         if (side.Polygon.Count == 0)
+        {
           break;
+        }
       }
     }
 
@@ -40,24 +44,32 @@ public sealed class Solid
       return existing ?? _vertices.Add(v);
     }
 
-    if (sides.Any(static _ => _.Displacement != null))
-      foreach (var side in sides.Where(static _ => _.Displacement != null && _.Material != null))
+    if (sides.Any(static side => side.Displacement != null))
+    {
+      foreach (var side in sides.Where(static side => side.Displacement != null && side.Material != null))
       {
         if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
+        {
           pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
+        }
 
         var polygons = side.Displacement!.Convert(side);
         pi.AddRange(polygons.Select(polygon => polygon.Vertices.Select(AddVertex).ToList()));
       }
+    }
     else
-      foreach (var side in sides.Where(static _ => _.Material != null))
+    {
+      foreach (var side in sides.Where(static side => side.Material != null))
       {
         if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
+        {
           pi = PolygonIndicesByMaterial[side.Material!] = new List<List<int>>();
+        }
 
         pi.Add(Enumerable.Range(0, side.Polygon.Count)
           .Select(fi => AddVertex(side.Polygon.Vertices[fi])).ToList());
       }
+    }
 
     (_bBoxMin, _bBoxMax) = _vertices.Data.Select(static kv => kv.Key.Co).GetBBox();
   }

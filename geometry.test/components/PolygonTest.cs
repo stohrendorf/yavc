@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace geometry.test.components;
 
-public static class PolygonTest
+file static class PolygonTest
 {
   [Test]
   public static void TestCut()

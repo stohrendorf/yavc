@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace geometry.test.entities;
 
-public static class TestSide
+file static class TestSide
 {
   [Test]
   public static void TestConstruction()

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace geometry.components;
 
-public class VertexCoAccessor : IEnumerable<Vector>
+public sealed class VertexCoAccessor : IEnumerable<Vector>
 {
   private readonly IList<Vertex> _vertices;
 
@@ -21,7 +21,7 @@ public class VertexCoAccessor : IEnumerable<Vector>
 
   public IEnumerator<Vector> GetEnumerator()
   {
-    return _vertices.Select(static _ => _.Co).GetEnumerator();
+    return _vertices.Select(static v => v.Co).GetEnumerator();
   }
 
   IEnumerator IEnumerable.GetEnumerator()

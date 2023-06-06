@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace geometry.components;
 
-public class VertexCollection : IEnumerable<Vertex>
+public sealed class VertexCollection : IEnumerable<Vertex>
 {
   private readonly List<Vertex> _vertices = new();
 
