@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using geometry.entities;
 using yavc.visitors;
 
 // ReSharper disable CollectionNeverQueried.Global
@@ -77,8 +78,25 @@ internal sealed class ExportLight
   }
 }
 
+internal sealed class ExportAmbientGeneric
+{
+  public readonly IList<double> Location;
+  public readonly double Pitch;
+  public readonly double Radius;
+  public string Path;
+
+  public ExportAmbientGeneric(AmbientGeneric ambientGeneric)
+  {
+    Path = ambientGeneric.Message;
+    Location = new List<double> { ambientGeneric.Origin.X, ambientGeneric.Origin.Y, ambientGeneric.Origin.Z };
+    Pitch = ambientGeneric.Pitch;
+    Radius = ambientGeneric.Radius;
+  }
+}
+
 internal sealed class ExportData
 {
+  public readonly IList<ExportAmbientGeneric> Ambients = new List<ExportAmbientGeneric>();
   public readonly IList<ExportEntity> Entities = new List<ExportEntity>();
   public readonly IList<ExportEnvCubemap> EnvCubemaps = new List<ExportEnvCubemap>();
   public readonly IList<ExportInstance> Instances = new List<ExportInstance>();

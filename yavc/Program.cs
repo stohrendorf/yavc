@@ -12,7 +12,7 @@ using yavc.visitors;
 
 namespace yavc;
 
-internal static class Program
+file static class Program
 {
   private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
@@ -139,10 +139,20 @@ internal static class Program
     {
       logger.Info("Exporting VMF entities");
 
+      if (parsed.Value.Sounds == null)
+      {
+        logger.Error("Provide sounds folder for entities output");
+        return;
+      }
+
       var export = new ExportData();
 
       var propsVisitor = new PropsVisitor();
       propsVisitor.Visit(data);
+
+      logger.Info("Processing ambient sounds");
+      var ambientVis = new AmbientGenericVisitor(parsed.Value.Sounds);
+      ambientVis.Visit(data);
 
       foreach (var exportEntity in propsVisitor.Props.Select(static prop => new ExportEntity(prop)))
       {
@@ -163,6 +173,11 @@ internal static class Program
       foreach (var light in propsVisitor.Lights.Select(static light => new ExportLight(light)))
       {
         export.Lights.Add(light);
+      }
+
+      foreach (var ambient in ambientVis.AmbientGenerics)
+      {
+        export.Ambients.Add(new ExportAmbientGeneric(ambient));
       }
 
       var serializer = new JsonSerializer
@@ -194,5 +209,8 @@ internal static class Program
 
     [Option('m', "materials", Required = false, HelpText = "Materials base folder")]
     public string? Materials { get; set; } = null;
+
+    [Option('s', "sounds", Required = false, HelpText = "Sounds base folder")]
+    public string? Sounds { get; set; } = null;
   }
 }

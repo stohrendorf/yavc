@@ -1,11 +1,10 @@
-import bpy
+import json
+from pathlib import Path
 
-from bpy_extras.io_utils import ImportHelper
+import bpy
 from bpy.props import StringProperty
 from bpy.types import Operator
-
-from pathlib import Path
-import json
+from bpy_extras.io_utils import ImportHelper
 
 
 class ImportYAVCEntities(Operator, ImportHelper):
@@ -85,10 +84,21 @@ class ImportYAVCEntities(Operator, ImportHelper):
         for i, light in enumerate(data["Lights"]):
             l_name = f"light:{i}"
             l = bpy.data.lights.new(l_name, "POINT")
-            l.color = [float(x)/255.0 for x in light["Color"]]
+            l.color = [float(x) / 255.0 for x in light["Color"]]
             l.energy = light["Strength"]
             o = bpy.data.objects.new(l_name, l)
             o.location = list(light["Location"])
+            scene.collection.objects.link(o)
+
+        for i, ambient in enumerate(data["Ambients"]):
+            a_name = f"ambient:{i}"
+            a = bpy.data.speakers.new(a_name)
+            a.pitch = ambient["Pitch"]
+            # TODO check radius, possibly attenuation
+            a.distance_reference = ambient["Radius"]
+            a.sound = bpy.data.sounds.load(ambient["Path"], check_existing=True)
+            o = bpy.data.objects.new(a_name, a)
+            o.location = list(ambient["Location"])
             scene.collection.objects.link(o)
 
         return {'FINISHED'}
