@@ -175,6 +175,11 @@ file static class Program
         export.Lights.Add(light);
       }
 
+      foreach (var light in propsVisitor.SpotLights.Select(static light => new ExportSpotLight(light)))
+      {
+        export.SpotLights.Add(light);
+      }
+
       foreach (var ambient in ambientVis.AmbientGenerics)
       {
         export.Ambients.Add(new ExportAmbientGeneric(ambient));
@@ -191,6 +196,9 @@ file static class Program
       using var sw = File.CreateText(parsed.Value.Entities);
       using var jw = new JsonTextWriter(sw);
       serializer.Serialize(jw, export);
+
+      logger.Info(
+        $"Wrote {propsVisitor.Props.Count} props, {propsVisitor.Instances.Count} instances, {propsVisitor.EnvCubemaps.Count} cubemaps, {propsVisitor.Lights.Count} lights, {propsVisitor.SpotLights.Count} spot lights, {ambientVis.AmbientGenerics.Count} ambient sounds");
     }
   }
 

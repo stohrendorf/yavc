@@ -66,7 +66,7 @@ internal sealed class ExportEnvCubemap
 internal sealed class ExportLight
 {
   public IList<double> Color;
-
+  public double? Distance;
   public IList<double> Location;
   public double Strength;
 
@@ -75,6 +75,31 @@ internal sealed class ExportLight
     Location = new List<double> { light.Origin.X, light.Origin.Y, light.Origin.Z };
     Color = new List<double> { light.Color.X, light.Color.Y, light.Color.Z };
     Strength = light.Strength;
+    Distance = light.Distance;
+  }
+}
+
+internal sealed class ExportSpotLight
+{
+  public IList<double> Color;
+  public double Cone;
+  public double? Distance;
+  public double Exponent;
+  public double InnerCone;
+  public IList<double> Location;
+  public IList<double> Rotation;
+  public double Strength;
+
+  public ExportSpotLight(VMFSpotLight light)
+  {
+    Location = new List<double> { light.Origin.X, light.Origin.Y, light.Origin.Z };
+    Color = new List<double> { light.Color.X, light.Color.Y, light.Color.Z };
+    Strength = light.Strength;
+    Distance = light.Distance;
+    Rotation = new List<double> { light.Angles.Z, light.Pitch, light.Angles.Y };
+    Cone = light.Cone;
+    Exponent = light.Exponent;
+    InnerCone = light.InnerCone;
   }
 }
 
@@ -101,4 +126,5 @@ internal sealed class ExportData
   public readonly IList<ExportEnvCubemap> EnvCubemaps = new List<ExportEnvCubemap>();
   public readonly IList<ExportInstance> Instances = new List<ExportInstance>();
   public readonly IList<ExportLight> Lights = new List<ExportLight>();
+  public readonly IList<ExportSpotLight> SpotLights = new List<ExportSpotLight>();
 }

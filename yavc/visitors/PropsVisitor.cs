@@ -33,7 +33,21 @@ internal sealed class VMFEnvCubemap
 internal sealed class VMFLight
 {
   internal Vector Color;
+  internal double? Distance;
   internal Vector Origin;
+  internal double Strength;
+}
+
+internal sealed class VMFSpotLight
+{
+  internal Vector Angles;
+  internal Vector Color;
+  internal double Cone;
+  internal double? Distance;
+  internal double Exponent;
+  internal double InnerCone;
+  internal Vector Origin;
+  internal double Pitch;
   internal double Strength;
 }
 
@@ -43,6 +57,7 @@ internal sealed class PropsVisitor : EntityVisitor
   public readonly List<VMFInstance> Instances = new();
   public readonly List<VMFLight> Lights = new();
   public readonly List<VMFProp> Props = new();
+  public readonly List<VMFSpotLight> SpotLights = new();
 
   public override void Visit(Entity entity, bool skipTools)
   {
@@ -90,6 +105,25 @@ internal sealed class PropsVisitor : EntityVisitor
           Origin = entity["origin"].ParseToVector(),
           Color = new Vector(cols[0], cols[1], cols[2]),
           Strength = cols[3],
+          Distance = entity.GetOptionalValue("_distance")?.ParseToDouble(),
+        });
+        break;
+      }
+      case "entity" when entity.Classname == "light_spot":
+      {
+        var cols = entity["_light"].Split(" ").Select(double.Parse).ToArray();
+
+        SpotLights.Add(new VMFSpotLight
+        {
+          Origin = entity["origin"].ParseToVector(),
+          Color = new Vector(cols[0], cols[1], cols[2]),
+          Strength = cols[3],
+          Distance = entity.GetOptionalValue("_distance")?.ParseToDouble(),
+          Angles = entity["angles"].ParseToVector() * Math.PI / 180.0,
+          Cone = entity["_cone"].ParseToDouble() * Math.PI / 180.0,
+          InnerCone = entity["_inner_cone"].ParseToDouble() * Math.PI / 180.0,
+          Exponent = entity["_exponent"].ParseToDouble(),
+          Pitch = entity["pitch"].ParseToDouble() * Math.PI / 180.0,
         });
         break;
       }

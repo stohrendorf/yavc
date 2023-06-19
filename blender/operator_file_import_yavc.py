@@ -85,9 +85,27 @@ class ImportYAVCEntities(Operator, ImportHelper):
             l_name = f"light:{i}"
             l = bpy.data.lights.new(l_name, "POINT")
             l.color = [float(x) / 255.0 for x in light["Color"]]
-            l.energy = light["Strength"]
+            l.energy = light["Strength"] * 10000 / 256
+            if light["Distance"] is not None:
+                l.cutoff_distance = light["Distance"]
+                l.use_custom_distance = True
             o = bpy.data.objects.new(l_name, l)
             o.location = list(light["Location"])
+            scene.collection.objects.link(o)
+
+        for i, spot_light in enumerate(data["SpotLights"]):
+            l_name = f"spotlight:{i}"
+            l = bpy.data.lights.new(l_name, "SPOT")
+            l.color = [float(x) / 255.0 for x in spot_light["Color"]]
+            l.energy = spot_light["Strength"] * 10000 / 256
+            if spot_light["Distance"] is not None:
+                l.cutoff_distance = spot_light["Distance"]
+                l.use_custom_distance = True
+            l.spot_blend = spot_light["Exponent"]
+            l.spot_size = spot_light["Cone"]
+            o = bpy.data.objects.new(l_name, l)
+            o.location = list(spot_light["Location"])
+            o.rotation_euler = list(spot_light["Rotation"])
             scene.collection.objects.link(o)
 
         for i, ambient in enumerate(data["Ambients"]):
