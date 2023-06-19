@@ -89,7 +89,7 @@ internal sealed class ExportAmbientGeneric
   {
     Path = ambientGeneric.Message;
     Location = new List<double> { ambientGeneric.Origin.X, ambientGeneric.Origin.Y, ambientGeneric.Origin.Z };
-    Pitch = ambientGeneric.Pitch;
+    Pitch = ambientGeneric.Pitch / 100;
     Radius = ambientGeneric.Radius;
   }
 }
