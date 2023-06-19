@@ -44,7 +44,7 @@ internal sealed class PropsVisitor : EntityVisitor
   public readonly List<VMFLight> Lights = new();
   public readonly List<VMFProp> Props = new();
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     static string DropExtension(string p)
     {
@@ -95,6 +95,6 @@ internal sealed class PropsVisitor : EntityVisitor
       }
     }
 
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 }

@@ -20,7 +20,7 @@ internal sealed class AmbientGenericVisitor : EntityVisitor
 
   public IList<AmbientGeneric> AmbientGenerics => _ambientGenerics;
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     var classname = entity.Classname;
     if (classname == "ambient_generic")
@@ -37,6 +37,6 @@ internal sealed class AmbientGenericVisitor : EntityVisitor
       }
     }
 
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 }

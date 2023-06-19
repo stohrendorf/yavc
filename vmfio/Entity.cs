@@ -21,11 +21,11 @@ public sealed class Entity
 
   public string this[string key] => GetValue(key);
 
-  public void Accept(EntityVisitor visitor)
+  public void Accept(EntityVisitor visitor, bool skipTools)
   {
     foreach (var child in Children)
     {
-      visitor.Visit(child);
+      visitor.Visit(child, skipTools);
     }
   }
 

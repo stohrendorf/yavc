@@ -79,7 +79,7 @@ internal sealed class RopeVisitor : EntityVisitor
 
   public object Count => _starts.Count + _keyPoints.Count;
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     var classname = entity.Classname;
     if (classname is "move_rope" or "keyframe_rope")
@@ -102,7 +102,7 @@ internal sealed class RopeVisitor : EntityVisitor
       }
     }
 
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 
   private sealed class RopeKeyPoint

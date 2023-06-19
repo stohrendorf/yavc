@@ -24,26 +24,28 @@ internal sealed class SolidVisitor : EntityVisitor
     _vtfBasePath = vtfBasePath;
   }
 
-  private void ReadSolid(Entity entity)
+  private void ReadSolid(Entity entity, bool skipTools)
   {
     _sides = new List<Side>();
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
     var solid = new Solid(int.Parse(entity["id"]), _sides);
     _sides = null;
     Vmf.Solids.Add(solid);
   }
 
-  private void ReadSide(Entity entity)
+  private void ReadSide(Entity entity, bool skipTools)
   {
     var plane = entity["plane"].ParseToPlane();
     var uAxis = entity["uaxis"].ParseToTextureAxis();
     var vAxis = entity["vaxis"].ParseToTextureAxis();
 
     _displacement = null;
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
 
     var material = entity["material"];
-    var vmt = material.ToLower().StartsWith("tools/") ? null : VMT.TryGetCached(_vtfBasePath, material + ".vmt");
+    var vmt = skipTools && material.ToLower().StartsWith("tools/")
+      ? null
+      : VMT.TryGetCached(_vtfBasePath, material + ".vmt");
 
     var side = new Side(entity["id"].ParseToInt(), plane, vmt, uAxis, vAxis, _displacement);
 
@@ -53,7 +55,7 @@ internal sealed class SolidVisitor : EntityVisitor
     _sides!.Add(side);
   }
 
-  private void ReadDisplacementInfo(Entity entity)
+  private void ReadDisplacementInfo(Entity entity, bool skipTools)
   {
     _displacement = new Displacement { Power = int.Parse(entity["power"]) };
     var cols = entity["startposition"].Replace("[", "").Replace("]", "").Split(" ");
@@ -74,7 +76,7 @@ internal sealed class SolidVisitor : EntityVisitor
     _displacement.Offsets.AddRange(Enumerable.Range(0, n).Select(static idx => new List<Vector>()));
     _displacement.Distances.AddRange(Enumerable.Range(0, n).Select(static idx => new List<double>()));
     _displacement.Alphas.AddRange(Enumerable.Range(0, n).Select(static idx => new List<double>()));
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 
   private void ReadVectorRow(IList<List<Vector>> dest, Entity entity)
@@ -129,18 +131,18 @@ internal sealed class SolidVisitor : EntityVisitor
     }
   }
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     switch (entity.Typename)
     {
       case "solid":
-        ReadSolid(entity);
+        ReadSolid(entity, skipTools);
         break;
       case "side":
-        ReadSide(entity);
+        ReadSide(entity, skipTools);
         break;
       case "dispinfo":
-        ReadDisplacementInfo(entity);
+        ReadDisplacementInfo(entity, skipTools);
         break;
       case "normals":
         Debug.Assert(_displacement is not null);
@@ -163,7 +165,7 @@ internal sealed class SolidVisitor : EntityVisitor
         ReadVectorRow(_displacement.OffsetNormals, entity);
         break;
       default:
-        entity.Accept(this);
+        entity.Accept(this, skipTools);
         break;
     }
   }

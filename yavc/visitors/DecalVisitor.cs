@@ -22,7 +22,7 @@ internal sealed class DecalVisitor : EntityVisitor
 
   public IReadOnlyList<Decal> Decals => _decals;
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     if (entity.Classname == "infodecal")
     {
@@ -41,6 +41,6 @@ internal sealed class DecalVisitor : EntityVisitor
       }
     }
 
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 }

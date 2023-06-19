@@ -24,7 +24,7 @@ internal sealed class OverlayVisitor : EntityVisitor
 
   public IList<Overlay> Overlays => _overlays;
 
-  public override void Visit(Entity entity)
+  public override void Visit(Entity entity, bool skipTools)
   {
     var classname = entity.Classname;
     if (classname == "info_overlay" && entity["sides"] != "")
@@ -71,6 +71,6 @@ internal sealed class OverlayVisitor : EntityVisitor
       }
     }
 
-    entity.Accept(this);
+    entity.Accept(this, skipTools);
   }
 }

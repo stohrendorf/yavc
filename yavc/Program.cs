@@ -36,7 +36,7 @@ file static class Program
       }
 
       var ropeVis = new RopeVisitor();
-      ropeVis.Visit(data);
+      ropeVis.Visit(data, parsed.Value.SkipTools);
       logger.Info($"Connecting and calculating {ropeVis.Count} rope keypoints");
 
       var scene = new Scene { RootNode = new Node(Path.GetFileName(parsed.Value.VMF)) };
@@ -71,11 +71,11 @@ file static class Program
 
       logger.Info("Converting VMF geometry");
       var converter = new SolidVisitor(parsed.Value.Materials);
-      converter.Visit(data);
+      converter.Visit(data, parsed.Value.SkipTools);
 
       logger.Info("Processing decals");
       var decalVis = new DecalVisitor(parsed.Value.Materials);
-      decalVis.Visit(data);
+      decalVis.Visit(data, parsed.Value.SkipTools);
 
       foreach (var decal in decalVis.Decals)
       {
@@ -105,7 +105,7 @@ file static class Program
       var overlaysVis = new OverlayVisitor(parsed.Value.Materials,
         converter.Vmf.Solids.SelectMany(static solid => solid.Sides)
           .ToImmutableDictionary(static side => side.ID, static side => side));
-      overlaysVis.Visit(data);
+      overlaysVis.Visit(data, parsed.Value.SkipTools);
 
       foreach (var overlay in overlaysVis.Overlays)
       {
@@ -148,11 +148,11 @@ file static class Program
       var export = new ExportData();
 
       var propsVisitor = new PropsVisitor();
-      propsVisitor.Visit(data);
+      propsVisitor.Visit(data, parsed.Value.SkipTools);
 
       logger.Info("Processing ambient sounds");
       var ambientVis = new AmbientGenericVisitor(parsed.Value.Sounds);
-      ambientVis.Visit(data);
+      ambientVis.Visit(data, parsed.Value.SkipTools);
 
       foreach (var exportEntity in propsVisitor.Props.Select(static prop => new ExportEntity(prop)))
       {
@@ -212,5 +212,8 @@ file static class Program
 
     [Option('s', "sounds", Required = false, HelpText = "Sounds base folder")]
     public string? Sounds { get; set; } = null;
+
+    [Option('t', "tools", Required = false, HelpText = "Skip tool textures", Default = false)]
+    public bool SkipTools { get; set; } = false;
   }
 }
