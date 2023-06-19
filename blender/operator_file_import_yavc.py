@@ -92,14 +92,13 @@ class ImportYAVCEntities(Operator, ImportHelper):
 
         for i, ambient in enumerate(data["Ambients"]):
             a_name = f"ambient:{i}"
-            a = bpy.data.speakers.new(a_name)
+            bpy.ops.object.speaker_add(location=tuple(ambient["Location"]))
+            a = bpy.data.speakers[-1]
+            a.name = a_name
             a.pitch = ambient["Pitch"]
             # TODO check radius, possibly attenuation
             a.distance_reference = ambient["Radius"]
             a.sound = bpy.data.sounds.load(ambient["Path"], check_existing=True)
-            o = bpy.data.objects.new(a_name, a)
-            o.location = list(ambient["Location"])
-            scene.collection.objects.link(o)
 
         return {'FINISHED'}
 
