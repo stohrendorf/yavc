@@ -45,7 +45,7 @@ internal sealed class OverlayVisitor : EntityVisitor
       }
 
       var vmt = VMT.GetCached(_root, entity["material"]);
-      if (vmt == null)
+      if (vmt is null)
       {
         logger.Warn($"Material {entity["material"]} in info_overlay {entity["id"]} not found");
       }

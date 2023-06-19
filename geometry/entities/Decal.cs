@@ -23,6 +23,6 @@ public sealed class Decal
       .Select(f => (f.Plane.DistanceTo(Origin), f))
       .Where(static df => df.Item1 is <= DecalComputation.Eps and >= -1e-4)
       .Select(df => DecalComputation.CreateClippedPoly(this, df.Item2))
-      .FirstOrDefault(static poly => poly != null);
+      .FirstOrDefault(static poly => poly is not null);
   }
 }

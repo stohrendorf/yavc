@@ -53,6 +53,6 @@ public sealed class Image
   /// <returns>The data in bgra8888 format.</returns>
   public byte[]? GetBGRA32Data()
   {
-    return Data == null ? null : ImageFormatInfo.FromFormat(Format)?.ConvertToBGRA32(Data, Width, Height);
+    return Data is null ? null : ImageFormatInfo.FromFormat(Format)?.ConvertToBGRA32(Data, Width, Height);
   }
 }

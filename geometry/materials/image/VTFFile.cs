@@ -81,7 +81,7 @@ public sealed class VTFFile
     }
 
     var highResFormatInfo = ImageFormatInfo.FromFormat(highResImageFormat);
-    Debug.Assert(highResFormatInfo != null);
+    Debug.Assert(highResFormatInfo is not null);
     var lowResFormatInfo = ImageFormatInfo.FromFormat(lowResImageFormat);
 
     var thumbnailSize = lowResImageFormat == ImageFormat.None

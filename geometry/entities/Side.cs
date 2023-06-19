@@ -30,7 +30,7 @@ public sealed class Side
 
   internal Vector2 CalcUV(Vector vec, VMT.TextureTransform? transform = null)
   {
-    if (Material == null)
+    if (Material is null)
     {
       return new Vector2(0.0, 0.0);
     }

@@ -20,13 +20,13 @@ internal sealed class RopeVisitor : EntityVisitor
   {
     get
     {
-      var allReferences = _keyPoints.Values.Where(static keyPoint => keyPoint.Next != null)
+      var allReferences = _keyPoints.Values.Where(static keyPoint => keyPoint.Next is not null)
         .Select(static keyPoint => keyPoint.Next!)
-        .Concat(_starts.Where(static s => s.Next != null).Select(static s => s.Next!)).ToHashSet();
+        .Concat(_starts.Where(static s => s.Next is not null).Select(static s => s.Next!)).ToHashSet();
       var namedStarts = _keyPoints.Where(kv => !allReferences.Contains(kv.Key)).Select(static kv => kv.Value);
-      foreach (var start in _starts.Where(static start => start.Next != null).Concat(namedStarts))
+      foreach (var start in _starts.Where(static start => start.Next is not null).Concat(namedStarts))
       {
-        if (start.Next == null)
+        if (start.Next is null)
         {
           logger.Warn($"Rope start {start.ID} at {start.Origin} has no following keypoint");
           continue;
@@ -36,7 +36,7 @@ internal sealed class RopeVisitor : EntityVisitor
         var pt = start;
         var visited = new HashSet<int>();
         Vector? p0 = null;
-        while (pt.Next != null)
+        while (pt.Next is not null)
         {
           if (!_keyPoints.TryGetValue(pt.Next, out var next))
           {
@@ -65,13 +65,13 @@ internal sealed class RopeVisitor : EntityVisitor
             p0 = start.Origin;
           }
 
-          Debug.Assert(p0 != null);
+          Debug.Assert(p0 is not null);
 
           currentChain.AddRange(points.Select(point => point - p0.Value));
           pt = next;
         }
 
-        Debug.Assert(p0 != null);
+        Debug.Assert(p0 is not null);
         yield return (start.Name ?? $"rope-{start.ID}", p0.Value, currentChain);
       }
     }
@@ -92,7 +92,7 @@ internal sealed class RopeVisitor : EntityVisitor
       var id = entity["id"].ParseToInt();
       var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, additionalLength,
         subdivision);
-      if (name == null)
+      if (name is null)
       {
         _starts.Add(keyPoint);
       }

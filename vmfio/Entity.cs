@@ -39,7 +39,7 @@ public sealed class Entity
   public string GetValue(string key)
   {
     var value = GetOptionalValue(key);
-    if (value == null)
+    if (value is null)
     {
       throw new KeyNotFoundException($"Key {key} not found");
     }

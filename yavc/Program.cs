@@ -27,9 +27,9 @@ file static class Program
     logger.Info("Reading VMF");
     var data = VMFIO.Parser.ParseFile(parsed!.Value.VMF);
 
-    if (parsed.Value.DAE != null)
+    if (parsed.Value.DAE is not null)
     {
-      if (parsed.Value.Materials == null)
+      if (parsed.Value.Materials is null)
       {
         logger.Error("Provide materials folder for geometry output");
         return;
@@ -88,7 +88,7 @@ file static class Program
 
         var createdDecals = 0;
         foreach (var poly in candidates.Select(candidate => decal.TryConvert(candidate))
-                   .Where(static poly => poly != null))
+                   .Where(static poly => poly is not null))
         {
           createdDecals++;
           scene.RootNode.Children.Add(poly!.ExportDecal(decal.Material, scene));
@@ -135,11 +135,11 @@ file static class Program
         $"Wrote {converter.Vmf.Solids.Count} solids, {numRopes} ropes, {decalVis.Decals.Count} decals, {overlaysVis.Overlays.Count} overlays, {scene.Meshes.Count} meshes, {totalVertices} vertices, {totalFaces} faces");
     }
 
-    if (parsed.Value.Entities != null)
+    if (parsed.Value.Entities is not null)
     {
       logger.Info("Exporting VMF entities");
 
-      if (parsed.Value.Sounds == null)
+      if (parsed.Value.Sounds is null)
       {
         logger.Error("Provide sounds folder for entities output");
         return;

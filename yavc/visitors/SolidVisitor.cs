@@ -49,7 +49,7 @@ internal sealed class SolidVisitor : EntityVisitor
 
     _displacement = null;
 
-    Debug.Assert(_sides != null);
+    Debug.Assert(_sides is not null);
     _sides!.Add(side);
   }
 
@@ -143,24 +143,24 @@ internal sealed class SolidVisitor : EntityVisitor
         ReadDisplacementInfo(entity);
         break;
       case "normals":
-        Debug.Assert(_displacement != null);
-        ReadVectorRow(_displacement!.Normals, entity);
+        Debug.Assert(_displacement is not null);
+        ReadVectorRow(_displacement.Normals, entity);
         break;
       case "distances":
-        Debug.Assert(_displacement != null);
-        ReadScalarRow(_displacement!.Distances, entity);
+        Debug.Assert(_displacement is not null);
+        ReadScalarRow(_displacement.Distances, entity);
         break;
       case "alphas":
-        Debug.Assert(_displacement != null);
-        ReadScalarRow(_displacement!.Alphas, entity);
+        Debug.Assert(_displacement is not null);
+        ReadScalarRow(_displacement.Alphas, entity);
         break;
       case "offsets":
-        Debug.Assert(_displacement != null);
-        ReadVectorRow(_displacement!.Offsets, entity);
+        Debug.Assert(_displacement is not null);
+        ReadVectorRow(_displacement.Offsets, entity);
         break;
       case "offset_normals":
-        Debug.Assert(_displacement != null);
-        ReadVectorRow(_displacement!.OffsetNormals, entity);
+        Debug.Assert(_displacement is not null);
+        ReadVectorRow(_displacement.OffsetNormals, entity);
         break;
       default:
         entity.Accept(this);

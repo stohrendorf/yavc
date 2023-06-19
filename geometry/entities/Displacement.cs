@@ -26,7 +26,7 @@ public sealed class Displacement
   {
     get
     {
-      Debug.Assert(_polygons != null);
+      Debug.Assert(_polygons is not null);
       return _polygons;
     }
   }
@@ -35,7 +35,7 @@ public sealed class Displacement
   {
     get
     {
-      Debug.Assert(_flatPolygons != null);
+      Debug.Assert(_flatPolygons is not null);
       return _flatPolygons;
     }
   }
@@ -46,7 +46,7 @@ public sealed class Displacement
   {
     get
     {
-      Debug.Assert(_side != null);
+      Debug.Assert(_side is not null);
       int[] vertexWindingIndices = { -1, -1, -1, -1 };
       var bestDistance = double.PositiveInfinity;
       for (var i = 0; i < _side.Polygon.Count; i++)
@@ -100,9 +100,9 @@ public sealed class Displacement
       throw new ArgumentException($"Expected polygon with 4 vertices, got {side.Polygon.Count}");
     }
 
-    if (_side != null)
+    if (_side is not null)
     {
-      Debug.Assert(_polygons != null);
+      Debug.Assert(_polygons is not null);
       if (_side != side)
       {
         throw new ArgumentException();

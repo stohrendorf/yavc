@@ -54,13 +54,13 @@ public sealed class VMT : IEquatable<VMT>
 
     string? FindTexture(string? p)
     {
-      if (p == null)
+      if (p is null)
       {
         return null;
       }
 
       var resolved = FindSubPath(root, EnsureExtension(p, "vtf"));
-      if (resolved != null)
+      if (resolved is not null)
       {
         return Path.GetRelativePath(root, resolved);
       }
@@ -89,14 +89,14 @@ public sealed class VMT : IEquatable<VMT>
     BlendMaskTransform = new TextureTransform(rootChild.GetOptionalValue("$blendmasktransform"));
 
     var refTexture = FlowMap ?? BaseTexture ?? NormalMap;
-    if (refTexture == null && !ignoreMissingVTF)
+    if (refTexture is null && !ignoreMissingVTF)
     {
       throw new FileNotFoundException($"Material {subPath} contains no reference texture");
     }
 
     try
     {
-      if (refTexture != null)
+      if (refTexture is not null)
       {
         VTF = VTFInfoCache.Get(Path.Join(root, refTexture));
       }
@@ -135,7 +135,7 @@ public sealed class VMT : IEquatable<VMT>
   internal double DecalHeight => Height * _decalScale;
   internal double Height => VTF?.Height ?? 1;
 
-  public bool IsBlending => BaseTexture2 != null;
+  public bool IsBlending => BaseTexture2 is not null;
 
   public bool Equals(VMT? other)
   {
@@ -274,7 +274,7 @@ public sealed class VMT : IEquatable<VMT>
 
     internal TextureTransform(string? transformString)
     {
-      if (transformString != null)
+      if (transformString is not null)
       {
         var transformMatch = transformRe.Match(transformString);
         if (!transformMatch.Success)

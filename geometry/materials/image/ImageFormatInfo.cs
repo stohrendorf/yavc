@@ -397,7 +397,7 @@ public sealed class ImageFormatInfo
         if (BitsPerPixel > 32)
           throw new NotImplementedException($"Unsupported format: {Format}");
 
-        Debug.Assert(_masks != null);
+        Debug.Assert(_masks is not null);
         for (int i = 0, j = 0; i < data.Length; i += BytesPerPixel, j += 4)
         {
           var val = 0u;

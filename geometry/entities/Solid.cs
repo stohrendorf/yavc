@@ -44,9 +44,9 @@ public sealed class Solid
       return existing ?? _vertices.Add(v);
     }
 
-    if (sides.Any(static side => side.Displacement != null))
+    if (sides.Any(static side => side.Displacement is not null))
     {
-      foreach (var side in sides.Where(static side => side.Displacement != null && side.Material != null))
+      foreach (var side in sides.Where(static side => side.Displacement is not null && side.Material != null))
       {
         if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
         {
@@ -59,7 +59,7 @@ public sealed class Solid
     }
     else
     {
-      foreach (var side in sides.Where(static side => side.Material != null))
+      foreach (var side in sides.Where(static side => side.Material is not null))
       {
         if (!PolygonIndicesByMaterial.TryGetValue(side.Material!, out var pi))
         {

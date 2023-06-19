@@ -18,7 +18,7 @@ public sealed class Vertex : IEquatable<Vertex>
 
   public bool Equals(Vertex? other)
   {
-    return other != null && Co.Equals(other.Co) && UV.Equals(other.UV);
+    return other is not null && Co.Equals(other.Co) && UV.Equals(other.UV);
   }
 
   public override bool Equals(object? obj)

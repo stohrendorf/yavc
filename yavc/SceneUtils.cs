@@ -34,22 +34,22 @@ internal static class SceneUtils
       }
     }
 
-    if (material.BaseTexture != null)
+    if (material.BaseTexture is not null)
     {
       TryAddTexture(material.BaseTexture, TextureType.Diffuse);
     }
 
-    if (material.NormalMap != null)
+    if (material.NormalMap is not null)
     {
       TryAddTexture(material.NormalMap, TextureType.Normals);
     }
 
-    if (material.BaseTexture2 != null)
+    if (material.BaseTexture2 is not null)
     {
       TryAddTexture(material.BaseTexture2, TextureType.Diffuse);
     }
 
-    if (material.NormalMap2 != null)
+    if (material.NormalMap2 is not null)
     {
       TryAddTexture(material.NormalMap2, TextureType.Normals);
     }
@@ -60,7 +60,7 @@ internal static class SceneUtils
     }
 
     var matProp = mat.GetProperty("$mat.refracti,0,0");
-    if (matProp == null)
+    if (matProp is null)
     {
       matProp = new MaterialProperty("$mat.refracti", 1.45f);
       mat.AddProperty(matProp);

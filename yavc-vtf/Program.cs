@@ -121,7 +121,7 @@ file static class Program
                                 throw new InvalidOperationException(
                                   $"Could not extract directory name from {pngPath}"));
       var img = images[frame];
-      if (img.FormatInfo == null)
+      if (img.FormatInfo is null)
       {
         throw new NullReferenceException();
       }
@@ -170,32 +170,32 @@ file static class Program
       logger.Info($"({i + 1} of {vmts.Count}) {vmtPath}");
       var vmt = new VMT(parsed.Value.In, Path.GetRelativePath(parsed.Value.In, vmtPath), true);
 
-      if (vmt.BaseTexture != null)
+      if (vmt.BaseTexture is not null)
       {
         await ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
       }
 
-      if (vmt.BaseTexture2 != null)
+      if (vmt.BaseTexture2 is not null)
       {
         await ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
       }
 
-      if (vmt.NormalMap != null)
+      if (vmt.NormalMap is not null)
       {
         await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
       }
 
-      if (vmt.NormalMap2 != null)
+      if (vmt.NormalMap2 is not null)
       {
         await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
       }
 
-      if (vmt.NormalMap != null)
+      if (vmt.NormalMap is not null)
       {
         await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
       }
 
-      if (vmt.NormalMap2 != null)
+      if (vmt.NormalMap2 is not null)
       {
         await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out, vmt.SsBump && parsed.Value.Normalize);
       }

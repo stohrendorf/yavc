@@ -45,7 +45,7 @@ public sealed class Overlay
         foreach (var v in Vertices)
         {
           var projected = VectorUtils.RayPlaneIntersection(v.Co, BasisNormal, side.Plane);
-          Debug.Assert(projected != null);
+          Debug.Assert(projected is not null);
           Debug.Assert(side.Plane.DistanceTo(projected.Value) < 1e-6);
           overlayPolygon.Add(new Vertex(projected.Value,
             side.Material?.BaseTextureTransform.Apply(v.UV) ?? v.UV, 255));
@@ -54,7 +54,7 @@ public sealed class Overlay
         // clamp the overlay to the side it's projected onto
         var cutPoly =
           side.Polygon.EdgePlanes.Aggregate(overlayPolygon, static (current, edgePlane) => current.Cut(edgePlane));
-        if (side.Displacement == null)
+        if (side.Displacement is null)
         {
           var result = new Polygon();
           var offset = side.Plane.Normal.Normalized * 0.1;

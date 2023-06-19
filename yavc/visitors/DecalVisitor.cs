@@ -27,7 +27,7 @@ internal sealed class DecalVisitor : EntityVisitor
     if (entity.Classname == "infodecal")
     {
       var vmt = VMT.GetCached(_root, entity["texture"]);
-      if (vmt == null)
+      if (vmt is null)
       {
         logger.Warn($"Material {entity["texture"]} in infodecal {entity["id"]} not found");
       }

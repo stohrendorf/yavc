@@ -86,7 +86,7 @@ public static class Parser
   private static Token ConsumeRequired(this IEnumerator<Token> tokens)
   {
     var result = tokens.Consume();
-    if (result == null)
+    if (result is null)
     {
       throw new NullReferenceException();
     }
@@ -149,7 +149,7 @@ public static class Parser
       while (true)
       {
         var typename = tokens.Consume();
-        if (typename == null)
+        if (typename is null)
         {
           break;
         }

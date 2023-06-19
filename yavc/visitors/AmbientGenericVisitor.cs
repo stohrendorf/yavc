@@ -25,7 +25,7 @@ internal sealed class AmbientGenericVisitor : EntityVisitor
     var classname = entity.Classname;
     if (classname == "ambient_generic")
     {
-      if (entity.GetOptionalValue("message") == null)
+      if (entity.GetOptionalValue("message") is null)
       {
         logger.Warn($"ambient_generic {entity["id"]} has no message");
       }
