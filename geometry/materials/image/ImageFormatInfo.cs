@@ -211,7 +211,9 @@ public sealed class ImageFormatInfo
                    alphaBitsPerPixel is 0 or 32;
 
     if (_is8Aligned || _is16Aligned || _is32Aligned)
+    {
       return;
+    }
 
     var masks = new[]
     {
@@ -256,7 +258,7 @@ public sealed class ImageFormatInfo
   }
 
   /// <summary>
-  ///     Gets the size of the image data for this format in bytes
+  ///   Gets the size of the image data for this format in bytes
   /// </summary>
   /// <param name="width">The width of the image</param>
   /// <param name="height">The height of the image</param>
@@ -267,13 +269,29 @@ public sealed class ImageFormatInfo
     {
       case ImageFormat.DXT1:
       case ImageFormat.DXT1OneBitAlpha:
-        if (width is < 4 and > 0) width = 4;
-        if (height is < 4 and > 0) height = 4;
+        if (width is < 4 and > 0)
+        {
+          width = 4;
+        }
+
+        if (height is < 4 and > 0)
+        {
+          height = 4;
+        }
+
         return (width + 3) / 4 * ((height + 3) / 4) * 8;
       case ImageFormat.DXT3:
       case ImageFormat.DXT5:
-        if (width is < 4 and > 0) width = 4;
-        if (height is < 4 and > 0) height = 4;
+        if (width is < 4 and > 0)
+        {
+          width = 4;
+        }
+
+        if (height is < 4 and > 0)
+        {
+          height = 4;
+        }
+
         return (width + 3) / 4 * ((height + 3) / 4) * 16;
       default:
         return width * height * BytesPerPixel;
@@ -281,7 +299,7 @@ public sealed class ImageFormatInfo
   }
 
   /// <summary>
-  ///     Convert an array of data in this format to a standard bgra8888 format.
+  ///   Convert an array of data in this format to a standard bgra8888 format.
   /// </summary>
   /// <param name="data">The data in this format</param>
   /// <param name="width">The width of the image</param>
@@ -349,7 +367,10 @@ public sealed class ImageFormatInfo
           var shorts = new ushort[data.Length / 2];
           for (int i = 0, j = 0; i < data.Length; i += BytesPerPixel, j += 4)
           {
-            for (var k = 0; k < 4; k++) shorts[j + k] = BitConverter.ToUInt16(data, i + k * 2);
+            for (var k = 0; k < 4; k++)
+            {
+              shorts[j + k] = BitConverter.ToUInt16(data, i + k * 2);
+            }
 
             var lum = shorts[j + 0] * 0.299f + shorts[j + 1] * 0.587f + shorts[j + 2] * 0.114f;
             logAverageLuminance += (float)Math.Log(0.0000000001d + lum);
@@ -395,7 +416,9 @@ public sealed class ImageFormatInfo
         // Handle custom-aligned data that fits into a uint
 
         if (BitsPerPixel > 32)
+        {
           throw new NotImplementedException($"Unsupported format: {Format}");
+        }
 
         Debug.Assert(_masks is not null);
         for (int i = 0, j = 0; i < data.Length; i += BytesPerPixel, j += 4)
@@ -456,8 +479,12 @@ public sealed class ImageFormatInfo
   private static void TransformBluescreen(byte[] bytes, int index, int count)
   {
     for (var i = index; i < index + count; i += 4)
+    {
       if (bytes[i + 0] == byte.MaxValue && bytes[i + 1] == 0 && bytes[i + 2] == 0)
+      {
         bytes[i + 3] = 0;
+      }
+    }
   }
 
   private static void TransformLuminance(byte[] bytes, int index, int count)
@@ -481,7 +508,9 @@ public sealed class ImageFormatInfo
     }
 
     if (dest == 0)
+    {
       return b;
+    }
 
     partial >>= bits - dest;
     b <<= dest;
@@ -508,7 +537,11 @@ public sealed class ImageFormatInfo
 
     public byte Apply(uint value, int bitsPerPixel)
     {
-      if (Index < 0) return Component == 'a' ? byte.MaxValue : byte.MinValue;
+      if (Index < 0)
+      {
+        return Component == 'a' ? byte.MaxValue : byte.MinValue;
+      }
+
       var im = value >> (bitsPerPixel - Offset - Size);
       im &= Bitmask;
       return PartialToByte((byte)im, Size);
