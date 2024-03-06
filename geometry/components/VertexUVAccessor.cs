@@ -6,26 +6,26 @@ namespace geometry.components;
 
 public sealed class VertexUVAccessor : IEnumerable<Vector2>
 {
-  private readonly IList<Vertex> _vertices;
+    private readonly IList<Vertex> _vertices;
 
-  internal VertexUVAccessor(IList<Vertex> vertices)
-  {
-    _vertices = vertices;
-  }
+    internal VertexUVAccessor(IList<Vertex> vertices)
+    {
+        _vertices = vertices;
+    }
 
-  internal Vector2 this[int i]
-  {
-    get => _vertices[i].UV;
-    set => _vertices[i].UV = value;
-  }
+    internal Vector2 this[int i]
+    {
+        get => _vertices[i].UV;
+        set => _vertices[i].UV = value;
+    }
 
-  public IEnumerator<Vector2> GetEnumerator()
-  {
-    return _vertices.Select(static v => v.UV).GetEnumerator();
-  }
+    public IEnumerator<Vector2> GetEnumerator()
+    {
+        return _vertices.Select(static v => v.UV).GetEnumerator();
+    }
 
-  IEnumerator IEnumerable.GetEnumerator()
-  {
-    return GetEnumerator();
-  }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 }

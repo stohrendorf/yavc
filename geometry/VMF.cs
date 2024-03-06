@@ -3,7 +3,7 @@ using geometry.entities;
 
 namespace geometry;
 
-public sealed class VMF
+public sealed class Vmf
 {
-  public readonly List<Solid> Solids = new();
+    public readonly List<Solid> Solids = [];
 }

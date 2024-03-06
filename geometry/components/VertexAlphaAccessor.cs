@@ -6,26 +6,26 @@ namespace geometry.components;
 
 internal sealed class VertexAlphaAccessor : IEnumerable<Vector>
 {
-  private readonly IList<Vertex> _vertices;
+    private readonly IList<Vertex> _vertices;
 
-  public VertexAlphaAccessor(IList<Vertex> vertices)
-  {
-    _vertices = vertices;
-  }
+    public VertexAlphaAccessor(IList<Vertex> vertices)
+    {
+        _vertices = vertices;
+    }
 
-  public double this[int i]
-  {
-    get => _vertices[i].Alpha;
-    set => _vertices[i].Alpha = value;
-  }
+    public double this[int i]
+    {
+        get => _vertices[i].Alpha;
+        set => _vertices[i].Alpha = value;
+    }
 
-  public IEnumerator<Vector> GetEnumerator()
-  {
-    return _vertices.Select(static v => v.Co).GetEnumerator();
-  }
+    public IEnumerator<Vector> GetEnumerator()
+    {
+        return _vertices.Select(static v => v.Co).GetEnumerator();
+    }
 
-  IEnumerator IEnumerable.GetEnumerator()
-  {
-    return GetEnumerator();
-  }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 }

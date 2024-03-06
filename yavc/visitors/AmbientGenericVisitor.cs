@@ -9,34 +9,34 @@ namespace yavc.visitors;
 
 internal sealed class AmbientGenericVisitor : EntityVisitor
 {
-  private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
-  private readonly List<AmbientGeneric> _ambientGenerics = new();
-  private readonly string _root;
+    private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+    private readonly List<AmbientGeneric> _ambientGenerics = [];
+    private readonly string _root;
 
-  public AmbientGenericVisitor(string root)
-  {
-    _root = root;
-  }
-
-  public IList<AmbientGeneric> AmbientGenerics => _ambientGenerics;
-
-  public override void Visit(Entity entity, bool skipTools)
-  {
-    var classname = entity.Classname;
-    if (classname == "ambient_generic")
+    public AmbientGenericVisitor(string root)
     {
-      if (entity.GetOptionalValue("message") is null)
-      {
-        logger.Warn($"ambient_generic {entity["id"]} has no message");
-      }
-      else
-      {
-        var ag = new AmbientGeneric(Path.Join(_root, entity["message"]), entity["pitch"].ParseToDouble(),
-          entity["radius"].ParseToDouble(), entity["origin"].ParseToVector());
-        _ambientGenerics.Add(ag);
-      }
+        _root = root;
     }
 
-    entity.Accept(this, skipTools);
-  }
+    public IList<AmbientGeneric> AmbientGenerics => _ambientGenerics;
+
+    public override void Visit(Entity entity, bool skipTools)
+    {
+        var classname = entity.Classname;
+        if (classname == "ambient_generic")
+        {
+            if (entity.GetOptionalValue("message") is null)
+            {
+                logger.Warn($"ambient_generic {entity["id"]} has no message");
+            }
+            else
+            {
+                var ag = new AmbientGeneric(Path.Join(_root, entity["message"]), entity["pitch"].ParseToDouble(),
+                    entity["radius"].ParseToDouble(), entity["origin"].ParseToVector());
+                _ambientGenerics.Add(ag);
+            }
+        }
+
+        entity.Accept(this, skipTools);
+    }
 }
