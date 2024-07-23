@@ -15,7 +15,10 @@ internal static class Catenary
 
     private static IEnumerable<double> LinSpace(double a, double b, int n)
     {
-        if (n < 2) return Enumerable.Repeat(b, 1);
+        if (n < 2)
+        {
+            return Enumerable.Repeat(b, 1);
+        }
 
         var d = (b - a) / (n - 1);
         return Enumerable.Range(0, n).Select(i => a + d * i);
@@ -24,9 +27,12 @@ internal static class Catenary
     private static IEnumerable<Vector2> Calculate2D(double dx, double dy, double length, int subdivisions)
     {
         // https://math.stackexchange.com/questions/3557767/how-to-construct-a-catenary-of-a-specified-length-through-two-specified-points
-        if (dx < 1e-8) throw new ArgumentOutOfRangeException(nameof(dx));
+        ArgumentOutOfRangeException.ThrowIfLessThan(dx, 1e-8, nameof(dx));
 
-        if (length <= 0 || length * length < dx * dx + dy * dy) throw new ArgumentOutOfRangeException(nameof(length));
+        if (length <= 0 || length * length < dx * dx + dy * dy)
+        {
+            throw new ArgumentOutOfRangeException(nameof(length));
+        }
 
         var r = Math.Sqrt(length * length - dy * dy) / dx;
         Debug.Assert(r > 1, $"r={r} dx={dx} dy={dy} length={length}");
@@ -35,12 +41,20 @@ internal static class Catenary
         for (var i = 0; i < MaxIter; ++i)
         {
             if (i == MaxIter - 1)
+            {
                 logger.Warn($"Reached maximum iteration count of {MaxIter} while calculating initial rope values");
+            }
 
             var xx = r * aN - Math.Sinh(aN);
-            if (Math.Abs(xx / aN) <= 1e-15) break;
+            if (Math.Abs(xx / aN) <= 1e-15)
+            {
+                break;
+            }
 
-            if (!double.IsFinite(aN)) throw new ArithmeticException("aN calculation gave NaN");
+            if (!double.IsFinite(aN))
+            {
+                throw new ArithmeticException("aN calculation gave NaN");
+            }
 
             aN += xx / (Math.Cosh(aN) - r);
         }
@@ -61,9 +75,15 @@ internal static class Catenary
 
     public static IEnumerable<Vector> Calculate(Vector p0, Vector p1, double additionalLength, int subdivisions)
     {
-        if (p0.Distance(p1) < 1e-8) throw new ArgumentException($"Distance between points {p0} and {p1} too small");
+        if (p0.Distance(p1) < 1e-8)
+        {
+            throw new ArgumentException($"Distance between points {p0} and {p1} too small");
+        }
 
-        if (subdivisions < 0) throw new ArgumentException("subdivisions must be >= 0", nameof(subdivisions));
+        if (subdivisions < 0)
+        {
+            throw new ArgumentException("subdivisions must be >= 0", nameof(subdivisions));
+        }
 
         var d = p1 - p0;
         var dLength = d.Length;
@@ -72,14 +92,18 @@ internal static class Catenary
 
         if (dLength >= totalLength)
             // rope is stretched: straight line
+        {
             return new[] { p0, p1 };
+        }
 
         if (hDist >= VerticalThreshold)
+        {
             return Calculate2D(hDist, p1.Z - p0.Z, totalLength, subdivisions).Select(xy => new Vector(
                 p0.X + xy.X * d.X,
                 p0.Y + xy.X * d.Y,
                 p0.Z + xy.Y
             ));
+        }
 
         var dz = Math.Abs(p1.Z - p0.Z);
         var overhang = totalLength - 2 * dz;

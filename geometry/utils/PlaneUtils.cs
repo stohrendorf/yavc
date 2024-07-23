@@ -10,19 +10,12 @@ internal static class PlaneUtils
 {
     public static Polygon ToPolygon(this Plane plane, Side side)
     {
-        Vector n;
-        switch (plane.Normal.MaxAxis())
+        var n = plane.Normal.MaxAxis() switch
         {
-            case 0:
-            case 1:
-                n = Vector.UnitZ;
-                break;
-            case 2:
-                n = Vector.UnitX;
-                break;
-            default:
-                throw new Exception();
-        }
+            0 or 1 => Vector.UnitZ,
+            2 => Vector.UnitX,
+            _ => throw new Exception(),
+        };
 
         // project n onto p.Normal, then subtract that from the normal, giving the first base vector of the plane
         Debug.Assert(Math.Abs(plane.Normal.LengthSquared - 1) < 1e-8);

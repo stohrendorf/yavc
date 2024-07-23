@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace geometry.components;
 
@@ -19,11 +20,13 @@ public sealed class VertexUVAccessor : IEnumerable<Vector2>
         set => _vertices[i].UV = value;
     }
 
+    [MustDisposeResource]
     public IEnumerator<Vector2> GetEnumerator()
     {
         return _vertices.Select(static v => v.UV).GetEnumerator();
     }
 
+    [MustDisposeResource]
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();

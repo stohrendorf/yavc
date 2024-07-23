@@ -86,7 +86,10 @@ public static class Parser
     private static Token ConsumeRequired(this IEnumerator<Token> tokens)
     {
         var result = tokens.Consume();
-        if (result is null) throw new NullReferenceException();
+        if (result is null)
+        {
+            throw new NullReferenceException();
+        }
 
         return result;
     }
@@ -100,7 +103,10 @@ public static class Parser
             var first = tokens.ConsumeRequired();
             if (first.Value == "}")
             {
-                if (first.Quoted) throw new Exception("Quoted '}' found");
+                if (first.Quoted)
+                {
+                    throw new Exception("Quoted '}' found");
+                }
 
                 return new Entity(typename, kvs, children);
             }
@@ -109,7 +115,10 @@ public static class Parser
 
             if (next.Value == "{")
             {
-                if (next.Quoted) throw new Exception("Quoted '{' found");
+                if (next.Quoted)
+                {
+                    throw new Exception("Quoted '{' found");
+                }
 
                 children.Add(ReadEntity(first.Value, tokens));
             }
@@ -131,16 +140,25 @@ public static class Parser
                 parsed = Grammar.Parse(f);
             }
 
-            if (!parsed.Success) throw new IOException($"Failed to parse {filename}: {parsed.Error!}");
+            if (!parsed.Success)
+            {
+                throw new IOException($"Failed to parse {filename}: {parsed.Error!}");
+            }
 
             using var tokens = parsed.Value.GetEnumerator();
             while (true)
             {
                 var typename = tokens.Consume();
-                if (typename is null) break;
+                if (typename is null)
+                {
+                    break;
+                }
 
                 var open = tokens.ConsumeRequired();
-                if (open.Value != "{" || open.Quoted) throw new Exception();
+                if (open.Value != "{" || open.Quoted)
+                {
+                    throw new Exception();
+                }
 
                 result.Add(ReadEntity(typename.Value, tokens));
             }

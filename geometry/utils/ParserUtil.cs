@@ -5,19 +5,11 @@ using geometry.components;
 
 namespace geometry.utils;
 
-public static class ParserUtil
+public static partial class ParserUtil
 {
-    private static readonly Regex
-        axisPattern = new("^\\[([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)] ([^ ]+)$", RegexOptions.Compiled);
-
-    private static readonly Regex
-        planePattern = new(
-            @"^\(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\)$",
-            RegexOptions.Compiled);
-
     public static Plane ParseToPlane(this string data)
     {
-        var match = planePattern.Match(data);
+        var match = GetPlanePattern().Match(data);
         if (!match.Success)
         {
             throw new ArgumentException($"Invalid plane string: {data}");
@@ -38,7 +30,7 @@ public static class ParserUtil
 
     public static TextureAxis ParseToTextureAxis(this string data)
     {
-        var match = axisPattern.Match(data);
+        var match = GetAxisPattern().Match(data);
         if (!match.Success)
         {
             throw new ArgumentException($"Invalid texture axis string: {data}");
@@ -100,4 +92,11 @@ public static class ParserUtil
             ParseToDouble(cols[1])
         );
     }
+
+    [GeneratedRegex("^\\[([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)] ([^ ]+)$", RegexOptions.Compiled)]
+    private static partial Regex GetAxisPattern();
+
+    [GeneratedRegex(@"^\(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\) \(([^ ]+) ([^ ]+) ([^ ]+)\)$",
+        RegexOptions.Compiled)]
+    private static partial Regex GetPlanePattern();
 }

@@ -8,17 +8,11 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal sealed class DecalVisitor : EntityVisitor
+internal sealed class DecalVisitor(string _root) : EntityVisitor
 {
     private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
     private readonly List<Decal> _decals = [];
-    private readonly string _root;
-
-    public DecalVisitor(string root)
-    {
-        _root = root;
-    }
 
     public IReadOnlyList<Decal> Decals => _decals;
 

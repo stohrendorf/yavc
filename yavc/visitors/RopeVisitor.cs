@@ -54,10 +54,14 @@ internal sealed class RopeVisitor : EntityVisitor
                         (pt.Subdivision + 1) * RopeSegmentFactor);
 
                     if (!ReferenceEquals(pt, start))
+                    {
                         points = points
                             .Skip(1); // the first point of any segment equals the last point of the previous segments
+                    }
                     else
+                    {
                         p0 = start.Origin;
+                    }
 
                     Debug.Assert(p0 is not null);
 
@@ -87,32 +91,31 @@ internal sealed class RopeVisitor : EntityVisitor
             var keyPoint = new RopeKeyPoint(id, origin, name, nextName == name ? null : nextName, additionalLength,
                 subdivision);
             if (name is null)
+            {
                 _starts.Add(keyPoint);
+            }
             else
+            {
                 _keyPoints.Add(name, keyPoint);
+            }
         }
 
         entity.Accept(this, skipTools);
     }
 
-    private sealed class RopeKeyPoint
+    private sealed class RopeKeyPoint(
+        int id,
+        Vector origin,
+        string? name,
+        string? next,
+        double additionalLength,
+        int subdivision)
     {
-        public readonly double AdditionalLength;
-        public readonly int Id;
-        public readonly string? Name;
-        public readonly string? Next;
-        public readonly Vector Origin;
-        public readonly int Subdivision;
-
-        public RopeKeyPoint(int id, Vector origin, string? name, string? next, double additionalLength,
-            int subdivision)
-        {
-            Id = id;
-            Origin = origin;
-            Name = name;
-            Next = next;
-            AdditionalLength = additionalLength;
-            Subdivision = subdivision;
-        }
+        public readonly double AdditionalLength = additionalLength;
+        public readonly int Id = id;
+        public readonly string? Name = name;
+        public readonly string? Next = next;
+        public readonly Vector Origin = origin;
+        public readonly int Subdivision = subdivision;
     }
 }

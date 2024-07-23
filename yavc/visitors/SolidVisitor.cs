@@ -43,7 +43,7 @@ internal sealed class SolidVisitor : EntityVisitor
         entity.Accept(this, skipTools);
 
         var material = entity["material"];
-        var vmt = skipTools && material.ToLower().StartsWith("tools/")
+        var vmt = skipTools && material.StartsWith("tools/", StringComparison.InvariantCultureIgnoreCase)
             ? null
             : VMT.TryGetCached(_vtfBasePath, material + ".vmt");
 
@@ -59,7 +59,10 @@ internal sealed class SolidVisitor : EntityVisitor
     {
         _displacement = new Displacement { Power = int.Parse(entity["power"]) };
         var cols = entity["startposition"].Replace("[", "").Replace("]", "").Split(" ");
-        if (cols.Length != 3) throw new Exception();
+        if (cols.Length != 3)
+        {
+            throw new Exception();
+        }
 
         _displacement.StartPosition = new Vector(
             StringUtil.ParseDouble(cols[0]),
@@ -88,14 +91,19 @@ internal sealed class SolidVisitor : EntityVisitor
                 continue;
             }
 
-            if (row.Length != n * 3) throw new Exception($"{n * 3} != {row.Length}");
+            if (row.Length != n * 3)
+            {
+                throw new Exception($"{n * 3} != {row.Length}");
+            }
 
             for (var j = 0; j < n; ++j)
+            {
                 dest[i].Add(new Vector(
                     StringUtil.ParseDouble(row[j * 3 + 0]),
                     StringUtil.ParseDouble(row[j * 3 + 1]),
                     StringUtil.ParseDouble(row[j * 3 + 2])
                 ));
+            }
         }
     }
 
@@ -111,9 +119,15 @@ internal sealed class SolidVisitor : EntityVisitor
                 continue;
             }
 
-            if (row.Length != n) throw new Exception($"{n} != {row.Length}");
+            if (row.Length != n)
+            {
+                throw new Exception($"{n} != {row.Length}");
+            }
 
-            for (var j = 0; j < n; ++j) dest[i].AddRange(row.Select(StringUtil.ParseDouble));
+            for (var j = 0; j < n; ++j)
+            {
+                dest[i].AddRange(row.Select(StringUtil.ParseDouble));
+            }
         }
     }
 

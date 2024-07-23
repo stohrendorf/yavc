@@ -54,6 +54,7 @@ file static class Program
         var files = new List<string>();
 
         while (queue.TryDequeue(out var p))
+        {
             foreach (var subPath in Directory.EnumerateFileSystemEntries(p))
             {
                 if (Directory.Exists(subPath))
@@ -62,10 +63,14 @@ file static class Program
                     continue;
                 }
 
-                if (Path.GetExtension(subPath).ToLower() != extension) continue;
+                if (Path.GetExtension(subPath).Equals(extension, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
 
                 files.Add(subPath);
             }
+        }
 
         return files;
     }
@@ -115,7 +120,10 @@ file static class Program
                                       throw new InvalidOperationException(
                                           $"Could not extract directory name from {pngPath}"));
             var img = images[frame];
-            if (img.FormatInfo is null) throw new NullReferenceException();
+            if (img.FormatInfo is null)
+            {
+                throw new NullReferenceException();
+            }
 
             var data = Image.LoadPixelData<Bgra32>(img.GetBGRA32Data(), img.Width, img.Height);
             if (convertSsBump)
@@ -126,22 +134,31 @@ file static class Program
                     var converted = new Image<Rgba32>(img.Width, img.Height);
                     for (var y = 0; y < img.Height; ++y)
                     for (var x = 0; x < img.Width; ++x)
+                    {
                         converted[x, y] = SSBumpToNormal(data[x, y]);
+                    }
 
                     return converted.CloneAs<Bgra32>();
                 });
             }
 
             if (img.FormatInfo.AlphaBitsPerPixel > 0)
+            {
                 await data.SaveAsPngAsync(pngPath);
+            }
             else
+            {
                 await data.CloneAs<Rgb24>().SaveAsPngAsync(pngPath);
+            }
         }
     }
 
     private static async Task Main(string[] args)
     {
-        if (Parser.Default.ParseArguments<Options>(args) is not Parsed<Options> parsed) return;
+        if (Parser.Default.ParseArguments<Options>(args) is not Parsed<Options> parsed)
+        {
+            return;
+        }
 
         LogManager.ReconfigExistingLoggers();
         var vmts = CollectFiles(parsed.Value.In, ".vmt");
@@ -152,21 +169,37 @@ file static class Program
             logger.Info($"({i + 1} of {vmts.Count}) {vmtPath}");
             var vmt = new VMT(parsed.Value.In, Path.GetRelativePath(parsed.Value.In, vmtPath), true);
 
-            if (vmt.BaseTexture is not null) await ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
+            if (vmt.BaseTexture is not null)
+            {
+                await ConvertVTF(vmt.BaseTexture, parsed.Value.In, parsed.Value.Out);
+            }
 
-            if (vmt.BaseTexture2 is not null) await ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
-
-            if (vmt.NormalMap is not null) await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
-
-            if (vmt.NormalMap2 is not null) await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
+            if (vmt.BaseTexture2 is not null)
+            {
+                await ConvertVTF(vmt.BaseTexture2, parsed.Value.In, parsed.Value.Out);
+            }
 
             if (vmt.NormalMap is not null)
-                await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out,
-                    vmt.SsBump && parsed.Value.Normalize);
+            {
+                await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out);
+            }
 
             if (vmt.NormalMap2 is not null)
+            {
+                await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out);
+            }
+
+            if (vmt.NormalMap is not null)
+            {
+                await ConvertVTF(vmt.NormalMap, parsed.Value.In, parsed.Value.Out,
+                    vmt.SsBump && parsed.Value.Normalize);
+            }
+
+            if (vmt.NormalMap2 is not null)
+            {
                 await ConvertVTF(vmt.NormalMap2, parsed.Value.In, parsed.Value.Out,
                     vmt.SsBump && parsed.Value.Normalize);
+            }
         }
     }
 

@@ -9,18 +9,10 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal sealed class OverlayVisitor : EntityVisitor
+internal sealed class OverlayVisitor(string _root, IReadOnlyDictionary<int, Side> _sides) : EntityVisitor
 {
     private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
     private readonly List<Overlay> _overlays = [];
-    private readonly string _root;
-    private readonly IReadOnlyDictionary<int, Side> _sides;
-
-    public OverlayVisitor(string root, IReadOnlyDictionary<int, Side> sides)
-    {
-        _root = root;
-        _sides = sides;
-    }
 
     public IList<Overlay> Overlays => _overlays;
 
@@ -29,14 +21,20 @@ internal sealed class OverlayVisitor : EntityVisitor
         var classname = entity.Classname;
         if (classname == "info_overlay" && entity["sides"] != "")
         {
-            var sides = entity["sides"].Split(' ').Select(static sideId => sideId.ParseToInt()).ToList();
+            var sides1 = entity["sides"].Split(' ').Select(static sideId => sideId.ParseToInt()).ToList();
             var presentSides = new List<int>();
 
-            foreach (var side in sides)
+            foreach (var side in sides1)
+            {
                 if (!_sides.ContainsKey(side))
+                {
                     logger.Warn($"Overlay {entity["id"]} references side {side}, which does not exist");
+                }
                 else
+                {
                     presentSides.Add(side);
+                }
+            }
 
             var vmt = VMT.GetCached(_root, entity["material"]);
             if (vmt is null)

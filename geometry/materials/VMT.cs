@@ -13,7 +13,7 @@ using VMFIO;
 
 namespace geometry.materials;
 
-public sealed class VMT : IEquatable<VMT>
+public sealed partial class VMT : IEquatable<VMT>
 {
     private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
     private static readonly Dictionary<string, VMT?> cache = new();
@@ -224,12 +224,8 @@ public sealed class VMT : IEquatable<VMT>
         return !Equals(left, right);
     }
 
-    public readonly struct TextureTransform
+    public readonly partial struct TextureTransform
     {
-        private static readonly Regex transformRe =
-            new(
-                "^center (?<center>.+? .+?) scale (?<scale>.+? .+?) rotate (?<rotate>.+?) translate (?<translate>.+? .+?)$");
-
         private readonly bool _isIdentity;
         public readonly Vector2 Center;
         public readonly double Rotate;
@@ -240,7 +236,7 @@ public sealed class VMT : IEquatable<VMT>
         {
             if (transformString is not null)
             {
-                var transformMatch = transformRe.Match(transformString);
+                var transformMatch = GetTransformRe().Match(transformString);
                 if (!transformMatch.Success)
                     throw new ArgumentException($"Invalid texture transform '{transformString}'",
                         nameof(transformString));
@@ -275,5 +271,9 @@ public sealed class VMT : IEquatable<VMT>
             uv += Center + Translate;
             return uv;
         }
+
+        [GeneratedRegex(
+            "^center (?<center>.+? .+?) scale (?<scale>.+? .+?) rotate (?<rotate>.+?) translate (?<translate>.+? .+?)$")]
+        private static partial Regex GetTransformRe();
     }
 }

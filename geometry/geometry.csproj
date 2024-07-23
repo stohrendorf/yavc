@@ -7,7 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\utility\utility.csproj" />
-        <ProjectReference Include="..\vmfio\vmfio.csproj" />
+        <ProjectReference Include="..\utility\utility.csproj"/>
+        <ProjectReference Include="..\vmfio\vmfio.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" Version="2024.2.0"/>
     </ItemGroup>
 </Project>

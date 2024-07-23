@@ -7,16 +7,10 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal sealed class AmbientGenericVisitor : EntityVisitor
+internal sealed class AmbientGenericVisitor(string _root) : EntityVisitor
 {
     private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
     private readonly List<AmbientGeneric> _ambientGenerics = [];
-    private readonly string _root;
-
-    public AmbientGenericVisitor(string root)
-    {
-        _root = root;
-    }
 
     public IList<AmbientGeneric> AmbientGenerics => _ambientGenerics;
 

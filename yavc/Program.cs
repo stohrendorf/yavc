@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -59,7 +60,10 @@ file static class Program
 
                 mesh.Vertices.AddRange(points.Select(static v => v.ToAssimp()));
 
-                for (var i = 0; i < points.Count - 1; ++i) mesh.Faces.Add(new Face(new[] { i, i + 1 }));
+                for (var i = 0; i < points.Count - 1; ++i)
+                {
+                    mesh.Faces.Add(new Face([i, i + 1]));
+                }
 
                 scene.Meshes.Add(mesh);
                 node.MeshIndices.Add(scene.Meshes.Count - 1);
@@ -92,8 +96,10 @@ file static class Program
                 }
 
                 if (createdDecals == 0)
+                {
                     logger.Warn(
                         $"Could not create decal {decal.Id} at {decal.Origin} (material {decal.Material.Basename})");
+                }
             }
 
             logger.Info("Processing overlays");
@@ -102,15 +108,22 @@ file static class Program
                     .ToImmutableDictionary(static side => side.Id, static side => side));
             overlaysVis.Visit(data, parsed.Value.SkipTools);
 
-            foreach (var overlay in overlaysVis.Overlays) scene.RootNode.Children.Add(overlay.Export(scene));
+            foreach (var overlay in overlaysVis.Overlays)
+            {
+                scene.RootNode.Children.Add(overlay.Export(scene));
+            }
 
             logger.Info("Building export scene");
 
             foreach (var node in converter.Vmf.Solids
                          .Select(solid =>
-                             solid.Export(scene, static material => material.ToLower().StartsWith("tools/")))
+                             solid.Export(scene,
+                                 static material =>
+                                     material.StartsWith("tools/", StringComparison.InvariantCultureIgnoreCase)))
                          .Where(static node => node.HasMeshes))
+            {
                 scene.RootNode.Children.Add(node);
+            }
 
             logger.Info("Writing DAE");
 
@@ -146,22 +159,36 @@ file static class Program
             ambientVis.Visit(data, parsed.Value.SkipTools);
 
             foreach (var exportEntity in propsVisitor.Props.Select(static prop => new ExportEntity(prop)))
+            {
                 export.Entities.Add(exportEntity);
+            }
 
             foreach (var exportInstance in propsVisitor.Instances.Select(
-                         static instance => new ExportInstance(instance))) export.Instances.Add(exportInstance);
+                         static instance => new ExportInstance(instance)))
+            {
+                export.Instances.Add(exportInstance);
+            }
 
             foreach (var exportCubemap in propsVisitor.EnvCubemaps.Select(static envCubemap =>
                          new ExportEnvCubemap(envCubemap)))
+            {
                 export.EnvCubemaps.Add(exportCubemap);
+            }
 
             foreach (var light in propsVisitor.Lights.Select(static light => new ExportLight(light)))
+            {
                 export.Lights.Add(light);
+            }
 
             foreach (var light in propsVisitor.SpotLights.Select(static light => new ExportSpotLight(light)))
+            {
                 export.SpotLights.Add(light);
+            }
 
-            foreach (var ambient in ambientVis.AmbientGenerics) export.Ambients.Add(new ExportAmbientGeneric(ambient));
+            foreach (var ambient in ambientVis.AmbientGenerics)
+            {
+                export.Ambients.Add(new ExportAmbientGeneric(ambient));
+            }
 
             var serializer = new JsonSerializer
             {
