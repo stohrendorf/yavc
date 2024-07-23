@@ -36,10 +36,11 @@ file static class Program
         var T = (rgba.Z - P * Q) / S - rgba.X * baseB.X / (S * baseR.X);
         var U = (rgba.X - T * baseR.Z) / baseR.X;
 
-        Vector3 n;
-        n.X = U - baseR.Y / baseR.X * (P - T * N);
-        n.Y = P - T * N;
-        n.Z = T;
+        Vector3 n = new(
+            U - baseR.Y / baseR.X * (P - T * N),
+            P - T * N,
+            T
+        );
         n = (Vector3.Normalize(n) + Vector3.One) / 2.0f;
 
         return new Rgba32(new Vector4(n, rgba.W));
