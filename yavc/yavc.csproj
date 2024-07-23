@@ -8,21 +8,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\geometry\geometry.csproj" />
-        <ProjectReference Include="..\utility\utility.csproj" />
-        <ProjectReference Include="..\vmfio\vmfio.csproj" />
+        <ProjectReference Include="..\geometry\geometry.csproj"/>
+        <ProjectReference Include="..\utility\utility.csproj"/>
+        <ProjectReference Include="..\vmfio\vmfio.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AssimpNet" Version="4.1.0" />
-        <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="NLog" Version="5.2.8" />
-        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
+        <PackageReference Include="AssimpNet" Version="4.1.0"/>
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="NLog" Version="5.3.2"/>
+        <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
     <ItemGroup>
