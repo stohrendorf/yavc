@@ -93,6 +93,16 @@ public static partial class ParserUtil
         );
     }
 
+    public static double ToRad(this double value)
+    {
+        return value * Math.PI / 180.0;
+    }
+
+    public static Vector ToRad(this Vector v)
+    {
+        return v * Math.PI / 180.0;
+    }
+
     [GeneratedRegex("^\\[([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)] ([^ ]+)$", RegexOptions.Compiled)]
     private static partial Regex GetAxisPattern();
 

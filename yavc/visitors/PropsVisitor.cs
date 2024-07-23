@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using geometry.components;
@@ -69,7 +68,7 @@ internal sealed class PropsVisitor : EntityVisitor
                 Props.Add(new VmfProp
                 {
                     Origin = entity["origin"].ParseToVector(),
-                    Rotation = entity["angles"].ParseToVector() * Math.PI / 180.0,
+                    Rotation = entity["angles"].ParseToVector().ToRad(),
                     Color = entity.GetOptionalValue("rendercolor") ?? "255 255 255",
                     Model = DropExtension(entity["model"].ToLower()),
                     Skin = StringUtil.ParseInt(entity.GetOptionalValue("skin") ?? "0"),
@@ -79,7 +78,7 @@ internal sealed class PropsVisitor : EntityVisitor
                 Instances.Add(new VmfInstance
                 {
                     File = entity["file"].RequireNotNull(),
-                    Angles = entity["angles"].ParseToVector() * Math.PI / 180.0,
+                    Angles = entity["angles"].ParseToVector().ToRad(),
                     Origin = entity["origin"].ParseToVector(),
                 });
                 break;
@@ -114,11 +113,11 @@ internal sealed class PropsVisitor : EntityVisitor
                     Color = new Vector(cols[0], cols[1], cols[2]),
                     Strength = cols[3],
                     Distance = entity.GetOptionalValue("_distance")?.ParseToDouble(),
-                    Angles = entity["angles"].ParseToVector() * Math.PI / 180.0,
-                    Cone = entity["_cone"].ParseToDouble() * Math.PI / 180.0,
-                    InnerCone = entity["_inner_cone"].ParseToDouble() * Math.PI / 180.0,
+                    Angles = entity["angles"].ParseToVector().ToRad(),
+                    Cone = entity["_cone"].ParseToDouble().ToRad(),
+                    InnerCone = entity["_inner_cone"].ParseToDouble().ToRad(),
                     Exponent = entity["_exponent"].ParseToDouble(),
-                    Pitch = entity["pitch"].ParseToDouble() * Math.PI / 180.0,
+                    Pitch = entity["pitch"].ParseToDouble().ToRad(),
                 });
                 break;
             }
