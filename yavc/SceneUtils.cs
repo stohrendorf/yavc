@@ -7,7 +7,7 @@ namespace yavc;
 
 internal static class SceneUtils
 {
-    private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
     public static int FindOrCreateMaterial(this Scene scene, VMT material)
     {

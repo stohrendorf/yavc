@@ -4,7 +4,7 @@ using Parser = VMFIO.Parser;
 
 namespace vmfio.test;
 
-file static class ParserTest
+public static class ParserTest
 {
     [Test]
     public static void TestWhitespaceComments()

@@ -11,7 +11,7 @@ namespace yavc.visitors;
 internal sealed class RopeVisitor : EntityVisitor
 {
     private const int RopeSegmentFactor = 4;
-    private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
     private readonly Dictionary<string, RopeKeyPoint> _keyPoints = new();
 
     private readonly List<RopeKeyPoint> _starts = [];

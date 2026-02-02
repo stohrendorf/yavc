@@ -36,7 +36,7 @@ public sealed class Entity
         return kvs?.Value;
     }
 
-    public string GetValue(string key)
+    private string GetValue(string key)
     {
         var value = GetOptionalValue(key);
         if (value is null)

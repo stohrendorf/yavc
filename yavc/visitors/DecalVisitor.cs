@@ -8,33 +8,33 @@ using VMFIO;
 
 namespace yavc.visitors;
 
-internal sealed class DecalVisitor(string _root) : EntityVisitor
+internal sealed class DecalVisitor(string root) : EntityVisitor
 {
-    private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+  private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-    private readonly List<Decal> _decals = [];
+  private readonly List<Decal> _decals = [];
 
-    public IReadOnlyList<Decal> Decals => _decals;
+  public IReadOnlyList<Decal> Decals => _decals;
 
-    public override void Visit(Entity entity, bool skipTools)
+  public override void Visit(Entity entity, bool skipTools)
+  {
+    if (entity.Classname == "infodecal")
     {
-        if (entity.Classname == "infodecal")
-        {
-            var vmt = VMT.GetCached(_root, entity["texture"]);
-            if (vmt is null)
-            {
-                logger.Warn($"Material {entity["texture"]} in infodecal {entity["id"]} not found");
-            }
-            else
-            {
-                _decals.Add(new Decal(
-                    StringUtil.ParseInt(entity["id"]),
-                    entity["origin"].ParseToVector(),
-                    vmt
-                ));
-            }
-        }
-
-        entity.Accept(this, skipTools);
+      var vmt = VMT.GetCached(root, entity["texture"]);
+      if (vmt is null)
+      {
+        logger.Warn($"Material {entity["texture"]} in infodecal {entity["id"]} not found");
+      }
+      else
+      {
+        _decals.Add(new Decal(
+          StringUtil.ParseInt(entity["id"]),
+          entity["origin"].ParseToVector(),
+          vmt
+        ));
+      }
     }
+
+    entity.Accept(this, skipTools);
+  }
 }

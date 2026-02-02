@@ -15,7 +15,7 @@ namespace yavc;
 
 file static class Program
 {
-    private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
     private static void Main(string[] args)
     {
