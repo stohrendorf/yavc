@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>VMF/VMT Reference Database Viewer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: #252526;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3c3c3c;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #4ec9b0;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .header-load {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-load label {
+            padding: 8px 16px;
+            background: #0e639c;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .header-load label:hover {
+            background: #1177bb;
+        }
+
+        .header-load input[type="file"] {
+            display: none;
+        }
+
+        #fileName {
+            color: #858585;
+            font-size: 13px;
+        }
+
+        .controls {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #252526;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3c3c3c;
+            margin-bottom: 20px;
+        }
+
+        .content-wrapper {
+            padding: 0 20px 20px 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], select {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            background: #3c3c3c;
+            border: 1px solid #555;
+            color: #d4d4d4;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #007acc;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0e639c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #2d2d30;
+            padding: 10px 15px;
+            border-radius: 4px;
+            border-left: 3px solid #4ec9b0;
+        }
+
+        .stat-label {
+            color: #858585;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            color: #4ec9b0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .results {
+            background: #252526;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 400px;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+        }
+
+        .result-header {
+            color: #569cd6;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #3c3c3c;
+        }
+
+        .result-item {
+            background: #2d2d30;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 3px solid #4ec9b0;
+        }
+
+        .result-item:hover {
+            background: #333337;
+        }
+
+        .result-title {
+            color: #dcdcaa;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-detail {
+            color: #9cdcfe;
+            font-size: 13px;
+            margin-left: 15px;
+            margin-top: 5px;
+        }
+
+        .result-sub {
+            color: #858585;
+            font-size: 12px;
+            margin-left: 30px;
+            margin-top: 3px;
+        }
+
+        .no-results {
+            color: #858585;
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #3c3c3c;
+            color: #ce9178;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+
+        .highlight {
+            background: #4a4a00;
+            color: #ffff00;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #2d2d30;
+            border: 1px solid #3c3c3c;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #0e639c;
+            border-color: #007acc;
+        }
+
+        .tab:hover {
+            background: #333337;
+        }
+
+        .tab.active:hover {
+            background: #0e639c;
+        }
+
+        .tab, .result-item, button, .header-load label {
+            transition: background-color 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            input[type="text"], select {
+                min-width: 100%;
+            }
+
+            .stats {
+                justify-content: space-between;
+            }
+
+            .stat {
+                flex: 1 1 calc(50% - 10px);
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>VMF/VMT Reference Database Viewer</h1>
+    <div class="header-load">
+        <label for="jsonFile" aria-label="Load JSON database file">
+            Load JSON
+            <input accept=".json" id="jsonFile" type="file" aria-label="Select JSON file">
+        </label>
+        <span id="fileName" role="status" aria-live="polite"></span>
+    </div>
+</div>
+
+<div class="controls">
+    <div class="tab-container" role="tablist" aria-label="Search modes">
+        <div class="tab active" data-mode="texture" role="tab" tabindex="0">Find Texture</div>
+        <div class="tab" data-mode="material" role="tab" tabindex="0">Find Material</div>
+        <div class="tab" data-mode="entity" role="tab" tabindex="0">Find Entity</div>
+        <div class="tab" data-mode="browse-materials" role="tab" tabindex="0">Browse Materials</div>
+        <div class="tab" data-mode="browse-maps" role="tab" tabindex="0">Browse Maps</div>
+    </div>
+
+    <div class="search-box">
+        <input id="searchInput" placeholder="Enter search term..." type="text" aria-label="Search input">
+        <input id="skinInput" placeholder="Skin ID (optional)" style="max-width: 150px;" type="text" aria-label="Skin ID filter">
+        <button onclick="search()" aria-label="Execute search">Search</button>
+        <button onclick="clearResults()" aria-label="Clear search results">Clear</button>
+    </div>
+
+    <div class="stats" role="region" aria-label="Database statistics">
+        <div class="stat">
+            <div class="stat-label">Materials</div>
+            <div class="stat-value" id="materialCount">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Maps</div>
+            <div class="stat-value" id="mapCount">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Total Entities</div>
+            <div class="stat-value" id="entityCount">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Unique Textures</div>
+            <div class="stat-value" id="textureCount">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Total Decals</div>
+            <div class="stat-value" id="decalCount">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Total Overlays</div>
+            <div class="stat-value" id="overlayCount">0</div>
+        </div>
+    </div>
+</div>
+
+<div class="content-wrapper">
+    <div class="results" id="results" role="region" aria-live="polite" aria-label="Search results">
+        <div class="no-results">Load a JSON database file to begin</div>
+    </div>
+</div>
+
+<script>
+    let database = null;
+    let currentMode = 'texture';
+    let searchTimeout = null;
+    const DEBOUNCE_DELAY = 400;
+    const MAX_RESULTS = 100;
+    const MIN_SEARCH_LENGTH = 2;
+
+    // Auto-load db.json if it exists
+    window.addEventListener('load', function () {
+        fetch('db.json')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('db.json not found');
+            })
+            .then(data => {
+                database = data;
+                document.getElementById('fileName').textContent = 'Loaded: db.json';
+                updateStats();
+                clearResults();
+            })
+            .catch(() => {
+                // Silently fail if db.json doesn't exist
+            });
+    });
+
+    document.getElementById('jsonFile').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        document.getElementById('fileName').textContent = `Loading ${file.name}...`;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                database = JSON.parse(e.target.result);
+                document.getElementById('fileName').textContent = `Loaded: ${file.name}`;
+                updateStats();
+                clearResults();
+            } catch (err) {
+                alert('Error parsing JSON: ' + err.message);
+                document.getElementById('fileName').textContent = 'Error loading file';
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentMode = this.dataset.mode;
+            updatePlaceholder();
+            search();
+        });
+    });
+
+    // Live search with debouncing
+    document.getElementById('searchInput').addEventListener('input', function () {
+        if (!database) return;
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            search();
+        }, DEBOUNCE_DELAY);
+    });
+
+    document.getElementById('skinInput').addEventListener('input', function () {
+        if (!database) return;
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            search();
+        }, DEBOUNCE_DELAY);
+    });
+
+    // Enter key triggers immediate search
+    function handleEnterKey(e) {
+        if (e.key === 'Enter') {
+            clearTimeout(searchTimeout);
+            search();
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keypress', handleEnterKey);
+    document.getElementById('skinInput').addEventListener('keypress', handleEnterKey);
+
+    function updatePlaceholder() {
+        const input = document.getElementById('searchInput');
+        const skinInput = document.getElementById('skinInput');
+
+        skinInput.style.display = currentMode === 'entity' ? 'block' : 'none';
+
+        switch (currentMode) {
+            case 'texture':
+                input.placeholder = 'Enter texture name (e.g., concrete, metal)...';
+                break;
+            case 'material':
+                input.placeholder = 'Enter material name (e.g., concrete/floor)...';
+                break;
+            case 'entity':
+                input.placeholder = 'Enter entity model name (e.g., prop_static)...';
+                break;
+            case 'browse-materials':
+                input.placeholder = 'Enter material name to filter (leave empty for all)...';
+                break;
+            case 'browse-maps':
+                input.placeholder = 'Enter map name to filter (leave empty for all)...';
+                break;
+        }
+    }
+
+    function updateStats() {
+        if (!database) return;
+
+        document.getElementById('materialCount').textContent = Object.keys(database.Materials || {}).length;
+        document.getElementById('mapCount').textContent = Object.keys(database.Maps || {}).length;
+
+        let totalEntities = 0;
+        let totalDecals = 0;
+        let totalOverlays = 0;
+        Object.values(database.Maps || {}).forEach(map => {
+            totalEntities += map.Entities.length;
+            (map.Decals || []).forEach(decal => {
+                totalDecals += decal.Count;
+            });
+            (map.Overlays || []).forEach(overlay => {
+                totalOverlays += overlay.Count;
+            });
+        });
+        document.getElementById('entityCount').textContent = totalEntities;
+        document.getElementById('decalCount').textContent = totalDecals;
+        document.getElementById('overlayCount').textContent = totalOverlays;
+
+        const uniqueTextures = new Set();
+        Object.values(database.Materials || {}).forEach(mat => {
+            mat.Textures.forEach(tex => uniqueTextures.add(tex));
+        });
+        document.getElementById('textureCount').textContent = uniqueTextures.size;
+    }
+
+    function highlightText(text, search) {
+        if (!search) return text;
+        const regex = new RegExp(`(${escapeRegex(search)})`, 'gi');
+        return text.replace(regex, '<span class="highlight">$1</span>');
+    }
+
+    function escapeRegex(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function buildMapUsageHTML(mapUsage, searchTerm) {
+        const totalBrushes = mapUsage.usedIn.brushes.length;
+        const totalDecals = mapUsage.usedIn.decals.reduce((sum, d) => sum + d.count, 0);
+        const totalOverlays = mapUsage.usedIn.overlays.reduce((sum, o) => sum + o.count, 0);
+
+        let html = '<div class="result-item"><div class="result-title">' + mapUsage.mapPath + '</div>';
+
+        if (totalBrushes > 0) {
+            html += `<div class="result-detail" style="color: #9cdcfe;">
+                <strong>Brush Surfaces</strong> <span class="badge count">${totalBrushes}</span>
+            </div>`;
+        }
+
+        if (totalDecals > 0) {
+            html += `<div class="result-detail" style="color: #f48771;">
+                <strong>Decals</strong> <span class="badge count">${totalDecals} instances</span>
+            </div>`;
+            mapUsage.usedIn.decals.forEach(d => {
+                html += `<div class="result-sub">→ ${d.material} <span class="badge count">×${d.count}</span></div>`;
+            });
+        }
+
+        if (totalOverlays > 0) {
+            html += `<div class="result-detail" style="color: #dcdcaa;">
+                <strong>Overlays</strong> <span class="badge count">${totalOverlays} instances</span>
+            </div>`;
+            mapUsage.usedIn.overlays.forEach(o => {
+                html += `<div class="result-sub">→ ${o.material} <span class="badge count">×${o.count}</span></div>`;
+            });
+        }
+
+        html += '</div>';
+        return html;
+    }
+
+    function search() {
+        if (!database) {
+            return;
+        }
+
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+        const skinId = document.getElementById('skinInput').value.trim();
+
+        // Minimum character threshold for live search
+        if (searchTerm.length > 0 && searchTerm.length < MIN_SEARCH_LENGTH) {
+            document.getElementById('results').innerHTML =
+                `<div class="no-results">Enter at least ${MIN_SEARCH_LENGTH} characters to search</div>`;
+            return;
+        }
+
+        switch (currentMode) {
+            case 'texture':
+                searchTextureUsage(searchTerm);
+                break;
+            case 'material':
+                searchMaterialInMaps(searchTerm);
+                break;
+            case 'entity':
+                searchEntityUsage(searchTerm, skinId);
+                break;
+            case 'browse-materials':
+                browseMaterials(searchTerm);
+                break;
+            case 'browse-maps':
+                browseMaps(searchTerm);
+                break;
+        }
+    }
+
+    function searchTextureUsage(texture) {
+        const results = document.getElementById('results');
+
+        if (!texture) {
+            results.innerHTML = '<div class="no-results">Enter a texture name to search</div>';
+            return;
+        }
+
+        // Find materials using this texture
+        const materialsUsingTexture = [];
+        Object.entries(database.Materials || {}).forEach(([materialPath, materialInfo]) => {
+            const matchingTextures = materialInfo.Textures.filter(t =>
+                t.toLowerCase().includes(texture)
+            );
+
+            if (matchingTextures.length > 0) {
+                materialsUsingTexture.push({
+                    materialPath,
+                    materialInfo,
+                    matchingTextures
+                });
+            }
+        });
+
+        if (materialsUsingTexture.length === 0) {
+            results.innerHTML = '<div class="no-results">No materials found using this texture</div>';
+            return;
+        }
+
+        // Sort materials
+        materialsUsingTexture.sort((a, b) => a.materialPath.localeCompare(b.materialPath));
+
+        // Find maps using those materials
+        const materialPaths = materialsUsingTexture.map(m => m.materialPath);
+        const mapsUsingMaterials = [];
+
+        Object.entries(database.Maps || {}).forEach(([mapPath, mapInfo]) => {
+            const usedIn = {
+                brushes: [],
+                decals: [],
+                overlays: []
+            };
+
+            // Check brush materials
+            (mapInfo.Materials || []).forEach(mat => {
+                if (materialPaths.includes(mat)) {
+                    usedIn.brushes.push(mat);
+                }
+            });
+
+            // Check decals
+            (mapInfo.Decals || []).forEach(decal => {
+                if (materialPaths.includes(decal.Material)) {
+                    usedIn.decals.push({material: decal.Material, count: decal.Count});
+                }
+            });
+
+            // Check overlays
+            (mapInfo.Overlays || []).forEach(overlay => {
+                if (materialPaths.includes(overlay.Material)) {
+                    usedIn.overlays.push({material: overlay.Material, count: overlay.Count});
+                }
+            });
+
+            if (usedIn.brushes.length > 0 || usedIn.decals.length > 0 || usedIn.overlays.length > 0) {
+                // Sort materials within each category
+                usedIn.brushes.sort();
+                usedIn.decals.sort((a, b) => a.material.localeCompare(b.material));
+                usedIn.overlays.sort((a, b) => a.material.localeCompare(b.material));
+                mapsUsingMaterials.push({mapPath, usedIn});
+            }
+        });
+
+        // Sort maps
+        mapsUsingMaterials.sort((a, b) => a.mapPath.localeCompare(b.mapPath));
+
+        // Build output
+        const limitedMaterials = materialsUsingTexture.slice(0, MAX_RESULTS);
+        const materialLimitText = materialsUsingTexture.length > MAX_RESULTS ?
+            ` (showing first ${MAX_RESULTS} of ${materialsUsingTexture.length})` : '';
+
+        let html = '<div class="result-section">';
+        html += `<div class="result-header">Found ${materialsUsingTexture.length} material(s) using texture "${texture}"${materialLimitText}</div>`;
+
+        limitedMaterials.forEach(mat => {
+            html += `
+                    <div class="result-item">
+                        <div class="result-title">${highlightText(mat.materialPath, texture)}
+                            <span class="badge">${mat.materialInfo.ShaderType || 'unknown'}</span>
+                        </div>
+                        ${mat.matchingTextures.map(tex =>
+                `<div class="result-detail">→ ${highlightText(tex, texture)}</div>`
+            ).join('')}
+                    </div>
+                `;
+        });
+
+        html += '</div>';
+
+        if (mapsUsingMaterials.length > 0) {
+            const limitedMaps = mapsUsingMaterials.slice(0, MAX_RESULTS);
+            const mapLimitText = mapsUsingMaterials.length > MAX_RESULTS ?
+                ` (showing first ${MAX_RESULTS} of ${mapsUsingMaterials.length})` : '';
+
+            html += '<div class="result-section" style="margin-top: 20px;">';
+            html += `<div class="result-header">Used in ${mapsUsingMaterials.length} map(s)${mapLimitText}</div>`;
+
+            limitedMaps.forEach(mapUsage => {
+                html += buildMapUsageHTML(mapUsage, texture);
+            });
+
+            html += '</div>';
+        }
+
+        results.innerHTML = html;
+    }
+
+    function searchMaterialInMaps(material) {
+        const results = document.getElementById('results');
+
+        if (!material) {
+            results.innerHTML = '<div class="no-results">Enter a material name to search</div>';
+            return;
+        }
+
+        const matches = [];
+
+        Object.entries(database.Maps || {}).forEach(([mapPath, mapInfo]) => {
+            // Search in brush materials
+            const matchingBrushMaterials = (mapInfo.Materials || []).filter(m =>
+                m.toLowerCase().includes(material)
+            );
+
+            // Search in decals
+            const matchingDecals = (mapInfo.Decals || []).filter(d =>
+                d.Material.toLowerCase().includes(material)
+            );
+
+            // Search in overlays
+            const matchingOverlays = (mapInfo.Overlays || []).filter(o =>
+                o.Material.toLowerCase().includes(material)
+            );
+
+            if (matchingBrushMaterials.length > 0 || matchingDecals.length > 0 || matchingOverlays.length > 0) {
+                // Sort materials within each category
+                matchingBrushMaterials.sort();
+                matchingDecals.sort((a, b) => a.Material.localeCompare(b.Material));
+                matchingOverlays.sort((a, b) => a.Material.localeCompare(b.Material));
+                matches.push({
+                    mapPath,
+                    brushMaterials: matchingBrushMaterials,
+                    decals: matchingDecals,
+                    overlays: matchingOverlays
+                });
+            }
+        });
+
+        // Sort matches by map path
+        matches.sort((a, b) => a.mapPath.localeCompare(b.mapPath));
+
+        if (matches.length === 0) {
+            results.innerHTML = '<div class="no-results">No maps found using this material</div>';
+            return;
+        }
+
+        let html = '';
+        let totalCount = 0;
+
+        matches.slice(0, MAX_RESULTS).forEach(match => {
+            const brushCount = match.brushMaterials.length;
+            const decalCount = match.decals.reduce((sum, d) => sum + d.Count, 0);
+            const overlayCount = match.overlays.reduce((sum, o) => sum + o.Count, 0);
+            totalCount += brushCount + decalCount + overlayCount;
+
+            html += `
+                    <div class="result-item">
+                        <div class="result-title">${highlightText(match.mapPath, material)}</div>
+                        ${brushCount > 0 ? `
+                            <div class="result-detail" style="color: #9cdcfe;">
+                                <strong>Brush Surfaces</strong> <span class="badge count">${brushCount} materials</span>
+                            </div>
+                            ${match.brushMaterials.slice(0, 5).map(mat =>
+                `<div class="result-sub">→ ${highlightText(mat, material)}</div>`
+            ).join('')}
+                            ${brushCount > 5 ?
+                `<div class="result-sub" style="color: #858585;">... and ${brushCount - 5} more</div>`
+                : ''}
+                        ` : ''}
+                        ${match.decals.length > 0 ? `
+                            <div class="result-detail" style="color: #f48771;">
+                                <strong>Decals</strong> <span class="badge count">${decalCount} instances</span>
+                            </div>
+                            ${match.decals.map(d =>
+                `<div class="result-sub">→ ${highlightText(d.Material, material)} <span class="badge count">×${d.Count}</span></div>`
+            ).join('')}
+                        ` : ''}
+                        ${match.overlays.length > 0 ? `
+                            <div class="result-detail" style="color: #dcdcaa;">
+                                <strong>Overlays</strong> <span class="badge count">${overlayCount} instances</span>
+                            </div>
+                            ${match.overlays.map(o =>
+                `<div class="result-sub">→ ${highlightText(o.Material, material)} <span class="badge count">×${o.Count}</span></div>`
+            ).join('')}
+                        ` : ''}
+                    </div>
+                `;
+        });
+
+        const limitText = matches.length > MAX_RESULTS ? ` (showing first ${MAX_RESULTS} of ${matches.length} maps)` : '';
+        results.innerHTML = `
+                <div class="result-section">
+                    <div class="result-header">Found material "${material}" in ${matches.length} map(s)${limitText}</div>
+                    ${html}
+                </div>
+            `;
+    }
+
+    function searchEntityUsage(model, skinId) {
+        const results = document.getElementById('results');
+        let html = '';
+        let count = 0;
+
+        if (!model) {
+            results.innerHTML = '<div class="no-results">Enter an entity model to search</div>';
+            return;
+        }
+
+        const searchSkin = skinId ? parseInt(skinId) : null;
+        const matches = [];
+
+        Object.entries(database.Maps || {}).forEach(([mapPath, mapInfo]) => {
+            const matchingEntities = mapInfo.Entities.filter(e => {
+                if (!e.Model || !e.Model.toLowerCase().includes(model)) return false;
+                if (searchSkin !== null && e.Skin !== searchSkin) return false;
+                return true;
+            });
+
+            if (matchingEntities.length > 0) {
+                // Sort entities by classname
+                matchingEntities.sort((a, b) => a.Classname.localeCompare(b.Classname));
+                matches.push({mapPath, matchingEntities});
+            }
+        });
+
+        // Sort matches by map path
+        matches.sort((a, b) => a.mapPath.localeCompare(b.mapPath));
+
+        // Build HTML from sorted matches
+        matches.forEach(match => {
+            count += match.matchingEntities.length;
+            html += `
+                    <div class="result-item">
+                        <div class="result-title">${highlightText(match.mapPath, model)}</div>
+                        ${match.matchingEntities.map(entity => `
+                            <div class="result-detail">
+                                ${entity.Classname}
+                                <span class="badge">model: ${highlightText(entity.Model, model)}</span>
+                                <span class="badge">skin: ${entity.Skin !== null && entity.Skin !== undefined ? entity.Skin : 0}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+        });
+
+        if (count === 0) {
+            results.innerHTML = '<div class="no-results">No entities found matching criteria</div>';
+        } else {
+            const skinText = searchSkin !== null ? ` with skin ${searchSkin}` : '';
+            results.innerHTML = `
+                    <div class="result-section">
+                        <div class="result-header">Found ${count} entity instance(s) using model "${model}"${skinText}</div>
+                        ${html}
+                    </div>
+                `;
+        }
+    }
+
+    function browseMaterials(filter) {
+        const results = document.getElementById('results');
+        let html = '';
+        const maxDisplay = 100;
+
+        const materials = Object.entries(database.Materials || {})
+            .filter(([path]) => !filter || path.toLowerCase().includes(filter))
+            .sort((a, b) => a[0].localeCompare(b[0]));
+
+        let count = materials.length;
+        const display = materials.slice(0, maxDisplay);
+
+        display.forEach(([materialPath, materialInfo]) => {
+            html += `
+                    <div class="result-item">
+                        <div class="result-title">${highlightText(materialPath, filter)}
+                            <span class="badge">${materialInfo.ShaderType || 'unknown'}</span>
+                        </div>
+                        ${materialInfo.Textures.length > 0 ?
+                materialInfo.Textures.map(tex =>
+                    `<div class="result-detail">→ ${tex}</div>`
+                ).join('')
+                : '<div class="result-detail" style="color: #858585;">No textures</div>'
+            }
+                    </div>
+                `;
+        });
+
+        if (count === 0) {
+            results.innerHTML = '<div class="no-results">No materials found</div>';
+        } else {
+            const limitText = count > maxDisplay ? ` (showing first ${maxDisplay})` : '';
+            results.innerHTML = `
+                    <div class="result-section">
+                        <div class="result-header">Materials: ${count}${limitText}</div>
+                        ${html}
+                    </div>
+                `;
+        }
+    }
+
+    function browseMaps(filter) {
+        const results = document.getElementById('results');
+        let html = '';
+
+        const maps = Object.entries(database.Maps || {})
+            .filter(([path]) => !filter || path.toLowerCase().includes(filter))
+            .sort((a, b) => a[0].localeCompare(b[0]));
+
+        let count = maps.length;
+
+        maps.forEach(([mapPath, mapInfo]) => {
+            const entityCounts = {};
+            mapInfo.Entities.forEach(entity => {
+                entityCounts[entity.Classname] = (entityCounts[entity.Classname] || 0) + 1;
+            });
+
+            const topEntities = Object.entries(entityCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const materialCount = (mapInfo.Materials || []).length;
+
+            html += `
+                    <div class="result-item">
+                        <div class="result-title">${highlightText(mapPath, filter)}
+                            <span class="badge">${mapInfo.Entities.length} entities</span>
+                            <span class="badge">${materialCount} materials</span>
+                        </div>
+                        ${topEntities.map(([classname, count]) =>
+                `<div class="result-detail">${classname} <span class="badge">${count}</span></div>`
+            ).join('')}
+                    </div>
+                `;
+        });
+
+        if (count === 0) {
+            results.innerHTML = '<div class="no-results">No maps found</div>';
+        } else {
+            results.innerHTML = `
+                    <div class="result-section">
+                        <div class="result-header">Maps: ${count}</div>
+                        ${html}
+                    </div>
+                `;
+        }
+    }
+
+    function clearResults() {
+        const results = document.getElementById('results');
+        if (!database) {
+            results.innerHTML = '<div class="no-results">Load a JSON database file to begin</div>';
+        } else {
+            results.innerHTML = '<div class="no-results">Enter a search term and click Search</div>';
+        }
+    }
+
+    updatePlaceholder();
+</script>
+</body>
+</html>

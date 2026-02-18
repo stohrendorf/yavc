@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "geometry.test", "geometry.t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vmfio.test", "vmfio.test\vmfio.test.csproj", "{3692C625-2270-4B06-8814-2BC562E7C6CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vmf-db", "vmf-db\vmf-db.csproj", "{9E08E6C0-2068-42A9-B619-25CDDD8CE378}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{3692C625-2270-4B06-8814-2BC562E7C6CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3692C625-2270-4B06-8814-2BC562E7C6CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3692C625-2270-4B06-8814-2BC562E7C6CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E08E6C0-2068-42A9-B619-25CDDD8CE378}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E08E6C0-2068-42A9-B619-25CDDD8CE378}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E08E6C0-2068-42A9-B619-25CDDD8CE378}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E08E6C0-2068-42A9-B619-25CDDD8CE378}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
