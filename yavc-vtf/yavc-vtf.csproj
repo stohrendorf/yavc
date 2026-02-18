@@ -8,18 +8,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="CommandLineParser" Version="2.9.1" />
-        <PackageReference Include="NLog" Version="5.4.0" />
-        <PackageReference Include="NLog.Extensions.Logging" Version="5.4.0" />
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="NLog" Version="6.1.0"/>
+        <PackageReference Include="NLog.Extensions.Logging" Version="6.1.1"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="NLog.config" CopyToOutputDirectory="PreserveNewest"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\geometry\geometry.csproj" />
+        <ProjectReference Include="..\geometry\geometry.csproj"/>
     </ItemGroup>
 
 </Project>
